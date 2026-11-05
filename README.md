@@ -22,6 +22,7 @@ schemas/        JSON schemas for connector.json, plugin.json and translation fil
 | [Google Analytics 4](connectors/google-analytics.json) | Reports from the Data API (OAuth2) |
 | [Google Search Console](connectors/google-search-console.json) | Search performance per site (OAuth2) |
 | [Matomo](connectors/matomo.json) | Website statistics, read only |
+| [Mollie](connectors/mollie) | Payments, refunds, customers, mandates, subscriptions, settlements and more: the full API v2 (126 functions, code functions for settlements) |
 | [WooCommerce](connectors/woocommerce.json) | Orders, products and customers (REST API v3) |
 
 | Plugin | What |
