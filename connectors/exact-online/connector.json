@@ -1,0 +1,525 @@
+{
+  "$schema": "../../schemas/connector.json",
+  "id": "exact-online",
+  "name": "Exact Online",
+  "version": "0.3.0",
+  "description": "Exact Online: facturen, relaties, artikelen en boekingsregels, plus code-functies voor grootboekkaart, boekingen, afletterstatus, bankregels per periode en bewijs bij bankuitgaven. Alleen lezen. Nog te testen met een echte administratie.",
+  "homepage": "https://start.exactonline.nl/docs/HlpRestAPIResources.aspx",
+  "category": "Boekhouding",
+  "vars": [
+    {
+      "name": "CLIENT_ID",
+      "label": "Client-id",
+      "description": "Uit de Exact App Center-registratie van je app.",
+      "secret": false
+    },
+    {
+      "name": "CLIENT_SECRET",
+      "label": "Clientgeheim",
+      "description": "Uit de Exact App Center-registratie."
+    },
+    {
+      "name": "DIVISION",
+      "label": "Administratie (division)",
+      "description": "Nummer van de administratie (CurrentDivision). Na het verbinden kies je het uit de functie 'Wie ben ik'. Een andere administratie geef je per vraag mee met division.",
+      "secret": false,
+      "required": false,
+      "pattern": "^[0-9]+$",
+      "patternHint": "Alleen het nummer van de administratie, bijv. 1234567",
+      "chooseWith": "me"
+    },
+    {
+      "name": "EXACT_HOST",
+      "label": "Exact-domein",
+      "description": "start.exactonline.nl (NL), .be, .de, .co.uk enz.",
+      "secret": false,
+      "required": false,
+      "default": "start.exactonline.nl"
+    }
+  ],
+  "limits": {
+    "perMinute": 60,
+    "perDay": 5000,
+    "concurrency": 2,
+    "cacheTtlSeconds": 60,
+    "headers": [
+      {
+        "remaining": "x-ratelimit-minutely-remaining",
+        "reset": "x-ratelimit-minutely-reset"
+      },
+      {
+        "remaining": "x-ratelimit-remaining",
+        "reset": "x-ratelimit-reset"
+      }
+    ],
+    "note": "Exact Online: 60 aanroepen per minuut en 5.000 per dag per administratie; een nieuw toegangstoken hooguit eens per ~10 minuten. Controleer de actuele limieten in de documentatie van Exact."
+  },
+  "type": "rest",
+  "baseUrl": "https://{{EXACT_HOST}}/api/v1",
+  "headers": {
+    "Accept": "application/json"
+  },
+  "auth": {
+    "type": "oauth2",
+    "authorizeUrl": "https://{{EXACT_HOST}}/api/oauth2/auth",
+    "tokenUrl": "https://{{EXACT_HOST}}/api/oauth2/token",
+    "pkce": false,
+    "refreshMarginSeconds": 20,
+    "authorizeParams": {
+      "force_login": "0"
+    }
+  },
+  "setup": {
+    "minutes": 15,
+    "prerequisites": [
+      "Een Exact Online-account met toegang tot de administratie",
+      "Toegang tot het Exact App Center om een app te registreren"
+    ],
+    "steps": [
+      {
+        "id": "register-app",
+        "title": "App registreren in het Exact App Center",
+        "instruction": "Open de link en log in. Kies Mijn apps beheren → Nieuwe testapp registreren (voor eigen gebruik is een testapp genoeg). Geef de app een naam (bijv. Tailr Core), vul het adres hieronder in bij Redirect URI en sla op. Kopieer daarna de Client-id; het Clientgeheim plak je straks op de invulpagina.",
+        "url": "https://apps.exactonline.com",
+        "copy": {
+          "Redirect URI": "{{redirectUri}}"
+        },
+        "note": "Exact accepteert alleen een https-adres als Redirect URI. Werk je lokaal, gebruik dan een publiek adres of een tunnel."
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "me",
+      "title": { "nl": "Wie ben ik", "en": "Who am I" },
+      "summary": { "nl": "Wie er is ingelogd en in welke administratie je werkt.", "en": "Who is signed in and which administration you are working in." },
+      "description": "De ingelogde Exact-gebruiker en de huidige administratie (CurrentDivision). Gebruik dit om het administratienummer te vinden.",
+      "level": "read",
+      "path": "/current/Me",
+      "params": {},
+      "cacheTtlSeconds": 3600
+    },
+    {
+      "name": "list_sales_invoices",
+      "title": { "nl": "Verkoopfacturen", "en": "Sales invoices" },
+      "summary": { "nl": "Verkoopfacturen met nummer, datum, klant, bedrag en status.", "en": "Sales invoices with number, date, customer, amount and status." },
+      "description": "Verkoopfacturen met o.a. factuurnummer, datum, klant, bedrag en status. Filter op datum met $filter.",
+      "level": "read",
+      "path": "/{division}/salesinvoice/SalesInvoices",
+      "params": {
+        "filter": {
+          "in": "query",
+          "apiName": "$filter",
+          "description": "OData-filter, bijv. InvoiceDate ge datetime'2026-01-01'"
+        },
+        "select": {
+          "in": "query",
+          "apiName": "$select",
+          "description": "Velden, komma-gescheiden"
+        },
+        "top": {
+          "in": "query",
+          "type": "integer",
+          "apiName": "$top",
+          "description": "Maximaal aantal regels (Exact geeft er per keer hoogstens 60)"
+        },
+        "orderby": {
+          "in": "query",
+          "apiName": "$orderby",
+          "description": "Sortering, bijv. InvoiceDate desc"
+        },
+        "division": {
+          "in": "path",
+          "description": "Standaard de ingestelde waarde",
+          "default": "{{DIVISION}}"
+        }
+      }
+    },
+    {
+      "name": "list_accounts",
+      "title": { "nl": "Relaties", "en": "Accounts" },
+      "summary": { "nl": "Klanten en leveranciers met naam, plaats en status.", "en": "Customers and suppliers with name, city and status." },
+      "description": "Klanten en leveranciers (accounts) met naam, plaats en status.",
+      "level": "read",
+      "path": "/{division}/crm/Accounts",
+      "params": {
+        "filter": {
+          "in": "query",
+          "apiName": "$filter",
+          "description": "OData-filter, bijv. InvoiceDate ge datetime'2026-01-01'"
+        },
+        "select": {
+          "in": "query",
+          "apiName": "$select",
+          "description": "Velden, komma-gescheiden"
+        },
+        "top": {
+          "in": "query",
+          "type": "integer",
+          "apiName": "$top",
+          "description": "Maximaal aantal regels (Exact geeft er per keer hoogstens 60)"
+        },
+        "orderby": {
+          "in": "query",
+          "apiName": "$orderby",
+          "description": "Sortering, bijv. InvoiceDate desc"
+        },
+        "division": {
+          "in": "path",
+          "description": "Standaard de ingestelde waarde",
+          "default": "{{DIVISION}}"
+        }
+      },
+      "transform": {
+        "exclude": [
+          "d.results.Email",
+          "d.results.Phone",
+          "d.results.BankAccounts"
+        ]
+      }
+    },
+    {
+      "name": "list_items",
+      "title": { "nl": "Artikelen", "en": "Items" },
+      "summary": { "nl": "Artikelen met code, omschrijving en prijzen.", "en": "Items with code, description and prices." },
+      "description": "Artikelen met code, omschrijving en prijzen.",
+      "level": "read",
+      "path": "/{division}/logistics/Items",
+      "params": {
+        "filter": {
+          "in": "query",
+          "apiName": "$filter",
+          "description": "OData-filter, bijv. InvoiceDate ge datetime'2026-01-01'"
+        },
+        "select": {
+          "in": "query",
+          "apiName": "$select",
+          "description": "Velden, komma-gescheiden"
+        },
+        "top": {
+          "in": "query",
+          "type": "integer",
+          "apiName": "$top",
+          "description": "Maximaal aantal regels (Exact geeft er per keer hoogstens 60)"
+        },
+        "orderby": {
+          "in": "query",
+          "apiName": "$orderby",
+          "description": "Sortering, bijv. InvoiceDate desc"
+        },
+        "division": {
+          "in": "path",
+          "description": "Standaard de ingestelde waarde",
+          "default": "{{DIVISION}}"
+        }
+      },
+      "cacheTtlSeconds": 600
+    },
+    {
+      "name": "list_transaction_lines",
+      "title": { "nl": "Boekingsregels", "en": "Transaction lines" },
+      "summary": { "nl": "Losse boekingsregels met grootboekrekening, bedrag en datum.", "en": "Individual transaction lines with G/L account, amount and date." },
+      "description": "Financiële boekingsregels (grootboek, bedrag, datum, omschrijving). Altijd filteren op datum of grootboek, anders zijn het veel regels.",
+      "level": "read",
+      "path": "/{division}/financialtransaction/TransactionLines",
+      "params": {
+        "filter": {
+          "in": "query",
+          "apiName": "$filter",
+          "description": "OData-filter, bijv. InvoiceDate ge datetime'2026-01-01'"
+        },
+        "select": {
+          "in": "query",
+          "apiName": "$select",
+          "description": "Velden, komma-gescheiden"
+        },
+        "top": {
+          "in": "query",
+          "type": "integer",
+          "apiName": "$top",
+          "description": "Maximaal aantal regels (Exact geeft er per keer hoogstens 60)"
+        },
+        "orderby": {
+          "in": "query",
+          "apiName": "$orderby",
+          "description": "Sortering, bijv. InvoiceDate desc"
+        },
+        "division": {
+          "in": "path",
+          "description": "Standaard de ingestelde waarde",
+          "default": "{{DIVISION}}"
+        }
+      }
+    },
+    {
+      "name": "list_receivables",
+      "title": { "nl": "Openstaande debiteuren", "en": "Outstanding receivables" },
+      "summary": { "nl": "Welke klanten nog moeten betalen, en hoeveel.", "en": "Which customers still have to pay, and how much." },
+      "description": "Openstaande posten van klanten (wie moet nog betalen).",
+      "level": "read",
+      "path": "/{division}/read/financial/ReceivablesList",
+      "params": {
+        "filter": {
+          "in": "query",
+          "apiName": "$filter",
+          "description": "OData-filter, bijv. InvoiceDate ge datetime'2026-01-01'"
+        },
+        "select": {
+          "in": "query",
+          "apiName": "$select",
+          "description": "Velden, komma-gescheiden"
+        },
+        "top": {
+          "in": "query",
+          "type": "integer",
+          "apiName": "$top",
+          "description": "Maximaal aantal regels (Exact geeft er per keer hoogstens 60)"
+        },
+        "orderby": {
+          "in": "query",
+          "apiName": "$orderby",
+          "description": "Sortering, bijv. InvoiceDate desc"
+        },
+        "division": {
+          "in": "path",
+          "description": "Standaard de ingestelde waarde",
+          "default": "{{DIVISION}}"
+        }
+      }
+    }
+  ],
+  "scripts": [
+    {
+      "name": "list_bank_lines_by_period",
+      "title": { "nl": "Bankregels per periode", "en": "Bank lines by period" },
+      "summary": { "nl": "Alle bij- en afschrijvingen in een periode van hoogstens een maand.", "en": "All bank credits and debits in a period of at most one month." },
+      "description": "Bankregels (beide richtingen) in een periode van 1–31 dagen, optioneel voor één grootboekrekening (bijv. 17910 Kruisposten Mollie). AmountFC > 0 = geld binnen. Om een Mollie-uitbetaling af te letteren.",
+      "version": "0.2.0",
+      "level": "read",
+      "file": "tools/bank_lines_by_period.ts",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/*/financialtransaction/BankEntryLines"
+        },
+        {
+          "method": "GET",
+          "path": "/*/system/Divisions"
+        }
+      ],
+      "params": {
+        "start_date": {
+          "type": "string",
+          "required": true,
+          "description": "Begin (YYYY-MM-DD), inclusief"
+        },
+        "end_date": {
+          "type": "string",
+          "required": true,
+          "description": "Eind (YYYY-MM-DD), exclusief"
+        },
+        "gl_account_code": {
+          "type": "string",
+          "description": "Grootboekrekening, bijv. 17910"
+        }
+      },
+      "limits": {
+        "maxCalls": 45,
+        "timeoutSeconds": 120
+      }
+    },
+    {
+      "name": "get_general_ledger_card",
+      "title": { "nl": "Grootboekkaart", "en": "General ledger card" },
+      "summary": { "nl": "Beginsaldo, regels en eindsaldo van één grootboekrekening tussen twee datums.", "en": "Opening balance, lines and closing balance of one G/L account between two dates." },
+      "description": "Grootboekkaart van één rekening tussen twee datums (inclusief) binnen één boekjaar: beginsaldo, alle regels met debet/credit, eindsaldo en controle met de saldibalans van Exact. Standaard openstaande (20) en verwerkte (50) boekingen; include_open=false voor alleen verwerkt.",
+      "version": "0.2.0",
+      "level": "read",
+      "file": "tools/general_ledger_card.ts",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/*/financial/FinancialPeriods"
+        },
+        {
+          "method": "GET",
+          "path": "/*/financial/ReportingBalance"
+        },
+        {
+          "method": "GET",
+          "path": "/*/financialtransaction/TransactionLines"
+        },
+        {
+          "method": "GET",
+          "path": "/*/system/Divisions"
+        }
+      ],
+      "params": {
+        "gl_account_code": {
+          "type": "string",
+          "required": true,
+          "description": "Grootboekrekening, bijv. 17910"
+        },
+        "start_date": {
+          "type": "string",
+          "required": true,
+          "description": "Begin (YYYY-MM-DD), inclusief"
+        },
+        "end_date": {
+          "type": "string",
+          "required": true,
+          "description": "Eind (YYYY-MM-DD), inclusief"
+        },
+        "include_open": {
+          "type": "boolean",
+          "description": "Ook niet-verwerkte boekingen (standaard true)"
+        }
+      },
+      "limits": {
+        "maxCalls": 120,
+        "timeoutSeconds": 240
+      }
+    },
+    {
+      "name": "get_financial_entry",
+      "title": { "nl": "Boeking", "en": "Financial entry" },
+      "summary": { "nl": "Eén boeking met al haar regels, en of ze in balans is.", "en": "One entry with all its lines, and whether it balances." },
+      "description": "Alle regels van één boeking over alle grootboekrekeningen, met debet- en credittotaal en of de boeking in balans is. Op entry_id, of op entry_number met optioneel journal_code. Afletterstatus: gebruik get_matching_details.",
+      "version": "0.2.0",
+      "level": "read",
+      "file": "tools/financial_entry.ts",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/*/financialtransaction/TransactionLines"
+        },
+        {
+          "method": "GET",
+          "path": "/*/system/Divisions"
+        }
+      ],
+      "params": {
+        "entry_id": {
+          "type": "string",
+          "description": "EntryID (GUID)"
+        },
+        "entry_number": {
+          "type": "integer",
+          "description": "Boekstuknummer"
+        },
+        "journal_code": {
+          "type": "string",
+          "description": "Dagboek, bijv. 70"
+        }
+      },
+      "limits": {
+        "maxCalls": 45,
+        "timeoutSeconds": 120
+      }
+    },
+    {
+      "name": "get_matching_details",
+      "title": { "nl": "Afletterstatus", "en": "Matching status" },
+      "summary": { "nl": "Of facturen zijn afgeletterd en wat er nog openstaat.", "en": "Whether invoices are matched and what is still open." },
+      "description": "Afletterstatus van verkoop- en inkoopfacturen (matched, partially_matched, open, unknown) met openstaand bedrag en tegenboekingen. Op invoice_number, your_ref of entry_number (+ journal_code). Afletteren op een grootboekkaart (bijv. kruisposten) zit niet in de API van Exact en wordt nooit geraden.",
+      "version": "0.2.0",
+      "level": "read",
+      "file": "tools/matching_details.ts",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/*/cashflow/Receivables"
+        },
+        {
+          "method": "GET",
+          "path": "/*/cashflow/Payments"
+        },
+        {
+          "method": "GET",
+          "path": "/*/financialtransaction/TransactionLines"
+        },
+        {
+          "method": "GET",
+          "path": "/*/financial/GLAccounts"
+        },
+        {
+          "method": "GET",
+          "path": "/*/system/Divisions"
+        }
+      ],
+      "params": {
+        "invoice_number": {
+          "type": "integer",
+          "description": "Factuurnummer"
+        },
+        "your_ref": {
+          "type": "string",
+          "description": "Uw referentie, bijv. het ordernummer"
+        },
+        "entry_number": {
+          "type": "integer",
+          "description": "Boekstuknummer"
+        },
+        "journal_code": {
+          "type": "string",
+          "description": "Dagboek (alleen met entry_number)"
+        }
+      },
+      "limits": {
+        "maxCalls": 80,
+        "timeoutSeconds": 180
+      }
+    },
+    {
+      "name": "review_receipt_evidence",
+      "title": { "nl": "Bewijs bij bankuitgaven", "en": "Receipts for bank payments" },
+      "summary": { "nl": "Welke uitgaven op de bank nog geen bon of factuur hebben.", "en": "Which outgoing bank payments still lack a receipt or invoice." },
+      "description": "Voor uitgaande bankregels in een periode van 1–31 dagen: is er een gekoppeld document met bijlage? Categorieën evidence_present, evidence_needed, needs_review. Stelt nooit vast dat een bon echt ontbreekt en controleert de inhoud van bijlagen niet.",
+      "version": "0.2.0",
+      "level": "read",
+      "file": "tools/receipt_evidence.ts",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/*/financialtransaction/BankEntryLines"
+        },
+        {
+          "method": "GET",
+          "path": "/*/documents/Documents"
+        },
+        {
+          "method": "GET",
+          "path": "/*/documents/DocumentAttachments"
+        },
+        {
+          "method": "GET",
+          "path": "/*/purchaseentry/PurchaseEntries"
+        },
+        {
+          "method": "GET",
+          "path": "/*/system/Divisions"
+        }
+      ],
+      "params": {
+        "start_date": {
+          "type": "string",
+          "required": true,
+          "description": "Begin (YYYY-MM-DD), inclusief"
+        },
+        "end_date": {
+          "type": "string",
+          "required": true,
+          "description": "Eind (YYYY-MM-DD), exclusief"
+        },
+        "max_bank_lines": {
+          "type": "integer",
+          "description": "1–100, standaard 100"
+        }
+      },
+      "limits": {
+        "maxCalls": 70,
+        "timeoutSeconds": 180
+      }
+    }
+  ]
+}

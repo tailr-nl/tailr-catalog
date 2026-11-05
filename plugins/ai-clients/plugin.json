@@ -1,0 +1,24 @@
+{
+  "$schema": "../../schemas/plugin.json",
+  "id": "ai-clients",
+  "version": "1.3.0",
+  "api": "1.0",
+  "title": {
+    "nl": "AI-tools en apps toestaan",
+    "en": "Allow AI tools and apps"
+  },
+  "summary": {
+    "nl": "Bepaal per OAuth-client (AI-tool of app) of hij mag verbinden",
+    "en": "Decide per OAuth client (AI tool or app) whether it may connect"
+  },
+  "entry": "index.ts",
+  "hooks": [
+    "guard auth.before",
+    "guard oauth.consent",
+    "Te bevestigen",
+    "beheer-API",
+    "scherm",
+    "mail"
+  ],
+  "onFailure": "block"
+}

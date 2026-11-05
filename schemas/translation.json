@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tailr Core translation",
+  "description": "A translation file (Catalogue → Translations). The keys are the original Dutch texts; keep placeholders such as {name}.",
+  "x-tailr-version": "0.1.0",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON schema of this file, for completion in your editor."
+        },
+        "name": {
+          "description": "Name in the language menu, e.g. \"Deutsch\". Needed for a new language; not for nl or en.",
+          "type": "string",
+          "maxLength": 40
+        },
+        "dateLocale": {
+          "description": "Locale for dates and numbers, e.g. de-DE. Default: the language code.",
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+        },
+        "messages": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "description": "Texts of the web app: original Dutch text → translation."
+        },
+        "plugins": {
+          "description": "Texts of installed plugins, per plugin id: original Dutch text → translation.",
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "description": "Original Dutch text → translation. Keep the keys exactly as they are, and keep placeholders such as {name} unchanged. Empty values are skipped."
+          }
+        }
+      },
+      "required": [
+        "messages"
+      ],
+      "description": "A translation file for Tailr Core (Catalogue → Translations). Keys starting with _ are comments.",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[_$]": {}
+      }
+    },
+    {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "maxLength": 2000
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 2000
+      },
+      "description": "A flat file with only texts: original Dutch text → translation."
+    }
+  ]
+}

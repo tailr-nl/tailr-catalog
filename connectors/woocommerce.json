@@ -1,0 +1,533 @@
+{
+  "$schema": "../schemas/connector.json",
+  "id": "woocommerce",
+  "name": "WooCommerce",
+  "version": "0.4.0",
+  "description": "Bestellingen, producten, voorraad en omzet van je WooCommerce-webshop (REST API v3).",
+  "category": "Webshop",
+  "homepage": "https://woocommerce.github.io/woocommerce-rest-api-docs/",
+  "type": "rest",
+  "baseUrl": "{{SHOP_URL}}/wp-json/wc/v3",
+  "auth": {
+    "type": "basic",
+    "username": "{{WC_KEY}}",
+    "password": "{{WC_SECRET}}"
+  },
+  "vars": [
+    {
+      "name": "SHOP_URL",
+      "label": "Adres van de webshop",
+      "description": "Bijv. https://www.mijnwinkel.nl (zonder / aan het eind). Moet https zijn.",
+      "secret": false,
+      "pattern": "^https://[^/]+(/[^?#]*[^/?#])?$",
+      "patternHint": "Een https-adres zonder / aan het eind, bijv. https://www.mijnwinkel.nl",
+      "required": true
+    },
+    {
+      "name": "WC_KEY",
+      "label": "Consumer key",
+      "description": "WooCommerce → Instellingen → Geavanceerd → REST API → Sleutel toevoegen. Kies 'Lezen' als niemand mag schrijven.",
+      "secret": true,
+      "required": true
+    },
+    {
+      "name": "WC_SECRET",
+      "label": "Consumer secret",
+      "description": "Staat direct onder de Consumer key, na API-sleutel genereren. Je ziet hem maar één keer.",
+      "secret": true,
+      "required": true
+    }
+  ],
+  "limits": {
+    "perMinute": 120,
+    "concurrency": 2,
+    "timeoutSeconds": 30,
+    "cacheTtlSeconds": 60,
+    "note": "De WooCommerce REST API heeft zelf geen vaste limiet; hosting en beveiligingsplugins vaak wel. Daarom voorzichtig: 2 tegelijk en 120 per minuut. Pas aan als je hosting meer toestaat."
+  },
+  "setup": {
+    "minutes": 5,
+    "prerequisites": [
+      "Een WordPress-account met de rol Beheerder of Winkelmanager in de webshop"
+    ],
+    "steps": [
+      {
+        "id": "rest-key",
+        "title": "REST-sleutel maken in WooCommerce",
+        "instruction": "Ga in WordPress naar WooCommerce → Instellingen → Geavanceerd → REST API en klik op Sleutel toevoegen. Geef een omschrijving (bijv. Tailr Core) en kies bij Rechten 'Lezen', of 'Lezen/Schrijven' als de AI ook bestellingen of producten mag wijzigen. Klik op API-sleutel genereren. Laat de pagina open: de Consumer key en het Consumer secret plak je straks op de invulpagina.",
+        "note": "Het Consumer secret zie je maar één keer."
+      }
+    ],
+    "testWith": "list_products"
+  },
+  "tools": [
+    {
+      "name": "list_orders",
+      "title": { "nl": "Bestellingen opvragen", "en": "List orders" },
+      "summary": { "nl": "Bestellingen, nieuwste eerst, eventueel per status of periode.", "en": "Orders, newest first, optionally by status or period." },
+      "description": "Bestellingen, nieuwste eerst. Filter op status, periode (after/before, ISO-datum) of zoekterm. Persoonsgegevens zoals e-mail, telefoon en adres worden niet getoond.",
+      "level": "read",
+      "method": "GET",
+      "path": "/orders",
+      "params": {
+        "status": {
+          "in": "query",
+          "type": "string",
+          "description": "Status van de bestelling",
+          "enum": [
+            "pending",
+            "processing",
+            "on-hold",
+            "completed",
+            "cancelled",
+            "refunded",
+            "failed"
+          ]
+        },
+        "after": {
+          "in": "query",
+          "type": "string",
+          "description": "Vanaf datum, bijv. 2026-11-01T00:00:00"
+        },
+        "before": {
+          "in": "query",
+          "type": "string",
+          "description": "Tot datum"
+        },
+        "search": {
+          "in": "query",
+          "type": "string",
+          "description": "Zoekterm"
+        },
+        "per_page": {
+          "in": "query",
+          "type": "integer",
+          "description": "Aantal per pagina (max 100, standaard 10)"
+        },
+        "page": {
+          "in": "query",
+          "type": "integer",
+          "description": "Pagina"
+        }
+      },
+      "transform": {
+        "select": {
+          "id": "id",
+          "nummer": "number",
+          "status": "status",
+          "datum": "date_created",
+          "totaal": "total",
+          "valuta": "currency",
+          "betaalmethode": "payment_method_title",
+          "voornaam": "billing.first_name",
+          "achternaam": "billing.last_name",
+          "plaats": "billing.city",
+          "land": "billing.country",
+          "producten": "line_items.name",
+          "aantallen": "line_items.quantity"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "get_order",
+      "title": { "nl": "Bestelling bekijken", "en": "View order" },
+      "summary": { "nl": "Eén bestelling met regels, verzending en status, zonder contactgegevens.", "en": "One order with lines, shipping and status, without contact details." },
+      "description": "Eén bestelling met regels, verzending en status. Zonder e-mail, telefoon en straatadres.",
+      "level": "read",
+      "method": "GET",
+      "path": "/orders/{id}",
+      "params": {
+        "id": {
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Bestelnummer (id)"
+        }
+      },
+      "transform": {
+        "exclude": [
+          "billing.email",
+          "billing.phone",
+          "billing.address_1",
+          "billing.address_2",
+          "shipping.address_1",
+          "shipping.address_2",
+          "shipping.phone",
+          "customer_ip_address",
+          "customer_user_agent",
+          "meta_data",
+          "_links"
+        ],
+        "onError": "fail"
+      },
+      "privacy": {
+        "sensitivity": {
+          "id": "none", "number": "none", "status": "none", "date_created": "none", "date_paid": "none", "date_completed": "none",
+          "currency": "none", "total": "none", "total_tax": "none", "shipping_total": "none", "discount_total": "none", "payment_method_title": "none",
+          "customer_id": "none", "customer_note": "personal", "line_items": "none", "shipping_lines": "none",
+          "billing.first_name": "personal", "billing.last_name": "personal", "billing.company": "personal", "billing.postcode": "personal", "billing.city": "personal", "billing.country": "none",
+          "shipping.first_name": "personal", "shipping.last_name": "personal", "shipping.company": "personal", "shipping.postcode": "personal", "shipping.city": "personal", "shipping.country": "none"
+        },
+        "lookup": ["id"],
+        "label": "Klant"
+      }
+    },
+    {
+      "name": "update_order_status",
+      "title": { "nl": "Bestelstatus wijzigen", "en": "Change order status" },
+      "summary": { "nl": "Zet een bestelling bijvoorbeeld op afgerond of in de wacht.", "en": "Sets an order to, for example, completed or on hold." },
+      "description": "Zet de status van een bestelling, bijv. naar completed (afgerond) of on-hold.",
+      "level": "write",
+      "method": "PUT",
+      "path": "/orders/{id}",
+      "params": {
+        "id": {
+          "in": "path",
+          "type": "integer",
+          "required": true
+        },
+        "status": {
+          "in": "body",
+          "type": "string",
+          "enum": [
+            "pending",
+            "processing",
+            "on-hold",
+            "completed",
+            "cancelled",
+            "refunded",
+            "failed"
+          ],
+          "required": true
+        }
+      },
+      "transform": {
+        "select": {
+          "id": "id",
+          "status": "status"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "add_order_note",
+      "title": { "nl": "Notitie bij bestelling", "en": "Add order note" },
+      "summary": { "nl": "Zet een notitie bij een bestelling; als je dat kiest, krijgt de klant hem ook.", "en": "Adds a note to an order; if you choose, the customer receives it too." },
+      "description": "Voegt een notitie toe. Met customer_note=true ziet en ontvangt de klant de notitie.",
+      "level": "write",
+      "method": "POST",
+      "path": "/orders/{id}/notes",
+      "params": {
+        "id": {
+          "in": "path",
+          "type": "integer",
+          "required": true
+        },
+        "note": {
+          "in": "body",
+          "type": "string",
+          "required": true
+        },
+        "customer_note": {
+          "in": "body",
+          "type": "boolean",
+          "description": "Zichtbaar voor de klant"
+        }
+      },
+      "transform": {
+        "select": {
+          "id": "id",
+          "notitie": "note",
+          "klant_ziet_het": "customer_note"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "list_products",
+      "title": { "nl": "Producten opvragen", "en": "List products" },
+      "summary": { "nl": "Producten met prijs en voorraad.", "en": "Products with price and stock." },
+      "description": "Producten met prijs en voorraad. Filter op zoekterm, SKU, status of voorraadstatus.",
+      "level": "read",
+      "method": "GET",
+      "path": "/products",
+      "params": {
+        "search": {
+          "in": "query",
+          "type": "string"
+        },
+        "sku": {
+          "in": "query",
+          "type": "string"
+        },
+        "status": {
+          "in": "query",
+          "type": "string",
+          "enum": [
+            "publish",
+            "draft",
+            "pending",
+            "private"
+          ]
+        },
+        "stock_status": {
+          "in": "query",
+          "type": "string",
+          "enum": [
+            "instock",
+            "outofstock",
+            "onbackorder"
+          ]
+        },
+        "per_page": {
+          "in": "query",
+          "type": "integer"
+        },
+        "page": {
+          "in": "query",
+          "type": "integer"
+        }
+      },
+      "transform": {
+        "select": {
+          "id": "id",
+          "naam": "name",
+          "sku": "sku",
+          "prijs": "price",
+          "normale_prijs": "regular_price",
+          "actieprijs": "sale_price",
+          "voorraad": "stock_quantity",
+          "voorraadstatus": "stock_status",
+          "status": "status",
+          "categorieen": "categories.name"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "get_product",
+      "title": { "nl": "Product bekijken", "en": "View product" },
+      "summary": { "nl": "Alle gegevens van één product.", "en": "All details of one product." },
+      "description": "Alle gegevens van één product.",
+      "level": "read",
+      "method": "GET",
+      "path": "/products/{id}",
+      "params": {
+        "id": {
+          "in": "path",
+          "type": "integer",
+          "required": true
+        }
+      },
+      "transform": {
+        "exclude": [
+          "_links",
+          "meta_data",
+          "related_ids",
+          "upsell_ids",
+          "cross_sell_ids"
+        ],
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "update_product",
+      "title": { "nl": "Product aanpassen", "en": "Edit product" },
+      "summary": { "nl": "Wijzigt prijs, actieprijs, voorraad of status van een product.", "en": "Changes the price, sale price, stock or status of a product." },
+      "description": "Wijzig prijs, actieprijs, voorraad of status van een product. Prijzen als tekst, bijv. \"89.00\".",
+      "level": "write",
+      "method": "PUT",
+      "path": "/products/{id}",
+      "params": {
+        "id": {
+          "in": "path",
+          "type": "integer",
+          "required": true
+        },
+        "regular_price": {
+          "in": "body",
+          "type": "string",
+          "description": "Normale prijs"
+        },
+        "sale_price": {
+          "in": "body",
+          "type": "string",
+          "description": "Actieprijs, leeg = geen actie"
+        },
+        "stock_quantity": {
+          "in": "body",
+          "type": "integer",
+          "description": "Voorraad"
+        },
+        "manage_stock": {
+          "in": "body",
+          "type": "boolean",
+          "description": "Voorraad bijhouden"
+        },
+        "status": {
+          "in": "body",
+          "type": "string",
+          "enum": [
+            "publish",
+            "draft",
+            "pending",
+            "private"
+          ]
+        }
+      },
+      "transform": {
+        "select": {
+          "id": "id",
+          "naam": "name",
+          "prijs": "price",
+          "voorraad": "stock_quantity",
+          "status": "status"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "delete_product",
+      "title": { "nl": "Product verwijderen", "en": "Delete product" },
+      "summary": { "nl": "Zet een product in de prullenbak of verwijdert het definitief.", "en": "Moves a product to the trash or deletes it permanently." },
+      "description": "Verwijdert een product. Zonder force gaat het naar de prullenbak; met force=true definitief.",
+      "level": "admin",
+      "method": "DELETE",
+      "path": "/products/{id}",
+      "params": {
+        "id": {
+          "in": "path",
+          "type": "integer",
+          "required": true
+        },
+        "force": {
+          "in": "query",
+          "type": "boolean",
+          "description": "Definitief verwijderen"
+        }
+      },
+      "transform": {
+        "select": {
+          "id": "id",
+          "naam": "name"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "sales_report",
+      "title": { "nl": "Omzetrapport", "en": "Sales report" },
+      "summary": { "nl": "Omzet, aantal bestellingen en verkochte artikelen over een periode.", "en": "Revenue, number of orders and items sold over a period." },
+      "description": "Omzet, aantal bestellingen en verkochte artikelen over een periode (week, month, last_month, year) of tussen twee datums (YYYY-MM-DD).",
+      "level": "read",
+      "method": "GET",
+      "path": "/reports/sales",
+      "params": {
+        "period": {
+          "in": "query",
+          "type": "string",
+          "enum": [
+            "week",
+            "month",
+            "last_month",
+            "year"
+          ]
+        },
+        "date_min": {
+          "in": "query",
+          "type": "string",
+          "description": "YYYY-MM-DD"
+        },
+        "date_max": {
+          "in": "query",
+          "type": "string",
+          "description": "YYYY-MM-DD"
+        }
+      },
+      "transform": {
+        "exclude": [
+          "_links"
+        ],
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "top_sellers",
+      "title": { "nl": "Best verkochte producten", "en": "Top sellers" },
+      "summary": { "nl": "Welke producten het meest verkocht zijn in een periode.", "en": "Which products sold the most in a period." },
+      "description": "Best verkochte producten over een periode.",
+      "level": "read",
+      "method": "GET",
+      "path": "/reports/top_sellers",
+      "params": {
+        "period": {
+          "in": "query",
+          "type": "string",
+          "enum": [
+            "week",
+            "month",
+            "last_month",
+            "year"
+          ]
+        },
+        "date_min": {
+          "in": "query",
+          "type": "string"
+        },
+        "date_max": {
+          "in": "query",
+          "type": "string"
+        }
+      },
+      "transform": {
+        "exclude": [
+          "_links"
+        ],
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "list_customers",
+      "title": { "nl": "Klanten opvragen", "en": "List customers" },
+      "summary": { "nl": "Klanten met naam, plaats en aantal bestellingen, zonder contactgegevens.", "en": "Customers with name, city and number of orders, without contact details." },
+      "description": "Klanten met naam, plaats en aantal bestellingen. Zonder e-mail, telefoon en adres.",
+      "level": "read",
+      "method": "GET",
+      "path": "/customers",
+      "params": {
+        "search": {
+          "in": "query",
+          "type": "string",
+          "description": "Naam of e-mailadres van de klant. Verplicht: klanten zijn persoonsgegevens en komen per zoekopdracht (hooguit 10)."
+        },
+        "per_page": {
+          "in": "query",
+          "type": "integer"
+        },
+        "page": {
+          "in": "query",
+          "type": "integer"
+        }
+      },
+      "transform": {
+        "select": {
+          "id": "id",
+          "voornaam": "first_name",
+          "achternaam": "last_name",
+          "plaats": "billing.city",
+          "land": "billing.country",
+          "klant_sinds": "date_created",
+          "betalende_klant": "is_paying_customer"
+        },
+        "onError": "fail"
+      },
+      "privacy": {
+        "sensitivity": { "id": "none", "voornaam": "personal", "achternaam": "personal", "plaats": "personal", "land": "none", "klant_sinds": "none", "betalende_klant": "none" },
+        "lookup": ["search"],
+        "maxRecords": 10,
+        "label": "Klant"
+      }
+    }
+  ]
+}

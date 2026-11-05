@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/plugin.json",
+  "id": "extra-logging",
+  "version": "1.1.0",
+  "api": "1.0",
+  "title": {
+    "nl": "Extra logging",
+    "en": "Extra logging"
+  },
+  "summary": {
+    "nl": "Aanroepen en beheerwijzigingen naar een bestand, webhook of syslog",
+    "en": "Calls and admin changes to a file, webhook or syslog"
+  },
+  "entry": "index.ts",
+  "hooks": [
+    "on call.completed",
+    "on admin.completed",
+    "functie feedback",
+    "beheer-API",
+    "scherm"
+  ]
+}

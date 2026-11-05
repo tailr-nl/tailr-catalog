@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schemas/plugin.json",
+  "id": "handleiding",
+  "version": "1.0.0",
+  "api": "1.5",
+  "title": { "nl": "Handleiding", "en": "Guide" },
+  "summary": {
+    "nl": "Een handleiding voor iedereen, met de koppelingen en voorbeeldvragen per lezer; de beheerder past hem aan in markdown",
+    "en": "A guide for everyone, with the connections and example questions per reader; the administrator edits it in markdown"
+  },
+  "entry": "index.ts",
+  "hooks": ["scherm", "beheer-API", "tool handleiding__read", "instructies voor de AI", "plek connect", "teksten en"]
+}

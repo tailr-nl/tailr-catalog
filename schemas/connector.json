@@ -1,0 +1,1661 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tailr Core connector",
+  "description": "connector.json of a Tailr Core connector (or a single connector JSON file). See docs/koppelingen-maken.md.",
+  "x-tailr-version": "0.1.0",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON schema of this file, for completion in your editor."
+        },
+        "id": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "name": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "version": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "description": {
+          "$ref": "#/$defs/__schema5"
+        },
+        "homepage": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "category": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "vars": {
+          "$ref": "#/$defs/__schema8"
+        },
+        "limits": {
+          "$ref": "#/$defs/__schema12"
+        },
+        "hosts": {
+          "$ref": "#/$defs/__schema14"
+        },
+        "scripts": {
+          "$ref": "#/$defs/__schema17"
+        },
+        "context": {
+          "$ref": "#/$defs/__schema68"
+        },
+        "readme": {
+          "$ref": "#/$defs/__schema69"
+        },
+        "setup": {
+          "$ref": "#/$defs/__schema70"
+        },
+        "requires": {
+          "$ref": "#/$defs/__schema75"
+        },
+        "type": {
+          "type": "string",
+          "const": "rest"
+        },
+        "baseUrl": {
+          "type": "string",
+          "description": "Base URL of the API, e.g. https://api.mollie.com/v2. May contain {{VARS}}."
+        },
+        "auth": {
+          "default": {
+            "type": "none"
+          },
+          "description": "How Tailr Core signs in at the source: oauth2, bearer, basic, header, query or none.",
+          "$ref": "#/$defs/__schema77"
+        },
+        "headers": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "tools": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema78"
+          },
+          "description": "The functions: each one is one call."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "baseUrl",
+        "tools"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON schema of this file, for completion in your editor."
+        },
+        "id": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "name": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "version": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "description": {
+          "$ref": "#/$defs/__schema5"
+        },
+        "homepage": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "category": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "vars": {
+          "$ref": "#/$defs/__schema8"
+        },
+        "limits": {
+          "$ref": "#/$defs/__schema12"
+        },
+        "hosts": {
+          "$ref": "#/$defs/__schema14"
+        },
+        "scripts": {
+          "$ref": "#/$defs/__schema17"
+        },
+        "context": {
+          "$ref": "#/$defs/__schema68"
+        },
+        "readme": {
+          "$ref": "#/$defs/__schema69"
+        },
+        "setup": {
+          "$ref": "#/$defs/__schema70"
+        },
+        "requires": {
+          "$ref": "#/$defs/__schema75"
+        },
+        "type": {
+          "type": "string",
+          "const": "mcp"
+        },
+        "url": {
+          "type": "string"
+        },
+        "auth": {
+          "default": {
+            "type": "none"
+          },
+          "$ref": "#/$defs/__schema77"
+        },
+        "headers": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "levels": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write",
+              "admin"
+            ]
+          }
+        },
+        "markings": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "audience": {
+                "$ref": "#/$defs/__schema49"
+              },
+              "privacy": {
+                "$ref": "#/$defs/__schema51"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON schema of this file, for completion in your editor."
+        },
+        "id": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "name": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "version": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "description": {
+          "$ref": "#/$defs/__schema5"
+        },
+        "homepage": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "category": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "vars": {
+          "$ref": "#/$defs/__schema8"
+        },
+        "limits": {
+          "$ref": "#/$defs/__schema12"
+        },
+        "hosts": {
+          "$ref": "#/$defs/__schema14"
+        },
+        "scripts": {
+          "$ref": "#/$defs/__schema17"
+        },
+        "context": {
+          "$ref": "#/$defs/__schema68"
+        },
+        "readme": {
+          "$ref": "#/$defs/__schema69"
+        },
+        "setup": {
+          "$ref": "#/$defs/__schema70"
+        },
+        "requires": {
+          "$ref": "#/$defs/__schema75"
+        },
+        "type": {
+          "$ref": "#/$defs/__schema82"
+        },
+        "engine": {
+          "$ref": "#/$defs/__schema83"
+        },
+        "connection": {
+          "$ref": "#/$defs/__schema84"
+        },
+        "maxRows": {
+          "$ref": "#/$defs/__schema85"
+        },
+        "tools": {
+          "$ref": "#/$defs/__schema86"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "engine",
+        "tools"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON schema of this file, for completion in your editor."
+        },
+        "id": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "name": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "version": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "description": {
+          "$ref": "#/$defs/__schema5"
+        },
+        "homepage": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "category": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "vars": {
+          "$ref": "#/$defs/__schema8"
+        },
+        "limits": {
+          "$ref": "#/$defs/__schema12"
+        },
+        "hosts": {
+          "$ref": "#/$defs/__schema14"
+        },
+        "scripts": {
+          "$ref": "#/$defs/__schema17"
+        },
+        "context": {
+          "$ref": "#/$defs/__schema68"
+        },
+        "readme": {
+          "$ref": "#/$defs/__schema69"
+        },
+        "setup": {
+          "$ref": "#/$defs/__schema70"
+        },
+        "requires": {
+          "$ref": "#/$defs/__schema75"
+        },
+        "type": {
+          "$ref": "#/$defs/__schema88"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "__schema0": {
+      "description": "Unique id: lower-case letters, digits, - and _ (at most 48).",
+      "$ref": "#/$defs/__schema1"
+    },
+    "__schema1": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,47}$"
+    },
+    "__schema2": {
+      "type": "string",
+      "description": "Name of the system, e.g. Mollie."
+    },
+    "__schema3": {
+      "default": "0.1.0",
+      "description": "Version (MAJOR.MINOR.PATCH). Raise it on every change.",
+      "$ref": "#/$defs/__schema4"
+    },
+    "__schema4": {
+      "type": "string"
+    },
+    "__schema5": {
+      "type": "string"
+    },
+    "__schema6": {
+      "type": "string"
+    },
+    "__schema7": {
+      "type": "string"
+    },
+    "__schema8": {
+      "default": [],
+      "description": "Settings the administrator fills in (keys, URLs). Use them as {{NAME}}.",
+      "$ref": "#/$defs/__schema9"
+    },
+    "__schema9": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "description": "Name in UPPER_CASE, used as {{NAME}} in baseUrl, auth, headers and defaults."
+          },
+          "label": {
+            "type": "string",
+            "description": "Label on the setup page."
+          },
+          "description": {
+            "description": "Where the administrator finds this value at the source.",
+            "$ref": "#/$defs/__schema10"
+          },
+          "secret": {
+            "default": true,
+            "description": "Secret values are encrypted and never shown again (default true). Use false for e.g. a shop URL.",
+            "$ref": "#/$defs/__schema11"
+          },
+          "required": {
+            "default": true,
+            "type": "boolean"
+          },
+          "default": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "patternHint": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "chooseWith": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_]{1,64}$"
+          }
+        },
+        "required": [
+          "name",
+          "label"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "__schema10": {
+      "type": "string"
+    },
+    "__schema11": {
+      "type": "boolean"
+    },
+    "__schema12": {
+      "type": "object",
+      "properties": {
+        "perSecond": {
+          "$ref": "#/$defs/__schema13"
+        },
+        "perMinute": {
+          "$ref": "#/$defs/__schema13"
+        },
+        "perHour": {
+          "$ref": "#/$defs/__schema13"
+        },
+        "perDay": {
+          "$ref": "#/$defs/__schema13"
+        },
+        "perUserPerDay": {
+          "$ref": "#/$defs/__schema13"
+        },
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "cacheTtlSeconds": {
+          "maximum": 86400,
+          "$ref": "#/$defs/__schema13"
+        },
+        "maxWaitSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 120
+        },
+        "headers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "remaining": {
+                "type": "string"
+              },
+              "reset": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "remaining"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema13": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "__schema14": {
+      "default": [],
+      "description": "Extra hosts this connector may reach besides the host of baseUrl or url; the login only goes to these hosts.",
+      "$ref": "#/$defs/__schema15"
+    },
+    "__schema15": {
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/__schema16"
+      }
+    },
+    "__schema16": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema17": {
+      "default": [],
+      "description": "Code functions (tools/*.ts in the folder). They always run in the sandbox.",
+      "$ref": "#/$defs/__schema18"
+    },
+    "__schema18": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/__schema19"
+      }
+    },
+    "__schema19": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/__schema20"
+        },
+        "title": {
+          "$ref": "#/$defs/__schema21"
+        },
+        "summary": {
+          "$ref": "#/$defs/__schema25"
+        },
+        "description": {
+          "$ref": "#/$defs/__schema26"
+        },
+        "version": {
+          "$ref": "#/$defs/__schema27"
+        },
+        "level": {
+          "$ref": "#/$defs/__schema28"
+        },
+        "file": {
+          "$ref": "#/$defs/__schema29"
+        },
+        "code": {
+          "$ref": "#/$defs/__schema31"
+        },
+        "uses": {
+          "$ref": "#/$defs/__schema32"
+        },
+        "requests": {
+          "$ref": "#/$defs/__schema35"
+        },
+        "params": {
+          "$ref": "#/$defs/__schema38"
+        },
+        "limits": {
+          "$ref": "#/$defs/__schema47"
+        },
+        "audience": {
+          "$ref": "#/$defs/__schema48"
+        },
+        "privacy": {
+          "$ref": "#/$defs/__schema50"
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "__schema20": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_]{1,64}$"
+    },
+    "__schema21": {
+      "$ref": "#/$defs/__schema22"
+    },
+    "__schema22": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "object",
+          "properties": {
+            "nl": {
+              "$ref": "#/$defs/__schema23"
+            },
+            "en": {
+              "$ref": "#/$defs/__schema24"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "__schema23": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema24": {
+      "type": "string",
+      "minLength": 1
+    },
+    "__schema25": {
+      "$ref": "#/$defs/__schema22"
+    },
+    "__schema26": {
+      "type": "string"
+    },
+    "__schema27": {
+      "default": "1.0.0",
+      "type": "string",
+      "maxLength": 32
+    },
+    "__schema28": {
+      "default": "read",
+      "type": "string",
+      "enum": [
+        "read",
+        "write",
+        "admin"
+      ]
+    },
+    "__schema29": {
+      "description": "File in the connector folder, e.g. tools/settlement_breakdown.ts. Give file or code.",
+      "$ref": "#/$defs/__schema30"
+    },
+    "__schema30": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "__schema31": {
+      "type": "string",
+      "maxLength": 200000
+    },
+    "__schema32": {
+      "default": [],
+      "description": "Functions the code may call with ctx.call: a function of this connector (\"list_items\") or alias.function for a connection from requires.",
+      "$ref": "#/$defs/__schema33"
+    },
+    "__schema33": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/__schema34"
+      }
+    },
+    "__schema34": {
+      "type": "string",
+      "pattern": "^([a-z][a-z0-9_]{0,31}\\.)?[a-zA-Z0-9_]{1,64}$"
+    },
+    "__schema35": {
+      "default": [],
+      "description": "Requests the code may make with ctx.request: method plus path relative to baseUrl (* = one segment, ** = the rest).",
+      "$ref": "#/$defs/__schema36"
+    },
+    "__schema36": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/__schema37"
+      }
+    },
+    "__schema37": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "HEAD",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "pattern": "^\\/"
+        }
+      },
+      "required": [
+        "method",
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "__schema38": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "in": {
+            "default": "body",
+            "type": "string",
+            "enum": [
+              "path",
+              "query",
+              "body",
+              "header"
+            ]
+          },
+          "type": {
+            "$ref": "#/$defs/__schema39"
+          },
+          "required": {
+            "$ref": "#/$defs/__schema40"
+          },
+          "description": {
+            "$ref": "#/$defs/__schema41"
+          },
+          "enum": {
+            "$ref": "#/$defs/__schema43"
+          },
+          "apiName": {
+            "$ref": "#/$defs/__schema44"
+          },
+          "default": {
+            "$ref": "#/$defs/__schema45"
+          },
+          "schema": {
+            "$ref": "#/$defs/__schema46"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "__schema39": {
+      "default": "string",
+      "type": "string",
+      "enum": [
+        "string",
+        "number",
+        "integer",
+        "boolean",
+        "array",
+        "object"
+      ]
+    },
+    "__schema40": {
+      "default": false,
+      "type": "boolean"
+    },
+    "__schema41": {
+      "description": "For the AI: what to fill in, with the format.",
+      "$ref": "#/$defs/__schema42"
+    },
+    "__schema42": {
+      "type": "string"
+    },
+    "__schema43": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "number"
+        ]
+      }
+    },
+    "__schema44": {
+      "type": "string"
+    },
+    "__schema45": {
+      "type": "string"
+    },
+    "__schema46": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    },
+    "__schema47": {
+      "type": "object",
+      "properties": {
+        "cpuMs": {
+          "type": "integer",
+          "minimum": 50,
+          "maximum": 30000
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "memoryMb": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 256
+        },
+        "maxCalls": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema48": {
+      "$ref": "#/$defs/__schema49"
+    },
+    "__schema49": {
+      "type": "string",
+      "enum": [
+        "all",
+        "api"
+      ],
+      "description": "Who may call this function: \"all\" (the AI and the API, default) or \"api\" (only dashboards, tools and apps; never the AI over MCP). Use \"api\" when the data may go to a dashboard or tool but not into the chat. The connector sets the minimum: an administrator can make a function API-only, never undo it. See docs/koppelingen-maken.md, \"Privacygevoelige velden en functies\"."
+    },
+    "__schema50": {
+      "$ref": "#/$defs/__schema51"
+    },
+    "__schema51": {
+      "type": "object",
+      "properties": {
+        "sensitivity": {
+          "$ref": "#/$defs/__schema52"
+        },
+        "subject": {
+          "$ref": "#/$defs/__schema55"
+        },
+        "lookup": {
+          "$ref": "#/$defs/__schema57"
+        },
+        "records": {
+          "$ref": "#/$defs/__schema59"
+        },
+        "maxRecords": {
+          "$ref": "#/$defs/__schema61"
+        },
+        "dailyLimit": {
+          "$ref": "#/$defs/__schema63"
+        },
+        "label": {
+          "$ref": "#/$defs/__schema65"
+        }
+      },
+      "required": [
+        "sensitivity",
+        "lookup"
+      ],
+      "description": "Mark a function that returns data about people (names, email, phone, address, bank account, salary, health). Tailr Core then lets only the fields in sensitivity pass, gives the AI pseudonyms, works one person at a time (lookup required, at most maxRecords), applies a daily limit per user, never caches it, and logs every lookup. The connector sets the minimum: an administrator can only make it stricter. See docs/koppelingen-maken.md, \"Privacygevoelige velden en functies\".",
+      "additionalProperties": false
+    },
+    "__schema52": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/__schema53"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/__schema54"
+      },
+      "description": "Per field of a record: \"none\", \"personal\" (name, email, address), \"financial\" (IBAN, salary) or \"special\" (health, citizen service number). Only these fields pass (allowlist); fields that are not \"none\" get a pseudonym for the AI."
+    },
+    "__schema53": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
+    },
+    "__schema54": {
+      "type": "string",
+      "enum": [
+        "none",
+        "personal",
+        "financial",
+        "special"
+      ]
+    },
+    "__schema55": {
+      "default": "id",
+      "description": "Field with the id of the person in each record (default id).",
+      "$ref": "#/$defs/__schema56"
+    },
+    "__schema56": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
+    },
+    "__schema57": {
+      "minItems": 1,
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/__schema58"
+      },
+      "description": "Parameters to look up one person (id, number or email). At least one is required on every call; a list without a filter is refused."
+    },
+    "__schema58": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "__schema59": {
+      "description": "Where the records are in the response, e.g. items. Default: the response itself.",
+      "$ref": "#/$defs/__schema60"
+    },
+    "__schema60": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
+    },
+    "__schema61": {
+      "default": 1,
+      "description": "At most this many records per call (default 1).",
+      "$ref": "#/$defs/__schema62"
+    },
+    "__schema62": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50
+    },
+    "__schema63": {
+      "default": 100,
+      "description": "At most this many different people per user per day (default 100).",
+      "$ref": "#/$defs/__schema64"
+    },
+    "__schema64": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000
+    },
+    "__schema65": {
+      "description": "Word for the pseudonym, e.g. \"Customer\" gives \"Customer #K7Q2MX\".",
+      "$ref": "#/$defs/__schema66"
+    },
+    "__schema66": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "__schema67": {
+      "type": "object",
+      "properties": {
+        "entry": {
+          "type": "string"
+        },
+        "modules": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "hash": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "entry",
+        "modules",
+        "hash"
+      ],
+      "additionalProperties": false
+    },
+    "__schema68": {
+      "type": "string",
+      "maxLength": 8000
+    },
+    "__schema69": {
+      "type": "string",
+      "maxLength": 100000
+    },
+    "__schema70": {
+      "description": "Improvements to the standard setup guide: steps at the source, testWith, prerequisites.",
+      "$ref": "#/$defs/__schema71"
+    },
+    "__schema71": {
+      "type": "object",
+      "properties": {
+        "minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 240
+        },
+        "prerequisites": {
+          "maxItems": 8,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema72"
+          }
+        },
+        "steps": {
+          "maxItems": 10,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema73"
+          }
+        },
+        "loginNote": {
+          "description": "Tip at the step where the admin signs in at the source, e.g. a warning the source shows.",
+          "$ref": "#/$defs/__schema74"
+        },
+        "testWith": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_]{1,64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema72": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "__schema73": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,47}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "instruction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "copy": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "instruction"
+      ],
+      "additionalProperties": false
+    },
+    "__schema74": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "__schema75": {
+      "default": [],
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/__schema76"
+      }
+    },
+    "__schema76": {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,31}$"
+        },
+        "adapter": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "alias",
+        "adapter"
+      ],
+      "additionalProperties": false
+    },
+    "__schema77": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "oauth2"
+            },
+            "flow": {
+              "default": "authorization_code",
+              "type": "string",
+              "enum": [
+                "authorization_code",
+                "client_credentials"
+              ]
+            },
+            "authorizeUrl": {
+              "type": "string"
+            },
+            "tokenUrl": {
+              "type": "string"
+            },
+            "scopes": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "scopeSeparator": {
+              "default": " ",
+              "type": "string"
+            },
+            "clientId": {
+              "default": "{{CLIENT_ID}}",
+              "type": "string"
+            },
+            "clientSecret": {
+              "default": "{{CLIENT_SECRET}}",
+              "type": "string"
+            },
+            "pkce": {
+              "default": true,
+              "type": "boolean"
+            },
+            "tokenAuth": {
+              "default": "body",
+              "type": "string",
+              "enum": [
+                "body",
+                "basic"
+              ]
+            },
+            "authorizeParams": {
+              "default": {},
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "tokenParams": {
+              "default": {},
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "refreshMarginSeconds": {
+              "default": 60,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3600
+            }
+          },
+          "required": [
+            "type",
+            "tokenUrl"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "none"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "bearer"
+            },
+            "token": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "token"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "basic"
+            },
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "username",
+            "password"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "header"
+            },
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "query"
+            },
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "__schema78": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Function name: letters, digits and _. The AI sees <connection>__<name>.",
+          "$ref": "#/$defs/__schema20"
+        },
+        "title": {
+          "$ref": "#/$defs/__schema22"
+        },
+        "summary": {
+          "$ref": "#/$defs/__schema22"
+        },
+        "description": {
+          "type": "string",
+          "description": "For the AI: what the function returns, when to use it, and the shape of the parameters."
+        },
+        "level": {
+          "type": "string",
+          "enum": [
+            "read",
+            "write",
+            "admin"
+          ],
+          "description": "read = only looks; write = creates or changes; admin = deletes, money or sending."
+        },
+        "method": {
+          "default": "GET",
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        },
+        "path": {
+          "default": "/",
+          "description": "Path after baseUrl, with {param} for path parameters.",
+          "$ref": "#/$defs/__schema79"
+        },
+        "params": {
+          "default": {},
+          "description": "Parameters the AI fills in, by name.",
+          "$ref": "#/$defs/__schema80"
+        },
+        "transform": {
+          "description": "Leave out (exclude) or pick (select) fields before the answer goes to the AI.",
+          "$ref": "#/$defs/__schema81"
+        },
+        "graphql": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "soap": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string"
+            },
+            "envelope": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "default": "1.1",
+              "type": "string",
+              "enum": [
+                "1.1",
+                "1.2"
+              ]
+            }
+          },
+          "required": [
+            "envelope"
+          ],
+          "additionalProperties": false
+        },
+        "cacheTtlSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 86400
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "idempotent": {
+          "type": "boolean"
+        },
+        "audience": {
+          "$ref": "#/$defs/__schema49"
+        },
+        "privacy": {
+          "$ref": "#/$defs/__schema51"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "level"
+      ],
+      "additionalProperties": false
+    },
+    "__schema79": {
+      "type": "string"
+    },
+    "__schema80": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "in": {
+            "type": "string",
+            "enum": [
+              "path",
+              "query",
+              "body",
+              "header"
+            ],
+            "description": "Where the parameter goes: path ({name} in path), query, body or header."
+          },
+          "type": {
+            "$ref": "#/$defs/__schema39"
+          },
+          "required": {
+            "$ref": "#/$defs/__schema40"
+          },
+          "description": {
+            "$ref": "#/$defs/__schema41"
+          },
+          "enum": {
+            "$ref": "#/$defs/__schema43"
+          },
+          "apiName": {
+            "$ref": "#/$defs/__schema44"
+          },
+          "default": {
+            "$ref": "#/$defs/__schema45"
+          },
+          "schema": {
+            "$ref": "#/$defs/__schema46"
+          }
+        },
+        "required": [
+          "in"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "__schema81": {
+      "type": "object",
+      "properties": {
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "select": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "onError": {
+          "default": "fail",
+          "type": "string",
+          "enum": [
+            "fail",
+            "raw"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema82": {
+      "type": "string",
+      "const": "database"
+    },
+    "__schema83": {
+      "type": "string",
+      "enum": [
+        "postgres",
+        "mysql",
+        "mssql",
+        "sqlite"
+      ]
+    },
+    "__schema84": {
+      "default": {
+        "ssl": "disable"
+      },
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "string"
+        },
+        "database": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "ssl": {
+          "default": "disable",
+          "type": "string",
+          "enum": [
+            "disable",
+            "require",
+            "verify"
+          ]
+        },
+        "file": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema85": {
+      "default": 200,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000
+    },
+    "__schema86": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/__schema87"
+      }
+    },
+    "__schema87": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/__schema20"
+        },
+        "title": {
+          "$ref": "#/$defs/__schema22"
+        },
+        "summary": {
+          "$ref": "#/$defs/__schema22"
+        },
+        "description": {
+          "type": "string"
+        },
+        "level": {
+          "type": "string",
+          "enum": [
+            "read",
+            "write",
+            "admin"
+          ]
+        },
+        "sql": {
+          "type": "string",
+          "minLength": 1
+        },
+        "params": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "in": {
+                "default": "body",
+                "type": "string",
+                "enum": [
+                  "path",
+                  "query",
+                  "body",
+                  "header"
+                ]
+              },
+              "type": {
+                "$ref": "#/$defs/__schema39"
+              },
+              "required": {
+                "$ref": "#/$defs/__schema40"
+              },
+              "description": {
+                "$ref": "#/$defs/__schema41"
+              },
+              "enum": {
+                "$ref": "#/$defs/__schema43"
+              },
+              "apiName": {
+                "$ref": "#/$defs/__schema44"
+              },
+              "default": {
+                "$ref": "#/$defs/__schema45"
+              },
+              "schema": {
+                "$ref": "#/$defs/__schema46"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "maxRows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "transform": {
+          "$ref": "#/$defs/__schema81"
+        },
+        "cacheTtlSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 86400
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "idempotent": {
+          "type": "boolean"
+        },
+        "audience": {
+          "$ref": "#/$defs/__schema49"
+        },
+        "privacy": {
+          "$ref": "#/$defs/__schema51"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "level",
+        "sql"
+      ],
+      "additionalProperties": false
+    },
+    "__schema88": {
+      "type": "string",
+      "const": "composite"
+    }
+  }
+}

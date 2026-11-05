@@ -1,0 +1,23 @@
+{
+  "$schema": "../../schemas/plugin.json",
+  "id": "koppelingen-goedkeuren",
+  "version": "2.0.0",
+  "api": "1.0",
+  "title": {
+    "nl": "Koppelingen goedkeuren",
+    "en": "Approve connections"
+  },
+  "summary": {
+    "nl": "Nieuwe koppelingen, connectors en bronnen via de AI wachten op goedkeuring van een beheerder",
+    "en": "New connections, connectors and sources made through the AI wait for an administrator's approval"
+  },
+  "entry": "index.ts",
+  "hooks": [
+    "guard admin.before",
+    "Te bevestigen",
+    "beheer-API",
+    "scherm",
+    "mail"
+  ],
+  "onFailure": "block"
+}

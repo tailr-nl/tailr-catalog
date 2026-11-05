@@ -1,0 +1,993 @@
+{
+  "$schema": "../schemas/connector.json",
+  "id": "github",
+  "name": "GitHub",
+  "version": "1.3.0",
+  "description": "Repositories, bestanden, issues en pull requests op GitHub. Ook handig om eigen koppelingen naar een repo te uploaden.",
+  "homepage": "https://docs.github.com/rest",
+  "category": "Ontwikkeling",
+  "vars": [
+    {
+      "name": "GITHUB_TOKEN",
+      "label": "GitHub-token",
+      "description": "Fine-grained personal access token met toegang tot de gewenste repo's (Contents, Issues en Pull requests).",
+      "pattern": "^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$",
+      "patternHint": "Een GitHub-token begint met github_pat_ (fine-grained) of ghp_ (classic)",
+      "secret": true,
+      "required": true
+    }
+  ],
+  "limits": {
+    "perHour": 5000,
+    "concurrency": 10,
+    "cacheTtlSeconds": 60,
+    "note": "GitHub REST: 5.000 verzoeken per uur per token; secundaire limiet: maximaal 100 tegelijk en 900 punten per minuut. Bron: docs.github.com/rest/using-the-rest-api/rate-limits-for-the-rest-api"
+  },
+  "type": "rest",
+  "baseUrl": "https://api.github.com",
+  "auth": {
+    "type": "bearer",
+    "token": "{{GITHUB_TOKEN}}"
+  },
+  "headers": {
+    "X-GitHub-Api-Version": "2022-11-28",
+    "User-Agent": "tailr-core"
+  },
+  "setup": {
+    "minutes": 5,
+    "prerequisites": [
+      "Een GitHub-account met toegang tot de repositories die je wilt koppelen"
+    ],
+    "steps": [
+      {
+        "id": "token",
+        "title": "Fine-grained token maken",
+        "instruction": "Open de link. Geef het token een naam (bijv. Tailr Core) en een vervaldatum, en kies bij Repository access alleen de repo's die nodig zijn. Zet bij Permissions Contents, Issues en Pull requests op Read, of Contents en Issues op Read and write als de AI ook mag schrijven. Klik op Generate token. Laat de pagina open: het token plak je straks op de invulpagina.",
+        "url": "https://github.com/settings/personal-access-tokens/new",
+        "note": "Je ziet het token maar één keer."
+      }
+    ],
+    "testWith": "whoami"
+  },
+  "tools": [
+    {
+      "name": "get_repo",
+      "title": { "nl": "Repository bekijken", "en": "View repository" },
+      "summary": { "nl": "Omschrijving, standaardbranch en aantal open issues van een repository.", "en": "Description, default branch and number of open issues of a repository." },
+      "description": "Gegevens van één repository: omschrijving, standaardbranch, open issues.",
+      "level": "read",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        }
+      },
+      "transform": {
+        "select": {
+          "name": "$.full_name",
+          "private": "private",
+          "description": "description",
+          "default_branch": "default_branch",
+          "updated_at": "updated_at",
+          "url": "html_url",
+          "open_issues": "open_issues_count",
+          "language": "language"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "list_commits",
+      "title": { "nl": "Commits opvragen", "en": "List commits" },
+      "summary": { "nl": "Recente wijzigingen in een repository.", "en": "Recent changes in a repository." },
+      "description": "Recente commits van een repository, optioneel per branch, pad of periode.",
+      "level": "read",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/commits",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        },
+        "sha": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "SHA or branch to start listing commits from. Default: the repository’s default branch (usually `main`).",
+          "apiName": "sha"
+        },
+        "path": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Only commits containing this file path will be returned.",
+          "apiName": "path"
+        },
+        "author": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "GitHub username or email address to use to filter by commit author.",
+          "apiName": "author"
+        },
+        "committer": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "GitHub username or email address to use to filter by commit committer.",
+          "apiName": "committer"
+        },
+        "since": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Only show results that were last updated after the given time. This is a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ`. Due to limitations of Git, tim…",
+          "apiName": "since"
+        },
+        "until": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Only commits before this date will be returned. This is a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ`. Due to limitations of Git, timestamps must be…",
+          "apiName": "until"
+        },
+        "per_page": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "apiName": "per_page"
+        },
+        "page": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "apiName": "page"
+        }
+      },
+      "transform": {
+        "select": {
+          "sha": "sha",
+          "message": "commit.message",
+          "author": "commit.author.name",
+          "date": "commit.author.date"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "get_file",
+      "title": { "nl": "Bestand lezen", "en": "Read file" },
+      "summary": { "nl": "De inhoud van een bestand of map in een repository.", "en": "The contents of a file or folder in a repository." },
+      "description": "Inhoud van een bestand of map in een repository (base64 voor bestanden).",
+      "level": "read",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/contents/{path}",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        },
+        "path": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "path parameter",
+          "apiName": "path"
+        },
+        "ref": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "The name of the commit/branch/tag. Default: the repository’s default branch.",
+          "apiName": "ref"
+        }
+      }
+    },
+    {
+      "name": "put_file",
+      "title": { "nl": "Bestand opslaan", "en": "Save file" },
+      "summary": { "nl": "Maakt of wijzigt een bestand in een repository.", "en": "Creates or changes a file in a repository." },
+      "description": "Maakt of wijzigt een bestand in een repository met een commit. Bij wijzigen is de sha van het huidige bestand nodig.",
+      "level": "write",
+      "method": "PUT",
+      "path": "/repos/{owner}/{repo}/contents/{path}",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        },
+        "path": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "path parameter",
+          "apiName": "path"
+        },
+        "message": {
+          "in": "body",
+          "type": "string",
+          "required": true,
+          "description": "The commit message.",
+          "apiName": "message"
+        },
+        "content": {
+          "in": "body",
+          "type": "string",
+          "required": true,
+          "description": "The new file content, using Base64 encoding.",
+          "apiName": "content"
+        },
+        "sha": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "**Required if you are updating a file**. The blob SHA of the file being replaced.",
+          "apiName": "sha"
+        },
+        "branch": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "The branch name. Default: the repository’s default branch.",
+          "apiName": "branch"
+        },
+        "committer": {
+          "in": "body",
+          "type": "object",
+          "required": false,
+          "description": "The person that committed the file. Default: the authenticated user.",
+          "apiName": "committer"
+        },
+        "author": {
+          "in": "body",
+          "type": "object",
+          "required": false,
+          "description": "The author of the file. Default: The `committer` or the authenticated user if you omit `committer`.",
+          "apiName": "author"
+        }
+      },
+      "transform": {
+        "select": {
+          "path": "content.path",
+          "sha": "content.sha",
+          "commit": "commit.sha",
+          "url": "content.html_url"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "list_issues",
+      "title": { "nl": "Issues opvragen", "en": "List issues" },
+      "summary": { "nl": "Issues van een repository, eventueel per status of label.", "en": "Issues of a repository, optionally by status or label." },
+      "description": "Issues van een repository, optioneel per status, label of toegewezen persoon.",
+      "level": "read",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/issues",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        },
+        "milestone": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "If an `integer` is passed, it should refer to a milestone by its `number` field. If the string `*` is passed, issues with any milestone are accepted. If the string `none` is passed, issues without mi…",
+          "apiName": "milestone"
+        },
+        "state": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Indicates the state of the issues to return.",
+          "enum": [
+            "open",
+            "closed",
+            "all"
+          ],
+          "apiName": "state"
+        },
+        "assignee": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Can be the name of a user. Pass in `none` for issues with no assigned user, and `*` for issues assigned to any user.",
+          "apiName": "assignee"
+        },
+        "type": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Can be the name of an issue type. If the string `*` is passed, issues with any type are accepted. If the string `none` is passed, issues without type are returned.",
+          "apiName": "type"
+        },
+        "creator": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "The user that created the issue.",
+          "apiName": "creator"
+        },
+        "mentioned": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "A user that's mentioned in the issue.",
+          "apiName": "mentioned"
+        },
+        "issue_field_values": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "A comma-separated list of issue field filters in `field_slug:value` format. Only issues matching all specified field values are returned. Requires issue fields to be enabled for the repository. Issue…",
+          "apiName": "issue_field_values"
+        },
+        "labels": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "A list of comma separated label names. Example: `bug,ui,@high`",
+          "apiName": "labels"
+        },
+        "sort": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "What to sort results by.",
+          "enum": [
+            "created",
+            "updated",
+            "comments"
+          ],
+          "apiName": "sort"
+        },
+        "direction": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "The direction to sort the results by.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "apiName": "direction"
+        },
+        "since": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Only show results that were last updated after the given time. This is a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ`.",
+          "apiName": "since"
+        },
+        "per_page": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "apiName": "per_page"
+        },
+        "page": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "apiName": "page"
+        }
+      },
+      "transform": {
+        "select": {
+          "number": "number",
+          "title": "title",
+          "state": "state",
+          "user": "user.login",
+          "labels": "labels.name",
+          "created_at": "created_at",
+          "url": "html_url"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "create_issue",
+      "title": { "nl": "Issue aanmaken", "en": "Create issue" },
+      "summary": { "nl": "Maakt een nieuw issue aan.", "en": "Creates a new issue." },
+      "description": "Maakt een nieuw issue aan met titel, beschrijving en labels.",
+      "level": "write",
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/issues",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        },
+        "title": {
+          "in": "body",
+          "type": "string",
+          "required": true,
+          "description": "The title of the issue.",
+          "apiName": "title"
+        },
+        "body": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "The contents of the issue.",
+          "apiName": "body"
+        },
+        "assignee": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "Login for the user that this issue should be assigned to. _NOTE: Only users with push access can set the assignee for new issues. The assignee is silently dropped otherwise. **This field is closing d…",
+          "apiName": "assignee"
+        },
+        "milestone": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "apiName": "milestone"
+        },
+        "labels": {
+          "in": "body",
+          "type": "array",
+          "required": false,
+          "description": "Labels to associate with this issue. _NOTE: Only users with push access can set labels for new issues. Labels are silently dropped otherwise._",
+          "apiName": "labels"
+        },
+        "assignees": {
+          "in": "body",
+          "type": "array",
+          "required": false,
+          "description": "Logins for Users to assign to this issue. _NOTE: Only users with push access can set assignees for new issues. Assignees are silently dropped otherwise._",
+          "apiName": "assignees"
+        },
+        "issue_field_values": {
+          "in": "body",
+          "type": "array",
+          "required": false,
+          "description": "An array of issue field values to set on this issue. Each field value must include the field ID and the value to set. Issue fields are only available for organization-owned repositories with the feat…",
+          "apiName": "issue_field_values"
+        },
+        "type": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "The name of the issue type to associate with this issue. _NOTE: Only users with push access can set the type for new issues. The type is silently dropped otherwise._",
+          "apiName": "type"
+        },
+        "parent_issue_id": {
+          "in": "body",
+          "type": "integer",
+          "required": false,
+          "description": "The id of the parent issue to add this issue to as a sub-issue. _NOTE: Only users with triage access to both the parent issue's repository and this repository can set the parent issue._",
+          "apiName": "parent_issue_id"
+        }
+      },
+      "transform": {
+        "select": {
+          "number": "number",
+          "title": "title",
+          "state": "state",
+          "user": "user.login",
+          "labels": "labels.name",
+          "created_at": "created_at",
+          "url": "html_url"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "get_issue",
+      "title": { "nl": "Issue bekijken", "en": "View issue" },
+      "summary": { "nl": "Eén issue met beschrijving.", "en": "One issue with its description." },
+      "description": "Eén issue met beschrijving en aantal reacties.",
+      "level": "read",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/issues/{issue_number}",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        },
+        "issue_number": {
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the issue.",
+          "apiName": "issue_number"
+        }
+      },
+      "transform": {
+        "select": {
+          "number": "number",
+          "title": "title",
+          "state": "state",
+          "user": "user.login",
+          "labels": "labels.name",
+          "created_at": "created_at",
+          "url": "html_url",
+          "body": "body",
+          "comments": "comments"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "update_issue",
+      "title": { "nl": "Issue wijzigen", "en": "Update issue" },
+      "summary": { "nl": "Wijzigt titel, beschrijving, status of labels van een issue.", "en": "Changes the title, description, status or labels of an issue." },
+      "description": "Wijzigt titel, beschrijving, status of labels van een issue.",
+      "level": "write",
+      "method": "PATCH",
+      "path": "/repos/{owner}/{repo}/issues/{issue_number}",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        },
+        "issue_number": {
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the issue.",
+          "apiName": "issue_number"
+        },
+        "title": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "The title of the issue.",
+          "apiName": "title"
+        },
+        "body": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "The contents of the issue.",
+          "apiName": "body"
+        },
+        "assignee": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "Username to assign to this issue. **This field is closing down.**",
+          "apiName": "assignee"
+        },
+        "state": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "The open or closed state of the issue.",
+          "enum": [
+            "open",
+            "closed"
+          ],
+          "apiName": "state"
+        },
+        "state_reason": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "The reason for the state change. Ignored unless `state` is changed.",
+          "enum": [
+            "completed",
+            "not_planned",
+            "duplicate",
+            "reopened"
+          ],
+          "apiName": "state_reason"
+        },
+        "duplicate_issue_id": {
+          "in": "body",
+          "type": "integer",
+          "required": false,
+          "description": "The ID of the issue that this issue duplicates, used when marking this issue as a duplicate with `status: Duplicate` or `state_reason: duplicate`. The issue must exist and be accessible to the authen…",
+          "apiName": "duplicate_issue_id"
+        },
+        "milestone": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "apiName": "milestone"
+        },
+        "labels": {
+          "in": "body",
+          "type": "array",
+          "required": false,
+          "description": "Labels to associate with this issue. Pass one or more labels to _replace_ the set of labels on this issue. Send an empty array (`[]`) to clear all labels from the issue. Only users with push access c…",
+          "apiName": "labels"
+        },
+        "assignees": {
+          "in": "body",
+          "type": "array",
+          "required": false,
+          "description": "Usernames to assign to this issue. Pass one or more user logins to _replace_ the set of assignees on this issue. Send an empty array (`[]`) to clear all assignees from the issue. Only users with push…",
+          "apiName": "assignees"
+        },
+        "issue_field_values": {
+          "in": "body",
+          "type": "array",
+          "required": false,
+          "description": "An array of issue field values to set on this issue. Each field value must include the field ID and the value to set. Only users with push access can set field values for issues",
+          "apiName": "issue_field_values"
+        },
+        "type": {
+          "in": "body",
+          "type": "string",
+          "required": false,
+          "description": "The issue type to associate with this issue. Only users with push access can set the type for issues. Without push access to the repository, type changes are silently dropped.",
+          "apiName": "type"
+        }
+      },
+      "transform": {
+        "select": {
+          "number": "number",
+          "title": "title",
+          "state": "state",
+          "user": "user.login",
+          "labels": "labels.name",
+          "created_at": "created_at",
+          "url": "html_url"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "comment_on_issue",
+      "title": { "nl": "Reactie plaatsen", "en": "Post comment" },
+      "summary": { "nl": "Plaatst een reactie bij een issue of pull request.", "en": "Posts a comment on an issue or pull request." },
+      "description": "Plaatst een reactie bij een issue of pull request.",
+      "level": "write",
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/issues/{issue_number}/comments",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        },
+        "issue_number": {
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the issue.",
+          "apiName": "issue_number"
+        },
+        "body": {
+          "in": "body",
+          "type": "string",
+          "required": true,
+          "description": "The contents of the comment.",
+          "apiName": "body"
+        }
+      },
+      "transform": {
+        "select": {
+          "id": "id",
+          "url": "html_url"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "list_pull_requests",
+      "title": { "nl": "Pull requests opvragen", "en": "List pull requests" },
+      "summary": { "nl": "Pull requests van een repository.", "en": "Pull requests of a repository." },
+      "description": "Pull requests van een repository, optioneel per status of branch.",
+      "level": "read",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/pulls",
+      "params": {
+        "owner": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "apiName": "owner"
+        },
+        "repo": {
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+          "apiName": "repo"
+        },
+        "state": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Either `open`, `closed`, or `all` to filter by state.",
+          "enum": [
+            "open",
+            "closed",
+            "all"
+          ],
+          "apiName": "state"
+        },
+        "head": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Filter pulls by head user or head organization and branch name in the format of `user:ref-name` or `organization:ref-name`. For example: `github:new-script-format` or `octocat:test-branch`.",
+          "apiName": "head"
+        },
+        "base": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Filter pulls by base branch name. Example: `gh-pages`.",
+          "apiName": "base"
+        },
+        "sort": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "What to sort results by. `popularity` will sort by the number of comments. `long-running` will sort by date created and will limit the results to pull requests that have been open for more than a mon…",
+          "enum": [
+            "created",
+            "updated",
+            "popularity",
+            "long-running"
+          ],
+          "apiName": "sort"
+        },
+        "direction": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "The direction of the sort. Default: `desc` when sort is `created` or sort is not specified, otherwise `asc`.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "apiName": "direction"
+        },
+        "per_page": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "apiName": "per_page"
+        },
+        "page": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "apiName": "page"
+        }
+      },
+      "transform": {
+        "select": {
+          "number": "number",
+          "title": "title",
+          "state": "state",
+          "user": "user.login",
+          "head": "head.ref",
+          "base": "base.ref",
+          "url": "html_url"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "whoami",
+      "title": { "nl": "Wie ben ik op GitHub", "en": "Who am I on GitHub" },
+      "summary": { "nl": "Het GitHub-account achter het token.", "en": "The GitHub account behind the token." },
+      "description": "Gegevens van het GitHub-account achter de token.",
+      "level": "read",
+      "method": "GET",
+      "path": "/user",
+      "params": {},
+      "transform": {
+        "select": {
+          "login": "login",
+          "name": "name",
+          "url": "html_url"
+        },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "list_my_repos",
+      "title": { "nl": "Mijn repositories", "en": "My repositories" },
+      "summary": { "nl": "De repositories waar het token bij kan.", "en": "The repositories the token can access." },
+      "description": "Repositories waar de token toegang toe heeft.",
+      "level": "read",
+      "method": "GET",
+      "path": "/user/repos",
+      "params": {
+        "visibility": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Limit results to repositories with the specified visibility.",
+          "enum": [
+            "all",
+            "public",
+            "private"
+          ],
+          "apiName": "visibility"
+        },
+        "affiliation": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Comma-separated list of values. Can include: * `owner`: Repositories that are owned by the authenticated user. * `collaborator`: Repositories that the user has been added to as a collaborator. * `org…",
+          "apiName": "affiliation"
+        },
+        "type": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Limit results to repositories of the specified type. Will cause a `422` error if used in the same request as **visibility** or **affiliation**.",
+          "enum": [
+            "all",
+            "owner",
+            "public",
+            "private",
+            "member"
+          ],
+          "apiName": "type"
+        },
+        "sort": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "The property to sort the results by.",
+          "enum": [
+            "created",
+            "updated",
+            "pushed",
+            "full_name"
+          ],
+          "apiName": "sort"
+        },
+        "direction": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "The order to sort by. Default: `asc` when using `full_name`, otherwise `desc`.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "apiName": "direction"
+        },
+        "per_page": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "apiName": "per_page"
+        },
+        "page": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "apiName": "page"
+        },
+        "since": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Only show repositories updated after the given time. This is a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ`.",
+          "apiName": "since"
+        },
+        "before": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Only show repositories updated before the given time. This is a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ`.",
+          "apiName": "before"
+        }
+      },
+      "transform": {
+        "select": {
+          "name": "$.full_name",
+          "private": "private",
+          "description": "description",
+          "default_branch": "default_branch",
+          "updated_at": "updated_at",
+          "url": "html_url"
+        },
+        "onError": "fail"
+      }
+    }
+  ]
+}

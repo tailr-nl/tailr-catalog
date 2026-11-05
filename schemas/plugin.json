@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tailr Core plugin",
+  "description": "plugin.json of a Tailr Core plugin. See docs/plugins-maken.md.",
+  "x-tailr-version": "0.1.0",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "The JSON schema of this file, for completion in your editor."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,40}$",
+      "description": "Unique id; must equal the folder name. Lower-case letters, digits and hyphens."
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "Version of the plugin (semver, e.g. 1.2.0). Raise it on every change."
+    },
+    "api": {
+      "type": "string",
+      "pattern": "^\\d+(\\.\\d+)?$",
+      "description": "The plugin API this plugin needs, as \"major.minor\" (e.g. \"1.0\"). Use the lowest version that has everything you use; see \"Plugin API versions\" in docs/plugins.md."
+    },
+    "requires": {
+      "description": "What must be present for this plugin to load.",
+      "type": "object",
+      "properties": {
+        "core": {
+          "description": "A version range for Tailr Core itself (rarely needed; prefer api).",
+          "type": "string"
+        },
+        "plugins": {
+          "description": "Plugins that must be installed, with a version range, e.g. { \"tools\": \">=1.0\" }. Use them with api.use.",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,40}$"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "optional": {
+      "description": "Plugins this plugin can do more with, but does not need.",
+      "type": "object",
+      "properties": {
+        "plugins": {
+          "description": "Plugins this plugin uses when they are installed, with a version range.",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,40}$"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "object",
+          "properties": {
+            "nl": {
+              "type": "string",
+              "minLength": 1
+            },
+            "en": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "nl"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Name in the catalogue: a string, or per language { \"nl\": \"…\", \"en\": \"…\" }. Give both Dutch and English."
+    },
+    "summary": {
+      "description": "One sentence for the catalogue: a string, or { \"nl\": \"…\", \"en\": \"…\" }.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "nl": {
+              "type": "string"
+            },
+            "en": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "nl"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "entry": {
+      "default": "index.ts",
+      "description": "The file that exports register(api). Default index.ts.",
+      "type": "string"
+    },
+    "hooks": {
+      "description": "For the catalogue: where the plugin hooks in, e.g. \"guard tool.before\", \"screen\" or \"tool\".",
+      "maxItems": 30,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 80
+      }
+    },
+    "onFailure": {
+      "default": "disable",
+      "description": "After 5 failures in a row: \"disable\" turns the plugin off (default); \"block\" keeps it on so its guards keep refusing (for security plugins).",
+      "type": "string",
+      "enum": [
+        "disable",
+        "block"
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "version",
+    "api",
+    "title"
+  ],
+  "additionalProperties": false
+}

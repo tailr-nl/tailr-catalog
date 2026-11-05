@@ -1,0 +1,8 @@
+Tailr catalog
+Copyright 2026 Tailr
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+The GitHub connector (connectors/github.json) contains descriptions derived from
+GitHub's REST API description (https://github.com/github/rest-api-description),
+Copyright GitHub, Inc., licensed under the MIT License.

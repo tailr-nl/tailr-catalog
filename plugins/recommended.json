@@ -1,0 +1,19 @@
+{
+  "$comment": "Plugins die Tailr aanraadt in de welkomstwizard (stap Aanbevolen plugins, #192). Volgorde = volgorde op het scherm. Een plugin die (nog) niet in deze bron staat, slaat de wizard over.",
+  "plugins": [
+    {
+      "id": "handleiding",
+      "reason": {
+        "nl": "Een handleiding voor je collega's, met voorbeeldvragen voor de koppelingen waar ze bij mogen.",
+        "en": "A guide for your colleagues, with example questions for the connections they can use."
+      }
+    },
+    {
+      "id": "dashboards",
+      "reason": {
+        "nl": "Laat de AI dashboards bouwen die je collega's in Tailr Core openen, met hun eigen rechten.",
+        "en": "Let the AI build dashboards your colleagues open in Tailr Core, with their own permissions."
+      }
+    }
+  ]
+}

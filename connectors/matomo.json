@@ -1,0 +1,870 @@
+{
+  "$schema": "../schemas/connector.json",
+  "id": "matomo",
+  "name": "Matomo",
+  "version": "0.2.0",
+  "description": "Websitestatistieken uit Matomo (zelf gehost of Matomo Cloud): bezoeken, bronnen, pagina's, doelen, e-commerce en live bezoekers.",
+  "homepage": "https://developer.matomo.org/api-reference/reporting-api",
+  "category": "Marketing",
+  "vars": [
+    {
+      "name": "MATOMO_URL",
+      "label": "Adres van Matomo",
+      "description": "Bijv. https://statistieken.mijnbedrijf.nl of https://mijnbedrijf.matomo.cloud (zonder / aan het eind, zonder index.php). Moet https zijn.",
+      "secret": false,
+      "pattern": "^https://[^/]+(/[^?#]*[^/?#])?$",
+      "patternHint": "Een https-adres zonder / aan het eind, bijv. https://mijnbedrijf.matomo.cloud"
+    },
+    {
+      "name": "TOKEN",
+      "label": "Authenticatietoken",
+      "description": "Matomo → Beheer → Persoonlijk → Beveiliging → Authenticatietokens → Nieuw token. Maak het token bij een gebruiker met alleen 'Bekijken'-rechten en zet 'Alleen beveiligde verzoeken toestaan' uit (Tailr Core stuurt het token mee in het adres)."
+    },
+    {
+      "name": "SITE_ID",
+      "label": "Website-id",
+      "description": "Het nummer van de website in Matomo (idSite), bijv. 1. Te vinden met de functie 'Websites'.",
+      "secret": false,
+      "required": false,
+      "chooseWith": "list_sites",
+      "pattern": "^[0-9]*$",
+      "patternHint": "Alleen cijfers"
+    }
+  ],
+  "limits": {
+    "concurrency": 3,
+    "timeoutSeconds": 60,
+    "retries": 1,
+    "cacheTtlSeconds": 300,
+    "note": "Matomo heeft zelf geen vaste API-limiet; rapporten over lange periodes of met segmenten kunnen zwaar zijn voor de server. Daarom maximaal 3 tegelijk en 5 minuten cache. Bron: developer.matomo.org/api-reference/reporting-api"
+  },
+  "type": "rest",
+  "baseUrl": "{{MATOMO_URL}}",
+  "auth": {
+    "type": "query",
+    "name": "token_auth",
+    "value": "{{TOKEN}}"
+  },
+  "setup": {
+    "minutes": 5,
+    "prerequisites": [
+      "Het adres van je Matomo",
+      "Een Matomo-gebruiker met alleen 'Bekijken'-rechten op de website(s); maak er zo nodig een aan"
+    ],
+    "steps": [
+      {
+        "id": "token",
+        "title": "Token maken in Matomo",
+        "instruction": "Log in in Matomo als de gebruiker met alleen Bekijken-rechten. Ga naar Beheer (tandwiel) → Persoonlijk → Beveiliging → Authenticatietokens en klik op Nieuw token aanmaken. Zet 'Alleen beveiligde verzoeken toestaan' uit en kopieer het token. Je plakt het straks op de invulpagina, niet in de chat.",
+        "note": "Tailr Core stuurt het token mee in het adres van elk verzoek; daarom moet die optie uit."
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "list_sites",
+      "title": { "nl": "Websites", "en": "Websites" },
+      "summary": { "nl": "De websites in Matomo waar het token bij kan, met hun nummer.", "en": "The websites in Matomo the token can access, with their number." },
+      "description": "Alle websites waar het token bij kan, met website-id (idsite), naam, adres, tijdzone en valuta.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=SitesManager.getSitesWithAtLeastViewAccess&format=JSON",
+      "params": {},
+      "cacheTtlSeconds": 3600,
+      "transform": {
+        "select": {
+          "idsite": "idsite",
+          "name": "name",
+          "main_url": "main_url",
+          "timezone": "timezone",
+          "currency": "currency",
+          "ecommerce": "ecommerce"
+        }
+      }
+    },
+    {
+      "name": "visits_summary",
+      "title": { "nl": "Bezoeken samengevat", "en": "Visits summary" },
+      "summary": { "nl": "Bezoeken, unieke bezoekers, bouncepercentage en tijd op de site.", "en": "Visits, unique visitors, bounce rate and time on site." },
+      "description": "Kerncijfers: bezoeken (nb_visits), unieke bezoekers, acties, bouncepercentage, gemiddelde bezoekduur en acties per bezoek. Met date=last30 en period=day krijg je een rij per dag.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=VisitsSummary.get&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        }
+      }
+    },
+    {
+      "name": "channels",
+      "title": { "nl": "Kanalen", "en": "Channels" },
+      "summary": { "nl": "Waar bezoekers vandaan komen: direct, zoekmachines, websites, campagnes of social.", "en": "Where visitors come from: direct, search engines, websites, campaigns or social." },
+      "description": "Bezoeken per kanaal: direct, zoekmachines, websites, campagnes, social.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Referrers.getReferrerType&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        }
+      }
+    },
+    {
+      "name": "referrers",
+      "title": { "nl": "Verwijzers", "en": "Referrers" },
+      "summary": { "nl": "Welke zoekmachines, websites en social netwerken bezoekers sturen.", "en": "Which search engines, websites and social networks send visitors." },
+      "description": "Alle verwijzers samen: zoekmachines, websites, social netwerken en campagnes, met bezoeken per verwijzer.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Referrers.getAll&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        }
+      }
+    },
+    {
+      "name": "campaigns",
+      "title": { "nl": "Campagnes", "en": "Campaigns" },
+      "summary": { "nl": "Bezoeken en conversies per campagne.", "en": "Visits and conversions per campaign." },
+      "description": "Bezoeken en conversies per campagne (utm_campaign / mtm_campaign).",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Referrers.getCampaigns&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        }
+      }
+    },
+    {
+      "name": "pages",
+      "title": { "nl": "Pagina's", "en": "Pages" },
+      "summary": { "nl": "Hoe vaak elke pagina is bekeken.", "en": "How often each page was viewed." },
+      "description": "Paginaweergaven per URL (plat, zonder mappen): weergaven (nb_hits), bezoeken, tijd op pagina, bounces en uitstappen.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Actions.getPageUrls&format=JSON&flat=1",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        },
+        "pattern": {
+          "in": "query",
+          "apiName": "filter_pattern",
+          "description": "Alleen URL's die hierop passen (reguliere expressie), bijv. ^/blog/"
+        }
+      }
+    },
+    {
+      "name": "entry_pages",
+      "title": { "nl": "Instappagina's", "en": "Entry pages" },
+      "summary": { "nl": "Op welke pagina's bezoeken beginnen en hoe vaak mensen direct weer weggaan.", "en": "Which pages visits start on and how often people leave right away." },
+      "description": "Pagina's waarop bezoeken beginnen, met bouncepercentage.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Actions.getEntryPageUrls&format=JSON&flat=1",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        }
+      }
+    },
+    {
+      "name": "site_search",
+      "title": { "nl": "Zoekopdrachten op de site", "en": "Site search" },
+      "summary": { "nl": "Waar bezoekers naar zochten met de zoekfunctie van je website.", "en": "What visitors searched for with your website's search." },
+      "description": "Waar bezoekers op de eigen website naar zochten (interne zoekfunctie).",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Actions.getSiteSearchKeywords&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        }
+      }
+    },
+    {
+      "name": "countries",
+      "title": { "nl": "Landen", "en": "Countries" },
+      "summary": { "nl": "Bezoeken per land.", "en": "Visits per country." },
+      "description": "Bezoeken per land.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=UserCountry.getCountry&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        }
+      }
+    },
+    {
+      "name": "devices",
+      "title": { "nl": "Apparaten", "en": "Devices" },
+      "summary": { "nl": "Bezoeken per apparaat: computer, telefoon of tablet.", "en": "Visits per device: desktop, phone or tablet." },
+      "description": "Bezoeken per apparaattype: desktop, smartphone, tablet.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=DevicesDetection.getType&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        }
+      }
+    },
+    {
+      "name": "events",
+      "title": { "nl": "Gebeurtenissen", "en": "Events" },
+      "summary": { "nl": "Klikken, downloads en andere gebeurtenissen per categorie.", "en": "Clicks, downloads and other events per category." },
+      "description": "Gebeurtenissen (events) per categorie, bijv. downloads, klikken of formulieren.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Events.getCategory&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        }
+      }
+    },
+    {
+      "name": "list_goals",
+      "title": { "nl": "Doelen", "en": "Goals" },
+      "summary": { "nl": "De doelen die voor de website zijn ingesteld.", "en": "The goals set up for the website." },
+      "description": "De doelen (goals) die voor de website zijn ingesteld, met id en naam.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Goals.getGoals&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        }
+      },
+      "cacheTtlSeconds": 3600,
+      "transform": {
+        "select": {
+          "idgoal": "idgoal",
+          "name": "name",
+          "description": "description",
+          "match_attribute": "match_attribute",
+          "revenue": "revenue"
+        }
+      }
+    },
+    {
+      "name": "goals",
+      "title": { "nl": "Conversies", "en": "Conversions" },
+      "summary": { "nl": "Conversies en opbrengst, voor alle doelen samen of één doel.", "en": "Conversions and revenue, for all goals together or one goal." },
+      "description": "Conversies, conversiepercentage en opbrengst, voor alle doelen samen of één doel. Gebruik idGoal=ecommerceOrder voor webwinkelbestellingen.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Goals.get&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "idGoal": {
+          "in": "query",
+          "description": "Optioneel: id van een doel (zie 'Doelen') of ecommerceOrder"
+        }
+      }
+    },
+    {
+      "name": "ecommerce_products",
+      "title": { "nl": "Producten (e-commerce)", "en": "Products (e-commerce)" },
+      "summary": { "nl": "Verkochte producten met aantal en omzet.", "en": "Products sold with quantity and revenue." },
+      "description": "Verkochte producten met aantal, omzet en conversiepercentage.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Goals.getItemsName&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 50, -1 = alles)",
+          "default": "50"
+        },
+        "sort": {
+          "in": "query",
+          "apiName": "filter_sort_column",
+          "description": "Sorteren op deze metric, bijv. nb_visits of nb_hits"
+        }
+      }
+    },
+    {
+      "name": "live_counter",
+      "title": { "nl": "Nu op de website", "en": "On the website now" },
+      "summary": { "nl": "Hoeveel bezoekers er de laatste minuten waren.", "en": "How many visitors there were in the last few minutes." },
+      "description": "Bezoeken, acties en bezoekers in de laatste minuten (standaard 30).",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Live.getCounters&format=JSON",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "lastMinutes": {
+          "in": "query",
+          "type": "integer",
+          "description": "Aantal minuten terug (standaard 30)",
+          "default": "30"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        }
+      },
+      "cacheTtlSeconds": 0
+    },
+    {
+      "name": "last_visits",
+      "title": { "nl": "Laatste bezoeken", "en": "Latest visits" },
+      "summary": { "nl": "De laatste bezoeken met bron, apparaat, land en pagina's, zonder IP-adres.", "en": "The latest visits with source, device, country and pages, without IP address." },
+      "description": "De laatste bezoeken met bron, apparaat, land en bezochte pagina's. IP-adres, bezoekers-id, gebruikers-id, plaats, eigen dimensies en advertentie-klik-id worden niet getoond.",
+      "level": "read",
+      "method": "GET",
+      "path": "/index.php?module=API&method=Live.getLastVisitsDetails&format=JSON&doNotFetchActions=0",
+      "params": {
+        "idSite": {
+          "in": "query",
+          "apiName": "idSite",
+          "type": "integer",
+          "required": true,
+          "description": "Website-id in Matomo; standaard de ingestelde website. Te vinden met 'Websites'.",
+          "default": "{{SITE_ID}}"
+        },
+        "period": {
+          "in": "query",
+          "required": true,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year",
+            "range"
+          ],
+          "description": "Periode per rij. Gebruik range voor één totaal over een eigen periode.",
+          "default": "month"
+        },
+        "date": {
+          "in": "query",
+          "required": true,
+          "description": "Datum of reeks: today, yesterday, 2026-10-31, last7 (laatste 7 periodes, één rij per periode) of bij range 2026-10-01,2026-10-31.",
+          "default": "today"
+        },
+        "segment": {
+          "in": "query",
+          "description": "Optioneel segment, bijv. deviceType==smartphone of referrerType==search;countryCode==nl"
+        },
+        "limit": {
+          "in": "query",
+          "apiName": "filter_limit",
+          "type": "integer",
+          "description": "Aantal bezoeken (standaard 10, maximaal 100)",
+          "default": "10"
+        }
+      },
+      "cacheTtlSeconds": 60,
+      "transform": {
+        "exclude": [
+          "visitIp",
+          "visitorId",
+          "fingerprint",
+          "userId",
+          "idVisit",
+          "latitude",
+          "longitude",
+          "city",
+          "region",
+          "regionCode",
+          "location",
+          "visitorProfile",
+          "actionDetails.url_ref",
+          "customVariables",
+          "actionDetails.customVariables",
+          "adClickId",
+          "sessionReplayUrl",
+          "dimension1",
+          "dimension2",
+          "dimension3",
+          "dimension4",
+          "dimension5",
+          "dimension6",
+          "dimension7",
+          "dimension8",
+          "dimension9",
+          "dimension10",
+          "actionDetails.dimension1",
+          "actionDetails.dimension2",
+          "actionDetails.dimension3",
+          "actionDetails.dimension4",
+          "actionDetails.dimension5",
+          "actionDetails.dimension6",
+          "actionDetails.dimension7",
+          "actionDetails.dimension8",
+          "actionDetails.dimension9",
+          "actionDetails.dimension10",
+          "actionDetails.iconSVG"
+        ]
+      }
+    }
+  ]
+}

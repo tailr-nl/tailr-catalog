@@ -1,0 +1,169 @@
+{
+  "$schema": "../schemas/connector.json",
+  "id": "google-analytics",
+  "name": "Google Analytics 4",
+  "version": "0.3.1",
+  "description": "Concept: rapporten uit Google Analytics 4 (Data API): bezoekers, sessies, bronnen, pagina's, conversies.",
+  "homepage": "https://developers.google.com/analytics/devguides/reporting/data/v1",
+  "category": "Marketing",
+  "vars": [
+    {
+      "name": "CLIENT_ID",
+      "label": "Client-id",
+      "description": "Staat in het venster na het aanmaken van de OAuth-client in Google Cloud Console (eindigt op .apps.googleusercontent.com).",
+      "secret": false,
+      "pattern": "\\.apps\\.googleusercontent\\.com$",
+      "patternHint": "Een Client-id van Google eindigt op .apps.googleusercontent.com"
+    },
+    {
+      "name": "CLIENT_SECRET",
+      "label": "Clientgeheim",
+      "description": "Uit hetzelfde venster als de Client-id (begint meestal met GOCSPX-)."
+    },
+    {
+      "name": "PROPERTY_ID",
+      "label": "Property-id",
+      "description": "Het nummer van de GA4-property (bijv. 123456789). Te vinden met de functie 'Accounts en properties'.",
+      "secret": false,
+      "required": false,
+      "pattern": "^[0-9]+$",
+      "patternHint": "Alleen het nummer van de property, zonder properties/",
+      "chooseWith": "list_properties"
+    }
+  ],
+  "setup": {
+    "minutes": 12,
+    "prerequisites": [
+      "Een Google-account met leestoegang tot de GA4-property",
+      "Toegang tot Google Cloud Console (een nieuw project mag; gebruik je al een client voor Search Console, dan kun je die hergebruiken)"
+    ],
+    "steps": [
+      {
+        "id": "enable-data-api",
+        "title": "Google Analytics Data API inschakelen",
+        "instruction": "Open de link, kies bovenaan je project (of maak er een) en klik op Inschakelen.",
+        "url": "https://console.cloud.google.com/apis/library/analyticsdata.googleapis.com"
+      },
+      {
+        "id": "enable-admin-api",
+        "title": "Google Analytics Admin API inschakelen",
+        "instruction": "Open de link en klik op Inschakelen, in hetzelfde project. Hiermee kan Tailr Core je properties opzoeken.",
+        "url": "https://console.cloud.google.com/apis/library/analyticsadmin.googleapis.com"
+      },
+      {
+        "id": "consent",
+        "title": "Toestemmingsscherm instellen",
+        "instruction": "Al gedaan voor Search Console in hetzelfde project? Dan kun je deze stap overslaan. Anders: open de link en vul een app-naam (bijv. Tailr Core) en je e-mailadres in. Kies bij Doelgroep: Extern, en zet de publicatiestatus op In productie.",
+        "url": "https://console.cloud.google.com/auth/branding",
+        "note": "Laat je het op Testen staan, dan verloopt de login na 7 dagen."
+      },
+      {
+        "id": "client",
+        "title": "OAuth-client aanmaken",
+        "instruction": "Open de link, klik op Client maken en kies Webapplicatie. Voeg het adres hieronder toe bij Geautoriseerde omleidings-URI's en klik op Maken. Heb je al een client voor Tailr Core in dit project, dan kun je die gebruiken.",
+        "url": "https://console.cloud.google.com/auth/clients",
+        "copy": {
+          "Geautoriseerde omleidings-URI": "{{redirectUri}}"
+        }
+      }
+    ],
+    "loginNote": "Google toont dan mogelijk 'Google heeft deze app niet geverifieerd'. Dat is normaal voor je eigen app: klik op Geavanceerd en daarna op Ga naar Tailr Core."
+  },
+  "limits": {
+    "concurrency": 5,
+    "cacheTtlSeconds": 300,
+    "note": "GA4 Data API (standaard property): 200.000 tokens per dag, 40.000 per uur, 10 gelijktijdige verzoeken per property. Bron: developers.google.com/analytics/devguides/reporting/data/v1/quotas"
+  },
+  "type": "rest",
+  "baseUrl": "https://analyticsdata.googleapis.com/v1beta",
+  "hosts": [
+    "analyticsadmin.googleapis.com",
+    "oauth2.googleapis.com",
+    "accounts.google.com"
+  ],
+  "auth": {
+    "type": "oauth2",
+    "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+    "tokenUrl": "https://oauth2.googleapis.com/token",
+    "authorizeParams": {
+      "access_type": "offline",
+      "prompt": "consent",
+      "include_granted_scopes": "true"
+    },
+    "scopes": [
+      "https://www.googleapis.com/auth/analytics.readonly"
+    ]
+  },
+  "tools": [
+    {
+      "name": "list_properties",
+      "title": {
+        "nl": "Accounts en properties",
+        "en": "Accounts and properties"
+      },
+      "summary": {
+        "nl": "Laat zien welke Google Analytics-accounts en properties er zijn, met hun id.",
+        "en": "Shows which Google Analytics accounts and properties exist, with their id."
+      },
+      "description": "Alle GA4-accounts en properties waar het gekoppelde Google-account bij kan, met property-id.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/accountSummaries",
+      "params": {},
+      "cacheTtlSeconds": 3600
+    },
+    {
+      "name": "run_report",
+      "title": {
+        "nl": "Rapport opvragen",
+        "en": "Run a report"
+      },
+      "summary": {
+        "nl": "Bezoekcijfers over een periode, zoals sessies, gebruikers en conversies, uitgesplitst naar bijvoorbeeld kanaal of pagina.",
+        "en": "Visitor figures over a period, such as sessions, users and conversions, split by for example channel or page."
+      },
+      "description": "Rapport met dimensies en metrics over een periode. Voorbeeld: dimensions [{\"name\":\"sessionDefaultChannelGroup\"}], metrics [{\"name\":\"sessions\"},{\"name\":\"conversions\"}], dateRanges [{\"startDate\":\"28daysAgo\",\"endDate\":\"today\"}].",
+      "level": "read",
+      "method": "POST",
+      "path": "/properties/{property}:runReport",
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id; standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "dateRanges": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "[{startDate, endDate}], bijv. 7daysAgo / today / 2026-01-31"
+        },
+        "dimensions": {
+          "in": "body",
+          "type": "array",
+          "description": "[{name}], bijv. date, country, pagePath, sessionSource"
+        },
+        "metrics": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "[{name}], bijv. activeUsers, sessions, screenPageViews, conversions, totalRevenue"
+        },
+        "dimensionFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Filter op dimensies (FilterExpression)"
+        },
+        "orderBys": {
+          "in": "body",
+          "type": "array",
+          "description": "Sortering"
+        },
+        "limit": {
+          "in": "body",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 10.000)"
+        }
+      }
+    }
+  ]
+}
