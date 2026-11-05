@@ -2,7 +2,7 @@
   "$schema": "../schemas/connector.json",
   "id": "woocommerce",
   "name": "WooCommerce",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Bestellingen, producten, voorraad en omzet van je WooCommerce-webshop (REST API v3).",
   "category": "Webshop",
   "homepage": "https://woocommerce.github.io/woocommerce-rest-api-docs/",
@@ -64,8 +64,8 @@
     {
       "name": "list_orders",
       "title": { "nl": "Bestellingen opvragen", "en": "List orders" },
-      "summary": { "nl": "Bestellingen, nieuwste eerst, eventueel per status of periode.", "en": "Orders, newest first, optionally by status or period." },
-      "description": "Bestellingen, nieuwste eerst. Filter op status, periode (after/before, ISO-datum) of zoekterm. Persoonsgegevens zoals e-mail, telefoon en adres worden niet getoond.",
+      "summary": { "nl": "Bestellingen, nieuwste eerst, eventueel per status of periode, zonder klantgegevens.", "en": "Orders, newest first, optionally by status or period, without customer details." },
+      "description": "Bestellingen, nieuwste eerst, met nummer, status, datum, bedrag, betaalmethode, land en producten. Filter op status, periode (after/before, ISO-datum) of zoekterm. Naam, e-mail, telefoon en adres van de klant zitten er niet in: zoek één klant met list_customers, of bekijk één bestelling met get_order.",
       "level": "read",
       "method": "GET",
       "path": "/orders",
@@ -119,13 +119,78 @@
           "totaal": "total",
           "valuta": "currency",
           "betaalmethode": "payment_method_title",
-          "voornaam": "billing.first_name",
-          "achternaam": "billing.last_name",
-          "plaats": "billing.city",
           "land": "billing.country",
           "producten": "line_items.name",
           "aantallen": "line_items.quantity"
         },
+        "onError": "fail"
+      }
+    },
+    {
+      "name": "list_orders_with_names",
+      "title": { "nl": "Bestellingen met klantnamen", "en": "Orders with customer names" },
+      "summary": { "nl": "Bestellingen met naam en plaats van de klant, voor dashboards en tools.", "en": "Orders with the customer's name and city, for dashboards and tools." },
+      "description": "Bestellingen, nieuwste eerst, met naam, bedrijf, postcode, plaats en land van de klant, en dezelfde filters als list_orders. Alleen voor dashboards, tools en apps (API), niet voor de AI. Zonder e-mail, telefoon, straat en IP-adres.",
+      "level": "read",
+      "audience": "api",
+      "method": "GET",
+      "path": "/orders",
+      "params": {
+        "status": {
+          "in": "query",
+          "type": "string",
+          "description": "Status van de bestelling",
+          "enum": [
+            "pending",
+            "processing",
+            "on-hold",
+            "completed",
+            "cancelled",
+            "refunded",
+            "failed"
+          ]
+        },
+        "after": {
+          "in": "query",
+          "type": "string",
+          "description": "Vanaf datum, bijv. 2026-11-01T00:00:00"
+        },
+        "before": {
+          "in": "query",
+          "type": "string",
+          "description": "Tot datum"
+        },
+        "search": {
+          "in": "query",
+          "type": "string",
+          "description": "Zoekterm"
+        },
+        "per_page": {
+          "in": "query",
+          "type": "integer",
+          "description": "Aantal per pagina (max 100, standaard 10)"
+        },
+        "page": {
+          "in": "query",
+          "type": "integer",
+          "description": "Pagina"
+        }
+      },
+      "transform": {
+        "exclude": [
+          "billing.email",
+          "billing.phone",
+          "billing.address_1",
+          "billing.address_2",
+          "shipping.address_1",
+          "shipping.address_2",
+          "shipping.phone",
+          "customer_ip_address",
+          "customer_user_agent",
+          "customer_note",
+          "meta_data",
+          "_links"
+        ],
         "onError": "fail"
       }
     },
@@ -489,9 +554,9 @@
     },
     {
       "name": "list_customers",
-      "title": { "nl": "Klanten opvragen", "en": "List customers" },
-      "summary": { "nl": "Klanten met naam, plaats en aantal bestellingen, zonder contactgegevens.", "en": "Customers with name, city and number of orders, without contact details." },
-      "description": "Klanten met naam, plaats en aantal bestellingen. Zonder e-mail, telefoon en adres.",
+      "title": { "nl": "Klant zoeken", "en": "Find customer" },
+      "summary": { "nl": "Zoekt een klant op naam of e-mail: naam, plaats en sinds wanneer, zonder contactgegevens.", "en": "Finds a customer by name or email: name, city and since when, without contact details." },
+      "description": "Zoekt klanten op naam of e-mailadres (search is verplicht, hooguit 10 per zoekopdracht). Geeft naam, plaats, land, klant sinds en of het een betalende klant is; naam en plaats komen als schuilnaam. Zonder e-mail, telefoon en adres.",
       "level": "read",
       "method": "GET",
       "path": "/customers",
@@ -499,6 +564,7 @@
         "search": {
           "in": "query",
           "type": "string",
+          "required": true,
           "description": "Naam of e-mailadres van de klant. Verplicht: klanten zijn persoonsgegevens en komen per zoekopdracht (hooguit 10)."
         },
         "per_page": {
