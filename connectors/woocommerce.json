@@ -130,7 +130,7 @@
       "name": "list_orders_with_names",
       "title": { "nl": "Bestellingen met klantnamen", "en": "Orders with customer names" },
       "summary": { "nl": "Bestellingen met naam en plaats van de klant, voor dashboards en tools.", "en": "Orders with the customer's name and city, for dashboards and tools." },
-      "description": "Bestellingen, nieuwste eerst, met naam, bedrijf, postcode, plaats en land van de klant, en dezelfde filters als list_orders. Alleen voor dashboards, tools en apps (API), niet voor de AI. Zonder e-mail, telefoon, straat en IP-adres.",
+      "description": "Bestellingen, nieuwste eerst, met naam, bedrijf, plaats en land van de klant, en dezelfde filters als list_orders. Alleen voor dashboards, tools en apps (API), niet voor de AI. Zonder e-mail, telefoon, adres en IP-adres.",
       "level": "read",
       "audience": "api",
       "method": "GET",
@@ -177,20 +177,22 @@
         }
       },
       "transform": {
-        "exclude": [
-          "billing.email",
-          "billing.phone",
-          "billing.address_1",
-          "billing.address_2",
-          "shipping.address_1",
-          "shipping.address_2",
-          "shipping.phone",
-          "customer_ip_address",
-          "customer_user_agent",
-          "customer_note",
-          "meta_data",
-          "_links"
-        ],
+        "select": {
+          "id": "id",
+          "nummer": "number",
+          "status": "status",
+          "datum": "date_created",
+          "totaal": "total",
+          "valuta": "currency",
+          "betaalmethode": "payment_method_title",
+          "voornaam": "billing.first_name",
+          "achternaam": "billing.last_name",
+          "bedrijf": "billing.company",
+          "plaats": "billing.city",
+          "land": "billing.country",
+          "producten": "line_items.name",
+          "aantallen": "line_items.quantity"
+        },
         "onError": "fail"
       }
     },

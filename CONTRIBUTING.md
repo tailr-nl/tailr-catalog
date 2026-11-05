@@ -20,7 +20,7 @@ For a list without a search field that would return people (customers, orders wi
 2. **Looking up a person goes one at a time,** in a separate function with `privacy`: a required `lookup` (id, number or email), `sensitivity` per field, and a low `maxRecords`. The AI gets pseudonyms.
 3. **An overview with names is only for the API,** and only where it is useful (a dashboard, a tool): a separate function with `audience: "api"`. The AI does not see it.
 
-Functions that write keep their level (`write` or `admin`). `tailr check` must pass without `personal_data_unmarked` warnings. Examples: `list_orders`, `list_customers` and `list_orders_with_names` in [woocommerce.json](connectors/woocommerce.json), and [Mollie](connectors/mollie/README.md#persoonsgegevens).
+Functions that write keep their level (`write` or `admin`). `tailr check` must pass without `personal_data_unmarked` warnings, with one exception: an API-only overview (step 3) keeps the real field names (such as `voornaam`), and then still gets that warning. Do not rename fields to avoid it. The check cannot yet mark API-only functions with `sensitivity` without the one-at-a-time rule; that is joepherrmann/tailr-core#216. Examples: `list_orders`, `list_customers` and `list_orders_with_names` in [woocommerce.json](connectors/woocommerce.json), and [Mollie](connectors/mollie/README.md#persoonsgegevens).
 - **Plugins are trusted code** that runs without a sandbox: they are reviewed closely, and must only use the plugin API (`@tailr/plugin`).
 - **Texts copied from someone else's documentation or API specification** must have a license that allows it. Mention the source in `NOTICE`.
 - **By contributing**, you agree that your contribution is licensed under the Apache License 2.0.
