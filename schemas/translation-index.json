@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tailr Core translation index",
+  "description": "translations/index.json of a translation source for Tailr Core.",
+  "x-tailr-version": "0.1.0",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "The JSON schema of this file, for completion in your editor."
+    },
+    "name": {
+      "description": "Name of the source, e.g. Tailr.",
+      "type": "string",
+      "maxLength": 80
+    },
+    "translations": {
+      "maxItems": 500,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$",
+            "description": "Language code, e.g. de, fr or pt-BR."
+          },
+          "file": {
+            "type": "string",
+            "pattern": "^[\\w./-]+\\.json$",
+            "description": "The translation file, relative to index.json, e.g. de.json."
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the translation, e.g. 1.0.0. Raise it with every change: Tailr Core shows an update when it is higher than the installed one."
+          },
+          "name": {
+            "description": "Name in the language menu, e.g. \"Deutsch\". Default: \"name\" in the file.",
+            "type": "string",
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "code",
+          "file",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "description": "The languages in this source."
+    }
+  },
+  "required": [
+    "translations"
+  ],
+  "additionalProperties": false
+}
