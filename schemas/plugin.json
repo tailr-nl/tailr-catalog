@@ -74,24 +74,22 @@
         {
           "type": "object",
           "properties": {
-            "nl": {
+            "en": {
               "type": "string",
               "minLength": 1
             },
-            "en": {
-              "type": "string"
+            "nl": {
+              "type": "string",
+              "minLength": 1
             }
           },
-          "required": [
-            "nl"
-          ],
           "additionalProperties": false
         }
       ],
-      "description": "Name in the catalogue: a string, or per language { \"nl\": \"…\", \"en\": \"…\" }. Give both Dutch and English."
+      "description": "Name in the catalogue: a string (English), or per language { \"en\": \"…\", \"nl\": \"…\" }. English is the default."
     },
     "summary": {
-      "description": "One sentence for the catalogue: a string, or { \"nl\": \"…\", \"en\": \"…\" }.",
+      "description": "One sentence for the catalogue: a string (English), or { \"en\": \"…\", \"nl\": \"…\" }.",
       "anyOf": [
         {
           "type": "string"
@@ -99,16 +97,13 @@
         {
           "type": "object",
           "properties": {
-            "nl": {
+            "en": {
               "type": "string"
             },
-            "en": {
+            "nl": {
               "type": "string"
             }
           },
-          "required": [
-            "nl"
-          ],
           "additionalProperties": false
         }
       ]

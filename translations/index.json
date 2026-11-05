@@ -1,5 +1,7 @@
 {
   "$schema": "../schemas/translation-index.json",
   "name": "Tailr",
-  "translations": []
+  "translations": [
+    { "code": "nl", "file": "nl.json", "version": "1.0.0", "name": "Nederlands" }
+  ]
 }

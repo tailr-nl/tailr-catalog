@@ -12,7 +12,7 @@ connectors/     Connectors: how Tailr Core reaches a system (REST, GraphQL, SOAP
 plugins/        Plugins: new capabilities in Tailr Core itself (trusted code, no sandbox).
                 One folder per plugin; recommended.json lists the ones the setup wizard suggests.
 translations/   Translations of the admin environment: index.json and one file per language.
-                Dutch and English are built into Tailr Core.
+                English is built into Tailr Core; Dutch (nl.json) and other languages come from here.
 schemas/        JSON schemas for connector.json, plugin.json, translation files and translations/index.json.
 ```
 
@@ -35,7 +35,7 @@ schemas/        JSON schemas for connector.json, plugin.json, translation files 
 | [koppelingen-goedkeuren](plugins/koppelingen-goedkeuren) | Connections and sources created through the AI wait for an admin's approval |
 | [mededeling](plugins/mededeling) | An announcement at the top of every page, for everyone or certain roles |
 
-Most texts for users are in Dutch, with English translations where the screens need them.
+Tailr Core is in English; the Dutch translation is [translations/nl.json](translations/nl.json). Connectors and plugins give their titles in English, with Dutch where the screens need it (`{ "en": "…", "nl": "…" }`).
 
 ## Make your own
 
