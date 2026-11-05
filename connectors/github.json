@@ -1,8 +1,40 @@
 {
+  "presentation": {
+    "intro": {
+      "en": "Review development activity and find the issues that need attention.",
+      "nl": "Bekijk ontwikkelwerk en ontdek welke issues aandacht nodig hebben."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "Help me choose a repository, then summarise its open issues by theme and identify the next three issues to investigate.",
+          "nl": "Help me een repository kiezen, vat de open issues per thema samen en wijs drie issues aan om als volgende te onderzoeken."
+        },
+        "requires": [
+          "list_my_repos",
+          "list_issues"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Show the open pull requests in a repository I choose. Summarise their purpose and which have been waiting the longest.",
+          "nl": "Toon de open pull requests in een repository die ik kies. Vat hun doel samen en geef aan welke het langst wachten."
+        },
+        "requires": [
+          "list_my_repos",
+          "list_pull_requests"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Review development activity and find the issues that need attention.",
+      "nl": "Bekijk ontwikkelwerk en ontdek welke issues aandacht nodig hebben."
+    }
+  },
   "$schema": "../schemas/connector.json",
   "id": "github",
   "name": "GitHub",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Repositories, bestanden, issues en pull requests op GitHub. Ook handig om eigen koppelingen naar een repo te uploaden.",
   "homepage": "https://docs.github.com/rest",
   "category": "Ontwikkeling",

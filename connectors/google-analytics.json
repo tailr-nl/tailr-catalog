@@ -1,8 +1,40 @@
 {
+  "presentation": {
+    "intro": {
+      "en": "Turn website statistics into concrete insights about visitors and pages.",
+      "nl": "Maak van websitestatistieken concrete inzichten over bezoekers en pagina’s."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "How did visitor numbers and engagement change last month compared with the month before? Break the results down by traffic source.",
+          "nl": "Hoe veranderden bezoekersaantallen en betrokkenheid vorige maand ten opzichte van de maand ervoor? Splits dit uit naar verkeersbron."
+        },
+        "requires": [
+          "list_properties",
+          "run_report"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Which landing pages attracted the most visitors last month, and which had the strongest engagement?",
+          "nl": "Welke landingspagina’s trokken vorige maand de meeste bezoekers en welke hadden de sterkste betrokkenheid?"
+        },
+        "requires": [
+          "list_properties",
+          "run_report"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Turn website statistics into concrete insights about visitors and pages.",
+      "nl": "Maak van websitestatistieken concrete inzichten over bezoekers en pagina’s."
+    }
+  },
   "$schema": "../schemas/connector.json",
   "id": "google-analytics",
   "name": "Google Analytics 4",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Concept: rapporten uit Google Analytics 4 (Data API): bezoekers, sessies, bronnen, pagina's, conversies.",
   "homepage": "https://developers.google.com/analytics/devguides/reporting/data/v1",
   "category": "Marketing",

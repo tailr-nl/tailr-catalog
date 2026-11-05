@@ -33,6 +33,6 @@ Mis je iets? Vraag het aan {{beheerder}}.
 - Eigen functies bevestig je onder **Mijn functies**. Ze werken in elke AI-tool en kunnen nooit meer dan jij zelf mag.
 - Voor eigen tooltjes en scripts maak je een sleutel onder **Mijn API-sleutels**. Deel die met niemand.
 - Onder **Mijn account** zie je waar je bent ingelogd. Herken je een apparaat niet, log het daar uit en wijzig je wachtwoord.
-- Gaat er iets mis, bijvoorbeeld een laptop kwijt of een tool die vreemd doet? Druk onder **Mijn tools** op **Alle AI-toegang nu intrekken**. Al je AI-tools en tools stoppen direct; daarna verbind je ze gewoon opnieuw.
+- Gaat er iets mis, bijvoorbeeld een laptop kwijt of een tool die vreemd doet? Druk onder **AI & tools** op **Alle AI-toegang nu intrekken**. Al je AI-tools en tools stoppen direct; daarna verbind je ze gewoon opnieuw.
 - Krijgt je AI de melding dat AI tijdelijk uit staat (`ai_access_paused`)? Dan heeft {{beheerder}} AI even voor iedereen uitgezet. Tailr Core zelf werkt gewoon.
 - Lukt iets niet? Je AI geeft je een referentie (`err_…`). Stuur die naar {{beheerder}}.

@@ -1,8 +1,39 @@
 {
+  "presentation": {
+    "intro": {
+      "en": "Check payment statuses and understand what is included in a settlement.",
+      "nl": "Controleer betaalstatussen en ontdek waar een uitbetaling uit bestaat."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "Review recent payments and group them by status. Highlight failed or expired payments that may need follow-up.",
+          "nl": "Bekijk recente betalingen en groepeer ze op status. Markeer mislukte of verlopen betalingen die mogelijk opvolging nodig hebben."
+        },
+        "requires": [
+          "list_payments"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Help me select a settlement, break it down into payments, refunds and costs, and explain how the payout amount is formed.",
+          "nl": "Help me een uitbetaling kiezen, splits die uit naar betalingen, terugbetalingen en kosten en leg uit hoe het uitbetaalde bedrag ontstaat."
+        },
+        "requires": [
+          "list_settlements",
+          "settlement_breakdown"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Check payment statuses and understand what is included in a settlement.",
+      "nl": "Controleer betaalstatussen en ontdek waar een uitbetaling uit bestaat."
+    }
+  },
   "$schema": "../../schemas/connector.json",
   "id": "mollie",
   "name": "Mollie",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Betalingen, terugbetalingen, klanten, machtigingen, abonnementen, betaallinks, verkoopfacturen, uitbetalingen en saldi bij Mollie, plus terminals, zakelijke rekening en partnerfuncties: de hele API v2 in 126 functies. Namen, rekeningnummers en adressen van klanten zie je per persoon, met schuilnamen voor de AI.",
   "homepage": "https://docs.mollie.com/reference/overview",
   "category": "Betalingen",

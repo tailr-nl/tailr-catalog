@@ -9,6 +9,120 @@
       "type": "string",
       "description": "The JSON schema of this file, for completion in your editor."
     },
+    "presentation": {
+      "type": "object",
+      "properties": {
+        "intro": {
+          "description": "Short explanation shown on the user's overview. Plain text, no HTML.",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1200
+            },
+            {
+              "type": "object",
+              "properties": {
+                "en": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1200
+                },
+                "nl": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1200
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "examples": {
+          "maxItems": 6,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1200
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "en": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1200
+                      },
+                      "nl": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1200
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ],
+                "description": "A useful question the user can copy to their AI tool. Use plain language, not function names."
+              },
+              "requires": {
+                "minItems": 1,
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                },
+                "description": "Function names needed for this example. Connector: local function names; plugin: qualified function names. Only shown if the user may use all of them through AI."
+              }
+            },
+            "required": [
+              "prompt",
+              "requires"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "whatsNew": {
+          "description": "Short explanation shown with a newly available module. Plain text; not a separate event per function.",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1200
+            },
+            {
+              "type": "object",
+              "properties": {
+                "en": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1200
+                },
+                "nl": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1200
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "adminOnly": {
+          "description": "Only show this content to administrators. Useful for administration plugins.",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
     "id": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9-]{1,40}$",

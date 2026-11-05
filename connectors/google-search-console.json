@@ -1,8 +1,40 @@
 {
+  "presentation": {
+    "intro": {
+      "en": "Compare search performance and find pages worth improving.",
+      "nl": "Vergelijk zoekprestaties en ontdek welke pagina’s je kunt verbeteren."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "Which search queries brought the most clicks last month? Show impressions, click-through rate and position, and suggest three improvements.",
+          "nl": "Welke zoekopdrachten leverden vorige maand de meeste klikken op? Toon vertoningen, doorklikpercentage en positie en geef drie verbeterpunten."
+        },
+        "requires": [
+          "list_sites",
+          "search_analytics"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Which pages have many impressions but few clicks in Google? Compare last month with the month before and explain where the opportunities are.",
+          "nl": "Welke pagina’s worden vaak vertoond in Google maar krijgen weinig klikken? Vergelijk vorige maand met de maand ervoor en leg uit waar kansen liggen."
+        },
+        "requires": [
+          "list_sites",
+          "search_analytics"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Compare search performance and find pages worth improving.",
+      "nl": "Vergelijk zoekprestaties en ontdek welke pagina’s je kunt verbeteren."
+    }
+  },
   "$schema": "../schemas/connector.json",
   "id": "google-search-console",
   "name": "Google Search Console",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Concept: zoekprestaties uit Google Search Console: klikken, vertoningen, CTR en positie per zoekopdracht of pagina.",
   "homepage": "https://developers.google.com/webmaster-tools/v1/searchanalytics/query",
   "category": "Marketing",

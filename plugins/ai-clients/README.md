@@ -18,7 +18,7 @@ Bepaal per OAuth-client (Claude, ChatGPT, Claude Code, een eigen app) of hij met
 
 Tailr Core ziet de client en de gebruiker, niet het account aan de kant van de AI-tool.
 
-**Samen met Mijn tools :** deze plugin beslist of een client überhaupt mag verbinden (voor de hele organisatie). Wat een toegestane client daarna per koppeling mag (*niets*, *lezen* of *schrijven*, standaard lezen), kiest elke medewerker zelf op het toestemmingsscherm en onder *Mijn tools*, en nooit meer dan hij zelf mag. Tools die een plugin uitgeeft met `api.identities` (haakje K) zijn geen OAuth-clients en gaan niet langs deze plugin; daarover beslist de plugin die ze uitgeeft.
+**Samen met AI & tools:** deze plugin beslist of een OAuth-client voor de organisatie mag verbinden. Een toegestane client volgt daarna de actuele rollen en uitzonderingen van de medewerker, zonder tweede rechtenmatrix op het toestemmingsscherm. Verbinden en intrekken staan samen onder *AI & tools*. Identiteiten uit `api.identities` zijn geen OAuth-clients: de uitgevende plugin bepaalt hun plafond.
 
 **Let op:** volgens de documentatie gebruiken Claude, ChatGPT en Claude Code met CIMD één client voor iedereen, privé én organisatie. Dat is nog niet met echte accounts getest . Stap 1 hierboven geeft dan geen aparte client. Dit werkt wel (nog te testen):
 

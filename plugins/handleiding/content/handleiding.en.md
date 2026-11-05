@@ -33,6 +33,6 @@ Missing something? Ask {{admin}}.
 - You confirm your own functions under **My functions**. They work in every AI tool and can never do more than you are allowed to.
 - For your own tools and scripts, create a key under **My API keys**. Never share it.
 - Under **My account** you can see where you are signed in. Don't recognise a device? Sign it out there and change your password.
-- Something wrong, for example a lost laptop or a tool that behaves oddly? Under **My tools**, press **Revoke all AI access now**. All your AI tools and tools stop immediately; afterwards you simply connect them again.
+- Something wrong, for example a lost laptop or a tool that behaves oddly? Under **AI & tools**, press **Revoke all AI access now**. All your AI tools and tools stop immediately; afterwards you simply connect them again.
 - Does your AI say that AI is temporarily off (`ai_access_paused`)? Then {{admin}} switched off AI for everyone for a while. Tailr Core itself works as usual.
 - Something not working? Your AI gives you a reference (`err_…`). Send it to {{admin}}.

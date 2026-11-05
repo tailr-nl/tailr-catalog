@@ -1,8 +1,40 @@
 {
+  "presentation": {
+    "intro": {
+      "en": "Understand where visitors come from and what they do on your website.",
+      "nl": "Ontdek waar bezoekers vandaan komen en wat ze op je website doen."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "Compare visits, unique visitors and bounce rate last month with the month before. Explain the three biggest changes.",
+          "nl": "Vergelijk bezoeken, unieke bezoekers en bouncepercentage van vorige maand met de maand ervoor. Leg de drie grootste veranderingen uit."
+        },
+        "requires": [
+          "list_sites",
+          "visits_summary"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Which traffic channels brought the most visitors last month? Compare their bounce rates and suggest where to investigate further.",
+          "nl": "Welke verkeerskanalen brachten vorige maand de meeste bezoekers? Vergelijk hun bouncepercentages en geef aan wat verder onderzoek verdient."
+        },
+        "requires": [
+          "list_sites",
+          "channels"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Understand where visitors come from and what they do on your website.",
+      "nl": "Ontdek waar bezoekers vandaan komen en wat ze op je website doen."
+    }
+  },
   "$schema": "../schemas/connector.json",
   "id": "matomo",
   "name": "Matomo",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Websitestatistieken uit Matomo (zelf gehost of Matomo Cloud): bezoeken, bronnen, pagina's, doelen, e-commerce en live bezoekers.",
   "homepage": "https://developer.matomo.org/api-reference/reporting-api",
   "category": "Marketing",
