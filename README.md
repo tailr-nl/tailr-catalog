@@ -11,8 +11,9 @@ connectors/     Connectors: how Tailr Core reaches a system (REST, GraphQL, SOAP
                 index.json lists them. Code in a connector always runs in Tailr Core's sandbox.
 plugins/        Plugins: new capabilities in Tailr Core itself (trusted code, no sandbox).
                 One folder per plugin; recommended.json lists the ones the setup wizard suggests.
-translations/   Translations of the admin environment, one file per language.
-schemas/        JSON schemas for connector.json, plugin.json and translation files.
+translations/   Translations of the admin environment: index.json and one file per language.
+                Dutch and English are built into Tailr Core.
+schemas/        JSON schemas for connector.json, plugin.json, translation files and translations/index.json.
 ```
 
 | Connector | What |
