@@ -1,7 +1,28 @@
 {
+  "presentation": {
+    "intro": {
+      "en": "Your organisation’s guide explains how to use Tailr Core with the systems you can access.",
+      "nl": "De handleiding van je organisatie legt uit hoe je Tailr Core gebruikt met de systemen waar je toegang toe hebt."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "Read my organisation’s Tailr Core guide and suggest three useful things I can try with the access I have.",
+          "nl": "Lees de Tailr Core-handleiding van mijn organisatie en geef drie nuttige dingen die ik kan proberen met mijn toegang."
+        },
+        "requires": [
+          "handleiding__read"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Your organisation’s guide is now available to you.",
+      "nl": "De handleiding van je organisatie is nu beschikbaar."
+    }
+  },
   "$schema": "../../schemas/plugin.json",
   "id": "handleiding",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "api": "1.5",
   "title": { "nl": "Handleiding", "en": "Guide" },
   "summary": {

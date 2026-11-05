@@ -1,7 +1,18 @@
 {
+  "presentation": {
+    "adminOnly": true,
+    "intro": {
+      "en": "Write an announcement for everyone or selected roles in the Announcement settings.",
+      "nl": "Schrijf via Mededeling een bericht voor iedereen of voor geselecteerde rollen."
+    },
+    "whatsNew": {
+      "en": "You can now publish an announcement for your colleagues.",
+      "nl": "Je kunt nu een mededeling voor je collega’s plaatsen."
+    }
+  },
   "$schema": "../../schemas/plugin.json",
   "id": "mededeling",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "api": "1.5",
   "title": { "nl": "Mededeling", "en": "Announcement" },
   "summary": {

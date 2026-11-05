@@ -1,7 +1,18 @@
 {
+  "presentation": {
+    "adminOnly": true,
+    "intro": {
+      "en": "Review connections and sources requested through AI under Approve connections before making them available.",
+      "nl": "Controleer koppelingen en bronnen die via AI zijn aangevraagd onder Koppelingen goedkeuren voordat je ze beschikbaar maakt."
+    },
+    "whatsNew": {
+      "en": "Connections requested through AI can now wait for administrator approval.",
+      "nl": "Koppelingen die via AI zijn aangevraagd kunnen nu op goedkeuring van een beheerder wachten."
+    }
+  },
   "$schema": "../../schemas/plugin.json",
   "id": "koppelingen-goedkeuren",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "api": "1.0",
   "title": {
     "nl": "Koppelingen goedkeuren",

@@ -1,8 +1,39 @@
 {
+  "presentation": {
+    "intro": {
+      "en": "Explore sales, orders and products without manually assembling reports.",
+      "nl": "Onderzoek omzet, bestellingen en producten zonder zelf rapporten samen te stellen."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "How did sales and order volume change last month compared with the month before? Explain which products contributed most.",
+          "nl": "Hoe veranderden omzet en het aantal bestellingen vorige maand ten opzichte van de maand ervoor? Leg uit welke producten het meest bijdroegen."
+        },
+        "requires": [
+          "sales_report",
+          "top_sellers"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Which orders are still being processed? Group them by age and show which need attention first, without customer details.",
+          "nl": "Welke bestellingen zijn nog in behandeling? Groepeer ze op ouderdom en laat zien welke als eerste aandacht nodig hebben, zonder klantgegevens."
+        },
+        "requires": [
+          "list_orders"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Explore sales, orders and products without manually assembling reports.",
+      "nl": "Onderzoek omzet, bestellingen en producten zonder zelf rapporten samen te stellen."
+    }
+  },
   "$schema": "../schemas/connector.json",
   "id": "woocommerce",
   "name": "WooCommerce",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Bestellingen, producten, voorraad en omzet van je WooCommerce-webshop (REST API v3).",
   "category": "Webshop",
   "homepage": "https://woocommerce.github.io/woocommerce-rest-api-docs/",

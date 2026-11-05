@@ -1,8 +1,41 @@
 {
+  "presentation": {
+    "intro": {
+      "en": "Investigate outstanding invoices and trace entries in your accounts.",
+      "nl": "Onderzoek openstaande facturen en zoek boekingen in je administratie terug."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "Which receivables are still outstanding? Group them by age and amount and point out which deserve attention first.",
+          "nl": "Welke vorderingen staan nog open? Groepeer ze op ouderdom en bedrag en geef aan welke als eerste aandacht verdienen."
+        },
+        "requires": [
+          "me",
+          "list_receivables"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Help me choose a general ledger account and period, then explain the largest movements and the entries behind them.",
+          "nl": "Help me een grootboekrekening en periode kiezen en leg daarna de grootste mutaties en bijbehorende boekingen uit."
+        },
+        "requires": [
+          "me",
+          "get_general_ledger_card",
+          "get_financial_entry"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Investigate outstanding invoices and trace entries in your accounts.",
+      "nl": "Onderzoek openstaande facturen en zoek boekingen in je administratie terug."
+    }
+  },
   "$schema": "../../schemas/connector.json",
   "id": "exact-online",
   "name": "Exact Online",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Exact Online: facturen, relaties, artikelen en boekingsregels, plus code-functies voor grootboekkaart, boekingen, afletterstatus, bankregels per periode en bewijs bij bankuitgaven. Alleen lezen. Nog te testen met een echte administratie.",
   "homepage": "https://start.exactonline.nl/docs/HlpRestAPIResources.aspx",
   "category": "Boekhouding",

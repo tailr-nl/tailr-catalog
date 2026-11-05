@@ -1,7 +1,18 @@
 {
+  "presentation": {
+    "adminOnly": true,
+    "intro": {
+      "en": "Choose which AI tools and apps may connect, and review requests from new clients under Allow AI tools.",
+      "nl": "Bepaal welke AI-tools en apps mogen verbinden en bekijk aanvragen van nieuwe clients onder AI-tools toestaan."
+    },
+    "whatsNew": {
+      "en": "You can now manage which AI clients may connect.",
+      "nl": "Je kunt nu beheren welke AI-clients mogen verbinden."
+    }
+  },
   "$schema": "../../schemas/plugin.json",
   "id": "ai-clients",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "api": "1.0",
   "title": {
     "nl": "AI-tools en apps toestaan",

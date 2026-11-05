@@ -1,7 +1,28 @@
 {
+  "presentation": {
+    "intro": {
+      "en": "Ask your AI to build a dashboard that you can open in Tailr Core. You choose the data it needs.",
+      "nl": "Laat je AI een dashboard bouwen dat je in Tailr Core kunt openen. Je kiest zelf welke gegevens het nodig heeft."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "Which dashboards have I saved? Show their purpose and help me choose one to open.",
+          "nl": "Welke dashboards heb ik opgeslagen? Laat zien waarvoor ze dienen en help me er een te openen."
+        },
+        "requires": [
+          "dashboards__list"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "You can now save and open your own dashboards.",
+      "nl": "Je kunt nu eigen dashboards opslaan en openen."
+    }
+  },
   "$schema": "../../schemas/plugin.json",
   "id": "dashboards",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "api": "1.3",
   "title": { "nl": "Mijn dashboards", "en": "My dashboards" },
   "summary": {

@@ -1,7 +1,18 @@
 {
+  "presentation": {
+    "adminOnly": true,
+    "intro": {
+      "en": "Configure additional logging to a file, webhook or syslog from the Extra logging settings.",
+      "nl": "Stel aanvullende logging naar een bestand, webhook of syslog in via Extra logging."
+    },
+    "whatsNew": {
+      "en": "Additional logging and user feedback can now be collected.",
+      "nl": "Je kunt nu aanvullende logs en feedback van gebruikers verzamelen."
+    }
+  },
   "$schema": "../../schemas/plugin.json",
   "id": "extra-logging",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "api": "1.0",
   "title": {
     "nl": "Extra logging",
