@@ -1779,6 +1779,24 @@
     "Connection approved": "Verbinding goedgekeurd",
     "Updates checked": "Updates gecontroleerd",
     "Synchronized": "Gesynchroniseerd",
-    "The general rule for every connection. A connector can have its own values from the API documentation (e.g. Exact: 60 per minute), and you can adjust those per connection under Connections.": "De algemene regel voor elke koppeling. Een connector kan eigen waarden uit de API-documentatie hebben (bijv. Exact: 60 per minuut). Je past die per koppeling aan onder Koppelingen."
+    "The general rule for every connection. A connector can have its own values from the API documentation (e.g. Exact: 60 per minute), and you can adjust those per connection under Connections.": "De algemene regel voor elke koppeling. Een connector kan eigen waarden uit de API-documentatie hebben (bijv. Exact: 60 per minuut). Je past die per koppeling aan onder Koppelingen.",
+    "Before you connect": "Voordat je koppelt",
+    "About {minutes} minutes": "Ongeveer {minutes} minuten",
+    "Loading setup plan…": "Stappenplan laden…",
+    "You will need": "Dit heb je nodig",
+    "Open source system": "Open het bronsysteem",
+    "All {n} setup steps": "Alle {n} stappen",
+    "Unfinished setups": "Nog af te ronden",
+    "Step {step} of {total}: {title}": "Stap {step} van {total}: {title}",
+    "Copy the prompt and continue in your AI tool. Your progress is saved for seven days.": "Kopieer de opdracht en ga verder in je AI-tool. Je voortgang wordt zeven dagen bewaard.",
+    "Copy resume prompt": "Kopieer hervatopdracht",
+    "In Tailr Core, resume my setup for {name}.": "Hervat in Tailr Core mijn stappenplan voor {name}.",
+    "Use tailr__admin_connection_setup_status with guideId={guideId}. Continue from the current step with tailr__admin_connection_setup_next; do not start a new plan. Never ask for secrets in the chat.": "Gebruik tailr__admin_connection_setup_status met guideId={guideId}. Ga verder bij de huidige stap met tailr__admin_connection_setup_next; begin geen nieuw plan. Vraag nooit om geheimen in de chat.",
+    "Manage connection": "Koppeling beheren",
+    "Cancel setup for {name}? Any connection already created will remain.": "Stappenplan voor {name} annuleren? Een al aangemaakte koppeling blijft bestaan.",
+    "Setup cancelled": "Stappenplan geannuleerd",
+    "Couldn't cancel setup": "Stappenplan annuleren is niet gelukt",
+    "Cancel setup": "Stappenplan annuleren",
+    "Use tailr__admin_connection_setup_start. Show the overview and guide me through one step at a time with tailr__admin_connection_setup_next. Never ask for passwords, API keys or client secrets in the chat.": "Gebruik tailr__admin_connection_setup_start. Toon het overzicht en begeleid me stap voor stap met tailr__admin_connection_setup_next. Vraag nooit om wachtwoorden, API-sleutels of clientgeheimen in de chat."
   }
 }
