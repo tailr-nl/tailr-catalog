@@ -34,15 +34,24 @@
   "$schema": "../schemas/connector.json",
   "id": "github",
   "name": "GitHub",
-  "version": "1.3.1",
-  "description": "Repositories, bestanden, issues en pull requests op GitHub. Ook handig om eigen koppelingen naar een repo te uploaden.",
+  "version": "1.3.2",
+  "description": {
+    "en": "Repositories, files, issues and pull requests on GitHub.",
+    "nl": "Repositories, bestanden, issues en pull requests op GitHub."
+  },
   "homepage": "https://docs.github.com/rest",
-  "category": "Ontwikkeling",
+  "category": "Development",
   "vars": [
     {
       "name": "GITHUB_TOKEN",
-      "label": "GitHub-token",
-      "description": "Fine-grained personal access token met toegang tot de gewenste repo's (Contents, Issues en Pull requests).",
+      "label": {
+        "en": "GitHub token",
+        "nl": "GitHub-token"
+      },
+      "description": {
+        "en": "A fine-grained personal access token for the required repositories, with Contents, Issues and Pull requests permissions.",
+        "nl": "Fine-grained personal access token met toegang tot de gewenste repo's (Contents, Issues en Pull requests)."
+      },
       "pattern": "^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$",
       "patternHint": "Een GitHub-token begint met github_pat_ (fine-grained) of ghp_ (classic)",
       "secret": true,
@@ -84,8 +93,14 @@
   "tools": [
     {
       "name": "get_repo",
-      "title": { "nl": "Repository bekijken", "en": "View repository" },
-      "summary": { "nl": "Omschrijving, standaardbranch en aantal open issues van een repository.", "en": "Description, default branch and number of open issues of a repository." },
+      "title": {
+        "nl": "Repository bekijken",
+        "en": "View repository"
+      },
+      "summary": {
+        "nl": "Omschrijving, standaardbranch en aantal open issues van een repository.",
+        "en": "Description, default branch and number of open issues of a repository."
+      },
       "description": "Gegevens van één repository: omschrijving, standaardbranch, open issues.",
       "level": "read",
       "method": "GET",
@@ -122,8 +137,14 @@
     },
     {
       "name": "list_commits",
-      "title": { "nl": "Commits opvragen", "en": "List commits" },
-      "summary": { "nl": "Recente wijzigingen in een repository.", "en": "Recent changes in a repository." },
+      "title": {
+        "nl": "Commits opvragen",
+        "en": "List commits"
+      },
+      "summary": {
+        "nl": "Recente wijzigingen in een repository.",
+        "en": "Recent changes in a repository."
+      },
       "description": "Recente commits van een repository, optioneel per branch, pad of periode.",
       "level": "read",
       "method": "GET",
@@ -212,8 +233,14 @@
     },
     {
       "name": "get_file",
-      "title": { "nl": "Bestand lezen", "en": "Read file" },
-      "summary": { "nl": "De inhoud van een bestand of map in een repository.", "en": "The contents of a file or folder in a repository." },
+      "title": {
+        "nl": "Bestand lezen",
+        "en": "Read file"
+      },
+      "summary": {
+        "nl": "De inhoud van een bestand of map in een repository.",
+        "en": "The contents of a file or folder in a repository."
+      },
       "description": "Inhoud van een bestand of map in een repository (base64 voor bestanden).",
       "level": "read",
       "method": "GET",
@@ -251,8 +278,14 @@
     },
     {
       "name": "put_file",
-      "title": { "nl": "Bestand opslaan", "en": "Save file" },
-      "summary": { "nl": "Maakt of wijzigt een bestand in een repository.", "en": "Creates or changes a file in a repository." },
+      "title": {
+        "nl": "Bestand opslaan",
+        "en": "Save file"
+      },
+      "summary": {
+        "nl": "Maakt of wijzigt een bestand in een repository.",
+        "en": "Creates or changes a file in a repository."
+      },
       "description": "Maakt of wijzigt een bestand in een repository met een commit. Bij wijzigen is de sha van het huidige bestand nodig.",
       "level": "write",
       "method": "PUT",
@@ -334,8 +367,14 @@
     },
     {
       "name": "list_issues",
-      "title": { "nl": "Issues opvragen", "en": "List issues" },
-      "summary": { "nl": "Issues van een repository, eventueel per status of label.", "en": "Issues of a repository, optionally by status or label." },
+      "title": {
+        "nl": "Issues opvragen",
+        "en": "List issues"
+      },
+      "summary": {
+        "nl": "Issues van een repository, eventueel per status of label.",
+        "en": "Issues of a repository, optionally by status or label."
+      },
       "description": "Issues van een repository, optioneel per status, label of toegewezen persoon.",
       "level": "read",
       "method": "GET",
@@ -476,8 +515,14 @@
     },
     {
       "name": "create_issue",
-      "title": { "nl": "Issue aanmaken", "en": "Create issue" },
-      "summary": { "nl": "Maakt een nieuw issue aan.", "en": "Creates a new issue." },
+      "title": {
+        "nl": "Issue aanmaken",
+        "en": "Create issue"
+      },
+      "summary": {
+        "nl": "Maakt een nieuw issue aan.",
+        "en": "Creates a new issue."
+      },
       "description": "Maakt een nieuw issue aan met titel, beschrijving en labels.",
       "level": "write",
       "method": "POST",
@@ -575,8 +620,14 @@
     },
     {
       "name": "get_issue",
-      "title": { "nl": "Issue bekijken", "en": "View issue" },
-      "summary": { "nl": "Eén issue met beschrijving.", "en": "One issue with its description." },
+      "title": {
+        "nl": "Issue bekijken",
+        "en": "View issue"
+      },
+      "summary": {
+        "nl": "Eén issue met beschrijving.",
+        "en": "One issue with its description."
+      },
       "description": "Eén issue met beschrijving en aantal reacties.",
       "level": "read",
       "method": "GET",
@@ -621,8 +672,14 @@
     },
     {
       "name": "update_issue",
-      "title": { "nl": "Issue wijzigen", "en": "Update issue" },
-      "summary": { "nl": "Wijzigt titel, beschrijving, status of labels van een issue.", "en": "Changes the title, description, status or labels of an issue." },
+      "title": {
+        "nl": "Issue wijzigen",
+        "en": "Update issue"
+      },
+      "summary": {
+        "nl": "Wijzigt titel, beschrijving, status of labels van een issue.",
+        "en": "Changes the title, description, status or labels of an issue."
+      },
       "description": "Wijzigt titel, beschrijving, status of labels van een issue.",
       "level": "write",
       "method": "PATCH",
@@ -751,8 +808,14 @@
     },
     {
       "name": "comment_on_issue",
-      "title": { "nl": "Reactie plaatsen", "en": "Post comment" },
-      "summary": { "nl": "Plaatst een reactie bij een issue of pull request.", "en": "Posts a comment on an issue or pull request." },
+      "title": {
+        "nl": "Reactie plaatsen",
+        "en": "Post comment"
+      },
+      "summary": {
+        "nl": "Plaatst een reactie bij een issue of pull request.",
+        "en": "Posts a comment on an issue or pull request."
+      },
       "description": "Plaatst een reactie bij een issue of pull request.",
       "level": "write",
       "method": "POST",
@@ -797,8 +860,14 @@
     },
     {
       "name": "list_pull_requests",
-      "title": { "nl": "Pull requests opvragen", "en": "List pull requests" },
-      "summary": { "nl": "Pull requests van een repository.", "en": "Pull requests of a repository." },
+      "title": {
+        "nl": "Pull requests opvragen",
+        "en": "List pull requests"
+      },
+      "summary": {
+        "nl": "Pull requests van een repository.",
+        "en": "Pull requests of a repository."
+      },
       "description": "Pull requests van een repository, optioneel per status of branch.",
       "level": "read",
       "method": "GET",
@@ -898,8 +967,14 @@
     },
     {
       "name": "whoami",
-      "title": { "nl": "Wie ben ik op GitHub", "en": "Who am I on GitHub" },
-      "summary": { "nl": "Het GitHub-account achter het token.", "en": "The GitHub account behind the token." },
+      "title": {
+        "nl": "Wie ben ik op GitHub",
+        "en": "Who am I on GitHub"
+      },
+      "summary": {
+        "nl": "Het GitHub-account achter het token.",
+        "en": "The GitHub account behind the token."
+      },
       "description": "Gegevens van het GitHub-account achter de token.",
       "level": "read",
       "method": "GET",
@@ -916,8 +991,14 @@
     },
     {
       "name": "list_my_repos",
-      "title": { "nl": "Mijn repositories", "en": "My repositories" },
-      "summary": { "nl": "De repositories waar het token bij kan.", "en": "The repositories the token can access." },
+      "title": {
+        "nl": "Mijn repositories",
+        "en": "My repositories"
+      },
+      "summary": {
+        "nl": "De repositories waar het token bij kan.",
+        "en": "The repositories the token can access."
+      },
       "description": "Repositories waar de token toegang toe heeft.",
       "level": "read",
       "method": "GET",

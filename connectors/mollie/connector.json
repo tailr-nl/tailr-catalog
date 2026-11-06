@@ -33,10 +33,13 @@
   "$schema": "../../schemas/connector.json",
   "id": "mollie",
   "name": "Mollie",
-  "version": "2.0.1",
-  "description": "Betalingen, terugbetalingen, klanten, machtigingen, abonnementen, betaallinks, verkoopfacturen, uitbetalingen en saldi bij Mollie, plus terminals, zakelijke rekening en partnerfuncties: de hele API v2 in 126 functies. Namen, rekeningnummers en adressen van klanten zie je per persoon, met schuilnamen voor de AI.",
+  "version": "2.0.2",
+  "description": {
+    "en": "Payments, refunds, customers, mandates, subscriptions, payment links, invoices, settlements and balances from Mollie. Personal data is pseudonymised for AI.",
+    "nl": "Betalingen, terugbetalingen, klanten, machtigingen, abonnementen, betaallinks, facturen, uitbetalingen en saldi uit Mollie. Persoonsgegevens worden gepseudonimiseerd voor AI."
+  },
   "homepage": "https://docs.mollie.com/reference/overview",
-  "category": "Betalingen",
+  "category": "Payments",
   "type": "rest",
   "baseUrl": "https://api.mollie.com/v2",
   "auth": {
@@ -49,8 +52,14 @@
   "vars": [
     {
       "name": "ACCESS_TOKEN",
-      "label": "Advanced access token",
-      "description": "Mollie-dashboard → Developers → API keys → Advanced access tokens. Kies de rechten die je wilt gebruiken (.read om te lezen, .write om te wijzigen). Een live_- of test_-sleutel werkt niet: die geeft geen toegang tot uitbetalingen, saldi en facturen.",
+      "label": {
+        "en": "Advanced access token",
+        "nl": "Advanced access token"
+      },
+      "description": {
+        "en": "Mollie dashboard → Developers → API keys → Advanced access tokens. Choose .read and .write scopes as needed. A live_ or test_ key cannot access settlements, balances and invoices.",
+        "nl": "Mollie-dashboard → Developers → API keys → Advanced access tokens. Kies de rechten die je wilt gebruiken (.read om te lezen, .write om te wijzigen). Een live_- of test_-sleutel werkt niet: die geeft geen toegang tot uitbetalingen, saldi en facturen."
+      },
       "secret": true,
       "required": true,
       "pattern": "^access_[A-Za-z0-9_-]{20,}$",
@@ -58,8 +67,14 @@
     },
     {
       "name": "PROFILE_ID",
-      "label": "Profiel (webshop)",
-      "description": "Alleen nodig als het token niet aan één profiel (webshop) gekoppeld is. Wordt dan automatisch meegegeven als profileId. Na het verbinden kies je het uit de functie 'Profielen'.",
+      "label": {
+        "en": "Profile (shop)",
+        "nl": "Profiel (webshop)"
+      },
+      "description": {
+        "en": "Only needed when the token is not linked to one profile (shop). It is sent as profileId. After connecting, choose it with Profiles.",
+        "nl": "Alleen nodig als het token niet aan één profiel (webshop) gekoppeld is. Wordt dan automatisch meegegeven als profileId. Na het verbinden kies je het uit de functie 'Profielen'."
+      },
       "secret": false,
       "required": false,
       "pattern": "^pfl_[A-Za-z0-9]{1,64}$",
