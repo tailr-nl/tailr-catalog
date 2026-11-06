@@ -5,7 +5,7 @@ Thanks for helping. Connectors, plugins and translations are all welcome.
 1. **Fork** this repository and make your change in `connectors/`, `plugins/` or `translations/`.
 2. **Keep the `"$schema"` line** at the top of `connector.json` or `plugin.json`, so your editor checks it.
 3. **Check it:** `npx tailr check <folder or file>`. It must pass.
-4. **Test it** in your own Tailr Core: add your fork as a source (*Catalogue → Connectors → Add → From Git*, or a plugin source in the Danger zone), install it and try it.
+4. **Test it** in your own Tailr Core: add your fork as a source (*Catalog → Connectors → Add → From Git*, or a plugin source in the Danger zone), install it and try it.
 5. **Bump the version** of what you changed, and the version in `connectors/index.json` for a connector.
 6. **Open a pull request** with what it does, how you tested it, and which systems or versions it supports.
 
@@ -32,3 +32,9 @@ A connector, plugin or structured translation file may provide `presentation.int
 A connector uses local function names in `requires`; a plugin or translation uses fully qualified names such as `dashboards__list`. A prompt is shown only when the user can access every required function through AI. News is one item per newly available module, not one per function. Raise the module version when changing content. Translations require the structured format with `messages`; keep their version in `translations/index.json`.
 
 See the matching JSON schema in `schemas/` and the core documentation `docs/presentation.md`. The installed core must support `presentation` to display it; older cores ignore the optional metadata.
+
+## Language and presentation
+
+Use English source text and provide Dutch in the same `{ "en": "…", "nl": "…" }` structure for connector descriptions and settings labels (`vars[].label` and `description`). Mark unfinished connectors with `maturity: "beta"`; keep test notes and fixed function counts out of their descriptions. This metadata needs a core that supports localized connector settings: release the matching core change before this catalog update.
+
+Plugin screens use the host translation and date helpers and inherit the Tailr theme. Keep one page title and move destructive row actions into an action menu with confirmation. A user's own role, connection and dashboard names remain as entered.

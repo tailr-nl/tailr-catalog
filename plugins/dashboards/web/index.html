@@ -1,175 +1,111 @@
 <!doctype html>
-<html lang="nl">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mijn dashboards</title>
-  <style>
-    .db-stack { display: grid; gap: 16px; }
-    .db-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
-    .db-head h2 { margin: 0; }
-    .db-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-    .db-review { border-left: 3px solid var(--warning, #d97706); }
-    .db-review.db-focus { box-shadow: 0 0 0 2px var(--warning, #d97706); }
-    .db-code { max-height: 360px; overflow: auto; font-size: 12px; white-space: pre-wrap; word-break: break-all; background: var(--surface-2, rgba(127,127,127,.08)); padding: 12px; border-radius: 8px; }
-    .db-preview { border: 1px dashed var(--border, #ccc); border-radius: 8px; padding: 4px; margin-top: 12px; }
-    .db-problem { color: var(--danger, #b91c1c); }
-    details.db-versions summary { cursor: pointer; margin-top: 12px; }
-  </style>
-</head>
-<body>
-  <div class="page-head"><div>
-    <h1>Mijn dashboards</h1>
-    <p>Dashboards die je AI voor je heeft gemaakt. Ze draaien afgeschermd, met jouw rechten: je ziet alleen je eigen data. Een nieuw dashboard of een nieuwe versie bevestig je eerst hier.</p>
-  </div></div>
-
-  <div id="notice"></div>
-  <div class="db-stack" id="pending"></div>
-  <div class="db-stack" id="list" style="margin-top: 16px;"></div>
-
-  <section class="card" id="howto" style="margin-top: 16px;">
-    <h2>Een dashboard laten maken</h2>
-    <p>Vraag het je AI-tool die met Tailr Core verbonden is, bijvoorbeeld: <em>"Maak een dashboard met de omzet per week en de openstaande facturen."</em> Je AI bewaart het met de functie <code>dashboards__save</code>. Daarna staat het hierboven bij <strong>Te bevestigen</strong>.</p>
-    <p class="hint" id="limits"></p>
-  </section>
-
-  <script src="/api/frame/host.js"></script>
-  <script>
-    const tailr = window.parent.tailr;
-    const call = (path, init) => tailr ? tailr.api(path, init) : fetch(path, { method: init?.method ?? (init?.body ? "POST" : "GET"), headers: { "content-type": "application/json" }, body: init?.body ? JSON.stringify(init.body) : undefined }).then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status); return j; });
-    const toast = (kind, m) => tailr ? tailr.toast[kind](m) : alert(m);
-    const base = "/api/p/dashboards";
-    const params = new URLSearchParams(location.search);
-    const focus = params.get("confirm");
-    const theme = () => { try { return window.parent.document.documentElement.dataset.theme === "dark" ? "dark" : "light"; } catch { return "light"; } };
-    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-    const text = (v) => (v && typeof v === "object" ? (v[tailr?.locale] ?? v.nl ?? v.en ?? "") : v ?? "");
-    const when = (iso) => (iso ? new Date(iso).toLocaleString(tailr?.locale === "en" ? "en-GB" : "nl-NL", { dateStyle: "medium", timeStyle: "short" }) : "");
-    const LEVEL = { read: "lezen", write: "schrijven", admin: "beheer" };
-    const PROBLEM = { not_available: "je hebt er geen toegang toe", write_not_allowed: "alleen leesfuncties toegestaan", admin_not_allowed: "beheerfuncties mogen niet", not_allowed: "mag niet in een dashboard" };
-    const STATUS = { active: ["Actief", "badge-success"], disabled: ["Uit", "badge-neutral"], pending: ["Te bevestigen", "badge-warning"], rejected: ["Afgewezen", "badge-danger"] };
-    const VSTATUS = { pending: "te bevestigen", confirmed: "bevestigd", rejected: "afgewezen", replaced: "vervangen door een nieuwere" };
-
-    async function review(d) {
-      const v = await call(`${base}/dashboards/${d.id}/versions/${d.pendingVersion}`);
-      const el = document.createElement("section");
-      el.className = "card db-review" + (focus === d.id ? " db-focus" : "");
-      el.id = `review-${d.id}`;
-      el.innerHTML = `
-        <div class="db-head"><h2>${esc(v.title)}</h2><span class="badge badge-warning">Te bevestigen</span><span class="muted">versie ${v.version}${d.activeVersion ? ` (nu actief: versie ${d.activeVersion})` : ""}</span></div>
-        ${v.description ? `<p>${esc(v.description)}</p>` : ""}
-        <p class="hint">Gemaakt ${esc(when(v.createdAt))} via ${esc(v.createdVia === "mcp" ? "je AI-tool" : v.createdVia)} · ${Math.ceil(v.size / 1024)} kB${v.libraries.length ? ` · bibliotheken: ${esc(v.libraries.join(", "))}` : ""}</p>
-        <h3>Dit dashboard mag deze functies aanroepen, met jouw rechten</h3>
-        ${v.tools.length ? `<table class="data"><thead><tr><th>Functie</th><th>Wat</th><th>Niveau</th></tr></thead><tbody>${v.tools.map((t) => `<tr><td><code>${esc(t.name)}</code></td><td>${esc(text(t.title) || t.description || "")}${t.problem ? `<div class="db-problem">Kan niet: ${esc(PROBLEM[t.problem] ?? t.problem)}</div>` : ""}</td><td>${esc(LEVEL[t.level] ?? "–")}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Geen functies: het dashboard toont alleen wat in de pagina zelf staat.</p>`}
-        <p class="hint">Bevestig alleen als je dit dashboard zelf hebt gevraagd. Het draait afgeschermd: het kan niets versturen naar buiten en alleen de functies hierboven gebruiken.</p>
-        <div class="db-actions">
-          <button class="btn btn-primary" data-act="confirm" ${v.problems ? "disabled" : ""}>Bevestigen</button>
-          <button class="btn btn-secondary" data-act="preview">Voorbeeld (zonder data)</button>
-          <button class="btn btn-secondary" data-act="code">Code bekijken</button>
-          <button class="btn btn-link danger" data-act="reject">Afwijzen</button>
-        </div>
-        <div data-slot="extra"></div>`;
-      const extra = el.querySelector('[data-slot="extra"]');
-      let preview;
-      el.addEventListener("click", async (e) => {
-        const act = e.target.closest("button")?.dataset.act;
-        if (!act) return;
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>My dashboards</title>
+<style>
+.db-stack{display:grid;gap:16px}.db-head,.db-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.db-head h2{margin:0;flex:1}.db-actions{margin-top:16px}.db-review{border-left:3px solid var(--warning)}.db-code{max-height:320px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.db-menu{position:relative}.db-menu summary{list-style:none}.db-menu-items{position:absolute;z-index:10;right:0;min-width:200px;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px #0002}.db-menu-items button{display:block;margin:4px 0;padding:8px;width:100%;text-align:left}.db-versions{margin-top:16px}
+</style></head><body>
+<div class="page-head"><div><h1 data-i18n="My dashboards">My dashboards</h1><p data-i18n="Dashboards built by your AI. Review each new version before it can use your data."></p></div></div>
+<div id="notice" role="status"></div><div id="pending" class="db-stack"></div><div id="list" class="db-stack" style="margin-top:16px"></div>
+<section class="card" style="margin-top:24px"><h2 data-i18n="Have your AI build a dashboard"></h2><p data-i18n="Ask your connected AI tool to build and save a dashboard. It appears here for you to review before opening."></p><p class="hint" id="limits"></p></section>
+<script src="/api/frame/host.js"></script><script src="/api/p/dashboards/ui/shared.js"></script><script>
+const { t, esc, name, call, toast, when, theme } = DashboardUI;
+const base = "/api/p/dashboards", focus = new URLSearchParams(location.search).get("confirm");
+const levels = { read: "Read", write: "Write", admin: "Admin" };
+const statuses = { active: ["Active", "badge-success"], disabled: ["Off", "badge-neutral"], pending: ["To confirm", "badge-warning"], rejected: ["Rejected", "badge-danger"] };
+const versionStatus = { pending: "To confirm", confirmed: "Confirmed", rejected: "Rejected", replaced: "Replaced" };
+const problems = { not_available: "No access", write_not_allowed: "Read functions only", admin_not_allowed: "Admin functions are not allowed", not_allowed: "Not allowed in a dashboard" };
+const used = (d, n) => name(d.usedTools?.find((tool) => tool.name === n) || { name: n });
+async function review(d) {
+    const v = await call(`${base}/dashboards/${d.id}/versions/${d.pendingVersion}`), el = document.createElement("section");
+    el.className = "card db-review";
+    el.id = `review-${d.id}`;
+    el.innerHTML = `<div class="db-head"><h2>${esc(v.title)}</h2><span class="badge badge-warning">${esc(t("To confirm"))}</span><span class="hint">${esc(t("Version {n}", { n: v.version }))}</span></div>${v.description ? `<p>${esc(v.description)}</p>` : ""}<p class="hint">${esc(when(v.createdAt))} · ${Math.ceil(v.size / 1024)} kB</p><h3>${esc(t("Functions this dashboard may use"))}</h3><div class="table-wrap"><table class="data"><thead><tr><th>${esc(t("Function"))}</th><th>${esc(t("Level"))}</th></tr></thead><tbody>${v.tools.map(tool => `<tr><td><strong title="${esc(tool.name)}">${esc(name(tool))}</strong>${tool.problem ? `<p class="danger">${esc(t(problems[tool.problem] || tool.problem))}</p>` : ""}</td><td>${esc(t(levels[tool.level] || "None"))}</td></tr>`).join("")}</tbody></table></div><p class="hint">${esc(t("Only confirm a dashboard you asked for. It runs in a sandbox with your permissions and cannot send data outside Tailr Core."))}</p><div class="db-actions"><button class="btn btn-primary" data-act="confirm" ${v.problems ? "disabled" : ""}>${esc(t("Confirm"))}</button><button class="btn btn-secondary" data-act="preview">${esc(t("Preview without data"))}</button><button class="btn btn-secondary" data-act="code">${esc(t("View code"))}</button><button class="btn btn-secondary danger" data-act="reject">${esc(t("Reject"))}</button></div><div data-slot="extra"></div>`;
+    let preview;
+    el.addEventListener("click", async (e) => {
+        const button = e.target.closest("button[data-act]");
+        if (!button)
+            return;
+        button.disabled = true;
+        const action = button.dataset.act, extra = el.querySelector('[data-slot="extra"]');
         try {
-          if (act === "confirm") {
-            await call(`${base}/dashboards/${d.id}/versions/${v.version}/confirm`, { method: "POST", body: {} });
-            toast("success", "Dashboard bevestigd");
-            (window.parent === window ? window : window.parent).location.href = `/p/dashboards/view?id=${encodeURIComponent(d.id)}`;
-          } else if (act === "reject") {
-            await call(`${base}/dashboards/${d.id}/versions/${v.version}/reject`, { method: "POST", body: {} });
-            toast("info", "Versie afgewezen");
-            load();
-          } else if (act === "code") {
-            extra.innerHTML = "";
-            const pre = document.createElement("pre");
-            pre.className = "db-code";
-            pre.textContent = v.html;
-            extra.appendChild(pre);
-          } else if (act === "preview") {
-            preview?.destroy();
-            extra.innerHTML = `<div class="db-preview"></div><p class="hint">Voorbeeld: aanroepen geven een fout tot je bevestigt.</p>`;
-            preview = TailrFrame.mount(extra.querySelector(".db-preview"), { html: v.html, libraries: v.libraries, tools: v.tools.filter((t) => !t.problem), locale: tailr?.locale, theme: theme(), title: v.title });
-          }
-        } catch (err) { toast("error", err.message); }
-      });
-      return el;
-    }
-
-    function card(d) {
-      const el = document.createElement("section");
-      el.className = "card";
-      const [label, cls] = STATUS[d.status] ?? [d.status, "badge-neutral"];
-      el.innerHTML = `
-        <div class="db-head"><h2>${esc(d.title)}</h2><span class="badge ${cls}">${label}</span>${d.activeVersion ? `<span class="muted">versie ${d.activeVersion}</span>` : ""}</div>
-        ${d.description ? `<p>${esc(d.description)}</p>` : ""}
-        ${d.uses.length ? `<p class="hint">Gebruikt: ${d.uses.map((u) => `<code>${esc(u)}</code>`).join(", ")}</p>` : ""}
-        <div class="db-actions">
-          ${d.status === "active" ? `<a class="btn btn-primary" href="/p/dashboards/view?id=${encodeURIComponent(d.id)}" target="_top">Openen</a>` : ""}
-          ${d.activeVersion ? `<button class="btn btn-secondary" data-act="toggle">${d.enabled ? "Uitzetten" : "Aanzetten"}</button>` : ""}
-          <button class="btn btn-link danger" data-act="delete">Verwijderen</button>
-        </div>
-        <details class="db-versions"><summary>Versies (${d.versions.length})</summary>
-          <table class="data"><thead><tr><th>Versie</th><th>Status</th><th>Gemaakt</th><th>Grootte</th><th>Functies</th><th></th></tr></thead><tbody>
-          ${d.versions.map((v) => `<tr><td>${v.version}${v.active ? ' <span class="badge badge-success">actief</span>' : ""}</td><td>${esc(VSTATUS[v.status] ?? v.status)}</td><td>${esc(when(v.createdAt))}</td><td>${Math.ceil(v.size / 1024)} kB</td><td>${v.uses.map((u) => `<code>${esc(u)}</code>`).join(" ")}</td><td>${v.status === "confirmed" && !v.active ? `<button class="btn btn-sm btn-secondary" data-act="activate" data-v="${v.version}">Terugzetten</button>` : ""}</td></tr>`).join("")}
-          </tbody></table>
-        </details>`;
-      el.addEventListener("click", async (e) => {
-        const btn = e.target.closest("button");
-        const act = btn?.dataset.act;
-        if (!act) return;
-        try {
-          if (act === "toggle") await call(`${base}/dashboards/${d.id}/enabled`, { method: "POST", body: { enabled: !d.enabled } });
-          if (act === "activate") await call(`${base}/dashboards/${d.id}/versions/${btn.dataset.v}/activate`, { method: "POST", body: {} });
-          if (act === "delete") {
-            if (!confirm(`Dashboard "${d.title}" met alle versies verwijderen?`)) return;
+            if (action === "confirm") {
+                await call(`${base}/dashboards/${d.id}/versions/${v.version}/confirm`, { method: "POST", body: {} });
+                toast("success", t("Dashboard confirmed"));
+                window.parent.location.href = `/p/dashboards/view?id=${encodeURIComponent(d.id)}`;
+            }
+            if (action === "reject") {
+                await call(`${base}/dashboards/${d.id}/versions/${v.version}/reject`, { method: "POST", body: {} });
+                toast("success", t("Version rejected"));
+                await load();
+            }
+            if (action === "code") {
+                preview?.destroy();
+                extra.innerHTML = "";
+                const code = document.createElement("pre");
+                code.className = "code db-code";
+                code.textContent = v.html;
+                extra.append(code);
+            }
+            if (action === "preview") {
+                preview?.destroy();
+                extra.innerHTML = '<div class="db-preview"></div>';
+                preview = TailrFrame.mount(extra.firstChild, { html: v.html, libraries: v.libraries, tools: v.tools.filter(tool => !tool.problem), locale: window.parent.tailr?.locale, theme: theme(), title: v.title });
+            }
+        }
+        catch (err) {
+            toast("error", t(err.message));
+        }
+        finally {
+            button.disabled = false;
+        }
+    });
+    return el;
+}
+function card(d) {
+    const el = document.createElement("section");
+    el.className = "card";
+    const [label, cls] = statuses[d.status] || [d.status, "badge-neutral"];
+    el.innerHTML = `<div class="db-head"><h2>${esc(d.title)}</h2><span class="badge ${cls}">${esc(t(label))}</span></div>${d.description ? `<p>${esc(d.description)}</p>` : ""}${d.uses.length ? `<p class="hint">${esc(t("Uses"))}: ${d.uses.map(n => `<span title="${esc(n)}">${esc(used(d, n))}</span>`).join(", ")}</p>` : ""}<div class="db-actions">${d.status === "active" ? `<a class="btn btn-primary" href="/p/dashboards/view?id=${encodeURIComponent(d.id)}" target="_top">${esc(t("Open"))}</a>` : ""}<details class="db-menu"><summary class="btn btn-secondary" aria-label="${esc(t("More actions for {name}", { name: d.title }))}">⋯</summary><div class="db-menu-items">${d.activeVersion ? `<button class="btn-link ${d.enabled ? "danger" : ""}" data-act="toggle">${esc(t(d.enabled ? "Turn off" : "Switch on"))}</button>` : ""}<button class="btn-link danger" data-act="delete">${esc(t("Delete"))}</button></div></details></div><details class="db-versions connection-section"><summary>${esc(t("Versions ({n})", { n: d.versions.length }))}</summary><div class="table-wrap"><table class="data"><thead><tr><th>${esc(t("Version"))}</th><th>${esc(t("Status"))}</th><th>${esc(t("Created"))}</th><th></th></tr></thead><tbody>${d.versions.map(v => `<tr><td>${v.version}${v.active ? ` <span class="badge badge-success">${esc(t("Active"))}</span>` : ""}</td><td>${esc(t(versionStatus[v.status] || v.status))}</td><td>${esc(when(v.createdAt))}</td><td>${v.status === "confirmed" && !v.active ? `<button class="btn btn-secondary btn-sm" data-act="activate" data-v="${v.version}">${esc(t("Restore"))}</button>` : ""}</td></tr>`).join("")}</tbody></table></div></details>`;
+    el.addEventListener("click", async (e) => { const button = e.target.closest("button[data-act]"); if (!button)
+        return; const action = button.dataset.act; if (action === "delete" && !confirm(t("Delete dashboard {name} and all its versions?", { name: d.title })))
+        return; if (action === "toggle" && d.enabled && !confirm(t("Turn off dashboard {name}?", { name: d.title })))
+        return; if (action === "activate" && !confirm(t("Restore version {n}?", { n: button.dataset.v })))
+        return; button.disabled = true; try {
+        if (action === "toggle")
+            await call(`${base}/dashboards/${d.id}/enabled`, { method: "POST", body: { enabled: !d.enabled } });
+        if (action === "activate")
+            await call(`${base}/dashboards/${d.id}/versions/${button.dataset.v}/activate`, { method: "POST", body: {} });
+        if (action === "delete")
             await call(`${base}/dashboards/${d.id}`, { method: "DELETE" });
-            toast("success", "Dashboard verwijderd");
-          }
-          load();
-        } catch (err) { toast("error", err.message); }
-      });
-      return el;
+        toast("success", t(action === "delete" ? "Dashboard deleted" : "Saved"));
+        await load();
     }
-
-    async function load() {
-      const notice = document.getElementById("notice");
-      const pending = document.getElementById("pending");
-      const list = document.getElementById("list");
-      notice.innerHTML = pending.innerHTML = list.innerHTML = "";
-      try {
-        const cfg = await call(`${base}/config`);
-        document.getElementById("limits").textContent = `Maximaal ${cfg.maxKb} kB per dashboard.${cfg.readOnly ? " Dashboards mogen alleen leesfuncties gebruiken." : ""}${cfg.canCreate ? "" : " Je rol mag (nog) geen dashboards maken; vraag je beheerder."}`;
-        if (!cfg.enabled) {
-          notice.innerHTML = `<div class="alert alert-info">Dashboards staan uit. Vraag je beheerder om ze aan te zetten.</div>`;
-          return;
-        }
-        const items = await call(`${base}/dashboards`);
-        const waiting = items.filter((d) => d.pendingVersion);
-        if (waiting.length) {
-          const h = document.createElement("h2");
-          h.textContent = "Te bevestigen";
-          pending.appendChild(h);
-          for (const d of waiting) pending.appendChild(await review(d));
-        }
-        const shown = items.filter((d) => d.activeVersion || !d.pendingVersion);
-        if (shown.length) {
-          const h = document.createElement("h2");
-          h.textContent = "Dashboards";
-          list.appendChild(h);
-          for (const d of shown) list.appendChild(card(d));
-        } else if (!waiting.length) {
-          list.innerHTML = `<div class="card empty"><p>Je hebt nog geen dashboards.</p></div>`;
-        }
-        if (focus) document.getElementById(`review-${focus}`)?.scrollIntoView({ block: "start" });
-      } catch (err) {
-        notice.innerHTML = `<div class="alert alert-danger">${esc(err.message)}</div>`;
-      }
+    catch (err) {
+        toast("error", t(err.message));
     }
-    load();
-  </script>
-</body>
-</html>
+    finally {
+        button.disabled = false;
+    } });
+    return el;
+}
+async function load() { const notice = document.getElementById("notice"), pending = document.getElementById("pending"), list = document.getElementById("list"); notice.innerHTML = pending.innerHTML = list.innerHTML = ""; try {
+    const cfg = await call(`${base}/config`);
+    document.getElementById("limits").textContent = t("Maximum {n} kB per dashboard.", { n: cfg.maxKb }) + (cfg.readOnly ? " " + t("Read functions only.") : "");
+    if (!cfg.enabled) {
+        notice.textContent = t("Dashboards are turned off. Ask your administrator to enable them.");
+        return;
+    }
+    const items = await call(`${base}/dashboards`);
+    for (const d of items.filter(d => d.pendingVersion))
+        pending.append(await review(d));
+    for (const d of items.filter(d => d.activeVersion || !d.pendingVersion))
+        list.append(card(d));
+    if (!items.length)
+        list.innerHTML = `<section class="empty-state compact"><h2>${esc(t("No dashboards yet"))}</h2><p>${esc(t("Ask your connected AI tool to build and save a dashboard. It appears here for you to review before opening."))}</p></section>`;
+    if (focus)
+        document.getElementById(`review-${focus}`)?.scrollIntoView({ block: "start" });
+}
+catch (err) {
+    notice.innerHTML = `<div class="alert alert-danger">${esc(t(err.message))}</div>`;
+} }
+load();
+</script></body></html>

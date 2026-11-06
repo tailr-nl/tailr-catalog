@@ -34,28 +34,49 @@
   "$schema": "../schemas/connector.json",
   "id": "google-search-console",
   "name": "Google Search Console",
-  "version": "0.3.2",
-  "description": "Concept: zoekprestaties uit Google Search Console: klikken, vertoningen, CTR en positie per zoekopdracht of pagina.",
+  "version": "0.3.3",
+  "description": {
+    "en": "Search performance from Google Search Console: clicks, impressions, click-through rate and position by query or page.",
+    "nl": "Zoekprestaties uit Google Search Console: klikken, vertoningen, doorklikratio en positie per zoekopdracht of pagina."
+  },
   "homepage": "https://developers.google.com/webmaster-tools/v1/searchanalytics/query",
   "category": "Marketing",
   "vars": [
     {
       "name": "CLIENT_ID",
-      "label": "Client-id",
-      "description": "Staat in het venster na het aanmaken van de OAuth-client in Google Cloud Console (eindigt op .apps.googleusercontent.com).",
+      "label": {
+        "en": "Client ID",
+        "nl": "Client-id"
+      },
+      "description": {
+        "en": "From the OAuth app registration at the source.",
+        "nl": "Staat in het venster na het aanmaken van de OAuth-client in Google Cloud Console (eindigt op .apps.googleusercontent.com)."
+      },
       "secret": false,
       "pattern": "\\.apps\\.googleusercontent\\.com$",
       "patternHint": "Een Client-id van Google eindigt op .apps.googleusercontent.com"
     },
     {
       "name": "CLIENT_SECRET",
-      "label": "Clientgeheim",
-      "description": "Uit hetzelfde venster als de Client-id (begint meestal met GOCSPX-)."
+      "label": {
+        "en": "Client secret",
+        "nl": "Clientgeheim"
+      },
+      "description": {
+        "en": "From the same app registration as the client ID.",
+        "nl": "Uit hetzelfde venster als de Client-id (begint meestal met GOCSPX-)."
+      }
     },
     {
       "name": "SITE_URL",
-      "label": "Website",
-      "description": "Zoals in Search Console, bijv. https://www.voorbeeld.nl/ of sc-domain:voorbeeld.nl",
+      "label": {
+        "en": "Website",
+        "nl": "Website"
+      },
+      "description": {
+        "en": "As shown in Search Console, e.g. https://www.example.com/ or sc-domain:example.com.",
+        "nl": "Zoals in Search Console, bijv. https://www.voorbeeld.nl/ of sc-domain:voorbeeld.nl"
+      },
       "secret": false,
       "required": false,
       "chooseWith": "list_sites"
@@ -186,5 +207,6 @@
         }
       }
     }
-  ]
+  ],
+  "maturity": "beta"
 }

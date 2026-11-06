@@ -4,37 +4,37 @@
     {
       "id": "exact-online",
       "file": "exact-online/connector.json",
-      "version": "0.3.1"
+      "version": "0.3.2"
     },
     {
       "id": "github",
       "file": "github.json",
-      "version": "1.3.1"
+      "version": "1.3.2"
     },
     {
       "id": "google-analytics",
       "file": "google-analytics.json",
-      "version": "0.3.2"
+      "version": "0.3.3"
     },
     {
       "id": "google-search-console",
       "file": "google-search-console.json",
-      "version": "0.3.2"
+      "version": "0.3.3"
     },
     {
       "id": "matomo",
       "file": "matomo.json",
-      "version": "0.2.1"
+      "version": "0.2.2"
     },
     {
       "id": "mollie",
       "file": "mollie/connector.json",
-      "version": "2.0.1"
+      "version": "2.0.2"
     },
     {
       "id": "woocommerce",
       "file": "woocommerce.json",
-      "version": "0.5.1"
+      "version": "0.5.2"
     }
   ]
 }

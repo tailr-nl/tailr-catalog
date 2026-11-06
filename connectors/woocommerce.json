@@ -33,9 +33,12 @@
   "$schema": "../schemas/connector.json",
   "id": "woocommerce",
   "name": "WooCommerce",
-  "version": "0.5.1",
-  "description": "Bestellingen, producten, voorraad en omzet van je WooCommerce-webshop (REST API v3).",
-  "category": "Webshop",
+  "version": "0.5.2",
+  "description": {
+    "en": "Orders, products, stock and revenue from your WooCommerce shop.",
+    "nl": "Bestellingen, producten, voorraad en omzet van je WooCommerce-webshop."
+  },
+  "category": "E-commerce",
   "homepage": "https://woocommerce.github.io/woocommerce-rest-api-docs/",
   "type": "rest",
   "baseUrl": "{{SHOP_URL}}/wp-json/wc/v3",
@@ -47,8 +50,14 @@
   "vars": [
     {
       "name": "SHOP_URL",
-      "label": "Adres van de webshop",
-      "description": "Bijv. https://www.mijnwinkel.nl (zonder / aan het eind). Moet https zijn.",
+      "label": {
+        "en": "Shop URL",
+        "nl": "Adres van de webshop"
+      },
+      "description": {
+        "en": "E.g. https://shop.example.com, without a trailing slash. HTTPS is required.",
+        "nl": "Bijv. https://www.mijnwinkel.nl (zonder / aan het eind). Moet https zijn."
+      },
       "secret": false,
       "pattern": "^https://[^/]+(/[^?#]*[^/?#])?$",
       "patternHint": "Een https-adres zonder / aan het eind, bijv. https://www.mijnwinkel.nl",
@@ -56,15 +65,27 @@
     },
     {
       "name": "WC_KEY",
-      "label": "Consumer key",
-      "description": "WooCommerce → Instellingen → Geavanceerd → REST API → Sleutel toevoegen. Kies 'Lezen' als niemand mag schrijven.",
+      "label": {
+        "en": "Consumer key",
+        "nl": "Consumer key"
+      },
+      "description": {
+        "en": "WooCommerce → Settings → Advanced → REST API → Add key. Choose Read if nobody needs to change data.",
+        "nl": "WooCommerce → Instellingen → Geavanceerd → REST API → Sleutel toevoegen. Kies 'Lezen' als niemand mag schrijven."
+      },
       "secret": true,
       "required": true
     },
     {
       "name": "WC_SECRET",
-      "label": "Consumer secret",
-      "description": "Staat direct onder de Consumer key, na API-sleutel genereren. Je ziet hem maar één keer.",
+      "label": {
+        "en": "Consumer secret",
+        "nl": "Consumer secret"
+      },
+      "description": {
+        "en": "Shown below the consumer key after generating the API key. It is shown only once.",
+        "nl": "Staat direct onder de Consumer key, na API-sleutel genereren. Je ziet hem maar één keer."
+      },
       "secret": true,
       "required": true
     }
@@ -94,8 +115,14 @@
   "tools": [
     {
       "name": "list_orders",
-      "title": { "nl": "Bestellingen opvragen", "en": "List orders" },
-      "summary": { "nl": "Bestellingen, nieuwste eerst, eventueel per status of periode, zonder klantgegevens.", "en": "Orders, newest first, optionally by status or period, without customer details." },
+      "title": {
+        "nl": "Bestellingen opvragen",
+        "en": "List orders"
+      },
+      "summary": {
+        "nl": "Bestellingen, nieuwste eerst, eventueel per status of periode, zonder klantgegevens.",
+        "en": "Orders, newest first, optionally by status or period, without customer details."
+      },
       "description": "Bestellingen, nieuwste eerst, met nummer, status, datum, bedrag, betaalmethode, land en producten. Filter op status, periode (after/before, ISO-datum) of zoekterm. Naam, e-mail, telefoon en adres van de klant zitten er niet in: zoek één klant met list_customers, of bekijk één bestelling met get_order.",
       "level": "read",
       "method": "GET",
@@ -159,8 +186,14 @@
     },
     {
       "name": "list_orders_with_names",
-      "title": { "nl": "Bestellingen met klantnamen", "en": "Orders with customer names" },
-      "summary": { "nl": "Bestellingen met naam en plaats van de klant, voor dashboards en tools.", "en": "Orders with the customer's name and city, for dashboards and tools." },
+      "title": {
+        "nl": "Bestellingen met klantnamen",
+        "en": "Orders with customer names"
+      },
+      "summary": {
+        "nl": "Bestellingen met naam en plaats van de klant, voor dashboards en tools.",
+        "en": "Orders with the customer's name and city, for dashboards and tools."
+      },
       "description": "Bestellingen, nieuwste eerst, met naam, bedrijf, plaats en land van de klant, en dezelfde filters als list_orders. Alleen voor dashboards, tools en apps (API), niet voor de AI. Zonder e-mail, telefoon, adres en IP-adres.",
       "level": "read",
       "audience": "api",
@@ -229,8 +262,14 @@
     },
     {
       "name": "get_order",
-      "title": { "nl": "Bestelling bekijken", "en": "View order" },
-      "summary": { "nl": "Eén bestelling met regels, verzending en status, zonder contactgegevens.", "en": "One order with lines, shipping and status, without contact details." },
+      "title": {
+        "nl": "Bestelling bekijken",
+        "en": "View order"
+      },
+      "summary": {
+        "nl": "Eén bestelling met regels, verzending en status, zonder contactgegevens.",
+        "en": "One order with lines, shipping and status, without contact details."
+      },
       "description": "Eén bestelling met regels, verzending en status. Zonder e-mail, telefoon en straatadres.",
       "level": "read",
       "method": "GET",
@@ -261,20 +300,51 @@
       },
       "privacy": {
         "sensitivity": {
-          "id": "none", "number": "none", "status": "none", "date_created": "none", "date_paid": "none", "date_completed": "none",
-          "currency": "none", "total": "none", "total_tax": "none", "shipping_total": "none", "discount_total": "none", "payment_method_title": "none",
-          "customer_id": "none", "customer_note": "personal", "line_items": "none", "shipping_lines": "none",
-          "billing.first_name": "personal", "billing.last_name": "personal", "billing.company": "personal", "billing.postcode": "personal", "billing.city": "personal", "billing.country": "none",
-          "shipping.first_name": "personal", "shipping.last_name": "personal", "shipping.company": "personal", "shipping.postcode": "personal", "shipping.city": "personal", "shipping.country": "none"
+          "id": "none",
+          "number": "none",
+          "status": "none",
+          "date_created": "none",
+          "date_paid": "none",
+          "date_completed": "none",
+          "currency": "none",
+          "total": "none",
+          "total_tax": "none",
+          "shipping_total": "none",
+          "discount_total": "none",
+          "payment_method_title": "none",
+          "customer_id": "none",
+          "customer_note": "personal",
+          "line_items": "none",
+          "shipping_lines": "none",
+          "billing.first_name": "personal",
+          "billing.last_name": "personal",
+          "billing.company": "personal",
+          "billing.postcode": "personal",
+          "billing.city": "personal",
+          "billing.country": "none",
+          "shipping.first_name": "personal",
+          "shipping.last_name": "personal",
+          "shipping.company": "personal",
+          "shipping.postcode": "personal",
+          "shipping.city": "personal",
+          "shipping.country": "none"
         },
-        "lookup": ["id"],
+        "lookup": [
+          "id"
+        ],
         "label": "Klant"
       }
     },
     {
       "name": "update_order_status",
-      "title": { "nl": "Bestelstatus wijzigen", "en": "Change order status" },
-      "summary": { "nl": "Zet een bestelling bijvoorbeeld op afgerond of in de wacht.", "en": "Sets an order to, for example, completed or on hold." },
+      "title": {
+        "nl": "Bestelstatus wijzigen",
+        "en": "Change order status"
+      },
+      "summary": {
+        "nl": "Zet een bestelling bijvoorbeeld op afgerond of in de wacht.",
+        "en": "Sets an order to, for example, completed or on hold."
+      },
       "description": "Zet de status van een bestelling, bijv. naar completed (afgerond) of on-hold.",
       "level": "write",
       "method": "PUT",
@@ -310,8 +380,14 @@
     },
     {
       "name": "add_order_note",
-      "title": { "nl": "Notitie bij bestelling", "en": "Add order note" },
-      "summary": { "nl": "Zet een notitie bij een bestelling; als je dat kiest, krijgt de klant hem ook.", "en": "Adds a note to an order; if you choose, the customer receives it too." },
+      "title": {
+        "nl": "Notitie bij bestelling",
+        "en": "Add order note"
+      },
+      "summary": {
+        "nl": "Zet een notitie bij een bestelling; als je dat kiest, krijgt de klant hem ook.",
+        "en": "Adds a note to an order; if you choose, the customer receives it too."
+      },
       "description": "Voegt een notitie toe. Met customer_note=true ziet en ontvangt de klant de notitie.",
       "level": "write",
       "method": "POST",
@@ -344,8 +420,14 @@
     },
     {
       "name": "list_products",
-      "title": { "nl": "Producten opvragen", "en": "List products" },
-      "summary": { "nl": "Producten met prijs en voorraad.", "en": "Products with price and stock." },
+      "title": {
+        "nl": "Producten opvragen",
+        "en": "List products"
+      },
+      "summary": {
+        "nl": "Producten met prijs en voorraad.",
+        "en": "Products with price and stock."
+      },
       "description": "Producten met prijs en voorraad. Filter op zoekterm, SKU, status of voorraadstatus.",
       "level": "read",
       "method": "GET",
@@ -405,8 +487,14 @@
     },
     {
       "name": "get_product",
-      "title": { "nl": "Product bekijken", "en": "View product" },
-      "summary": { "nl": "Alle gegevens van één product.", "en": "All details of one product." },
+      "title": {
+        "nl": "Product bekijken",
+        "en": "View product"
+      },
+      "summary": {
+        "nl": "Alle gegevens van één product.",
+        "en": "All details of one product."
+      },
       "description": "Alle gegevens van één product.",
       "level": "read",
       "method": "GET",
@@ -431,8 +519,14 @@
     },
     {
       "name": "update_product",
-      "title": { "nl": "Product aanpassen", "en": "Edit product" },
-      "summary": { "nl": "Wijzigt prijs, actieprijs, voorraad of status van een product.", "en": "Changes the price, sale price, stock or status of a product." },
+      "title": {
+        "nl": "Product aanpassen",
+        "en": "Edit product"
+      },
+      "summary": {
+        "nl": "Wijzigt prijs, actieprijs, voorraad of status van een product.",
+        "en": "Changes the price, sale price, stock or status of a product."
+      },
       "description": "Wijzig prijs, actieprijs, voorraad of status van een product. Prijzen als tekst, bijv. \"89.00\".",
       "level": "write",
       "method": "PUT",
@@ -487,8 +581,14 @@
     },
     {
       "name": "delete_product",
-      "title": { "nl": "Product verwijderen", "en": "Delete product" },
-      "summary": { "nl": "Zet een product in de prullenbak of verwijdert het definitief.", "en": "Moves a product to the trash or deletes it permanently." },
+      "title": {
+        "nl": "Product verwijderen",
+        "en": "Delete product"
+      },
+      "summary": {
+        "nl": "Zet een product in de prullenbak of verwijdert het definitief.",
+        "en": "Moves a product to the trash or deletes it permanently."
+      },
       "description": "Verwijdert een product. Zonder force gaat het naar de prullenbak; met force=true definitief.",
       "level": "admin",
       "method": "DELETE",
@@ -515,8 +615,14 @@
     },
     {
       "name": "sales_report",
-      "title": { "nl": "Omzetrapport", "en": "Sales report" },
-      "summary": { "nl": "Omzet, aantal bestellingen en verkochte artikelen over een periode.", "en": "Revenue, number of orders and items sold over a period." },
+      "title": {
+        "nl": "Omzetrapport",
+        "en": "Sales report"
+      },
+      "summary": {
+        "nl": "Omzet, aantal bestellingen en verkochte artikelen over een periode.",
+        "en": "Revenue, number of orders and items sold over a period."
+      },
       "description": "Omzet, aantal bestellingen en verkochte artikelen over een periode (week, month, last_month, year) of tussen twee datums (YYYY-MM-DD).",
       "level": "read",
       "method": "GET",
@@ -552,8 +658,14 @@
     },
     {
       "name": "top_sellers",
-      "title": { "nl": "Best verkochte producten", "en": "Top sellers" },
-      "summary": { "nl": "Welke producten het meest verkocht zijn in een periode.", "en": "Which products sold the most in a period." },
+      "title": {
+        "nl": "Best verkochte producten",
+        "en": "Top sellers"
+      },
+      "summary": {
+        "nl": "Welke producten het meest verkocht zijn in een periode.",
+        "en": "Which products sold the most in a period."
+      },
       "description": "Best verkochte producten over een periode.",
       "level": "read",
       "method": "GET",
@@ -587,8 +699,14 @@
     },
     {
       "name": "list_customers",
-      "title": { "nl": "Klant zoeken", "en": "Find customer" },
-      "summary": { "nl": "Zoekt een klant op naam of e-mail: naam, plaats en sinds wanneer, zonder contactgegevens.", "en": "Finds a customer by name or email: name, city and since when, without contact details." },
+      "title": {
+        "nl": "Klant zoeken",
+        "en": "Find customer"
+      },
+      "summary": {
+        "nl": "Zoekt een klant op naam of e-mail: naam, plaats en sinds wanneer, zonder contactgegevens.",
+        "en": "Finds a customer by name or email: name, city and since when, without contact details."
+      },
       "description": "Zoekt klanten op naam of e-mailadres (search is verplicht, hooguit 10 per zoekopdracht). Geeft naam, plaats, land, klant sinds en of het een betalende klant is; naam en plaats komen als schuilnaam. Zonder e-mail, telefoon en adres.",
       "level": "read",
       "method": "GET",
@@ -622,8 +740,18 @@
         "onError": "fail"
       },
       "privacy": {
-        "sensitivity": { "id": "none", "voornaam": "personal", "achternaam": "personal", "plaats": "personal", "land": "none", "klant_sinds": "none", "betalende_klant": "none" },
-        "lookup": ["search"],
+        "sensitivity": {
+          "id": "none",
+          "voornaam": "personal",
+          "achternaam": "personal",
+          "plaats": "personal",
+          "land": "none",
+          "klant_sinds": "none",
+          "betalende_klant": "none"
+        },
+        "lookup": [
+          "search"
+        ],
         "maxRecords": 10,
         "label": "Klant"
       }

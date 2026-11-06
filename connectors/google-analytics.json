@@ -34,28 +34,49 @@
   "$schema": "../schemas/connector.json",
   "id": "google-analytics",
   "name": "Google Analytics 4",
-  "version": "0.3.2",
-  "description": "Concept: rapporten uit Google Analytics 4 (Data API): bezoekers, sessies, bronnen, pagina's, conversies.",
+  "version": "0.3.3",
+  "description": {
+    "en": "Reports from Google Analytics 4: visitors, sessions, sources, pages and conversions.",
+    "nl": "Rapporten uit Google Analytics 4: bezoekers, sessies, bronnen, pagina’s en conversies."
+  },
   "homepage": "https://developers.google.com/analytics/devguides/reporting/data/v1",
   "category": "Marketing",
   "vars": [
     {
       "name": "CLIENT_ID",
-      "label": "Client-id",
-      "description": "Staat in het venster na het aanmaken van de OAuth-client in Google Cloud Console (eindigt op .apps.googleusercontent.com).",
+      "label": {
+        "en": "Client ID",
+        "nl": "Client-id"
+      },
+      "description": {
+        "en": "From the OAuth app registration at the source.",
+        "nl": "Staat in het venster na het aanmaken van de OAuth-client in Google Cloud Console (eindigt op .apps.googleusercontent.com)."
+      },
       "secret": false,
       "pattern": "\\.apps\\.googleusercontent\\.com$",
       "patternHint": "Een Client-id van Google eindigt op .apps.googleusercontent.com"
     },
     {
       "name": "CLIENT_SECRET",
-      "label": "Clientgeheim",
-      "description": "Uit hetzelfde venster als de Client-id (begint meestal met GOCSPX-)."
+      "label": {
+        "en": "Client secret",
+        "nl": "Clientgeheim"
+      },
+      "description": {
+        "en": "From the same app registration as the client ID.",
+        "nl": "Uit hetzelfde venster als de Client-id (begint meestal met GOCSPX-)."
+      }
     },
     {
       "name": "PROPERTY_ID",
-      "label": "Property-id",
-      "description": "Het nummer van de GA4-property (bijv. 123456789). Te vinden met de functie 'Accounts en properties'.",
+      "label": {
+        "en": "Property ID",
+        "nl": "Property-id"
+      },
+      "description": {
+        "en": "The numeric GA4 property ID, e.g. 123456789. Find it with Accounts and properties.",
+        "nl": "Het nummer van de GA4-property (bijv. 123456789). Te vinden met de functie 'Accounts en properties'."
+      },
       "secret": false,
       "required": false,
       "pattern": "^[0-9]+$",
@@ -197,5 +218,6 @@
         }
       }
     }
-  ]
+  ],
+  "maturity": "beta"
 }
