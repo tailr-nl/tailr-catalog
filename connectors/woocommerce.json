@@ -26,14 +26,14 @@
       }
     ],
     "whatsNew": {
-      "en": "Explore sales, orders and products without manually assembling reports.",
-      "nl": "Onderzoek omzet, bestellingen en producten zonder zelf rapporten samen te stellen."
+      "en": "Selected customer names can be requested for one order under your administrator policy. Product deletion requires confirmation.",
+      "nl": "Bepaalde klantnamen kunnen voor één bestelling worden opgevraagd volgens het beheerbeleid. Producten verwijderen vereist bevestiging."
     }
   },
   "$schema": "../schemas/connector.json",
   "id": "woocommerce",
   "name": "WooCommerce",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": {
     "en": "Orders, products, stock and revenue from your WooCommerce shop.",
     "nl": "Bestellingen, producten, voorraad en omzet van je WooCommerce-webshop."
@@ -332,7 +332,27 @@
         "lookup": [
           "id"
         ],
-        "label": "Klant"
+        "label": "Klant",
+        "chat": {
+          "allowReal": [
+            "billing.first_name",
+            "billing.last_name",
+            "shipping.first_name",
+            "shipping.last_name"
+          ]
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -515,6 +535,18 @@
           "cross_sell_ids"
         ],
         "onError": "fail"
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -611,7 +643,8 @@
           "naam": "name"
         },
         "onError": "fail"
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "sales_report",

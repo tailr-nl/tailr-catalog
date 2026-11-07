@@ -26,17 +26,17 @@
       }
     ],
     "whatsNew": {
-      "en": "Check payment statuses and understand what is included in a settlement.",
-      "nl": "Controleer betaalstatussen en ontdek waar een uitbetaling uit bestaat."
+      "en": "Selected names can be requested one record at a time under your administrator policy. Administrative actions require confirmation.",
+      "nl": "Bepaalde namen kunnen per record worden opgevraagd volgens het beheerbeleid. Beheeracties vereisen bevestiging."
     }
   },
   "$schema": "../../schemas/connector.json",
   "id": "mollie",
   "name": "Mollie",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": {
-    "en": "Payments, refunds, customers, mandates, subscriptions, payment links, invoices, settlements and balances from Mollie. Personal data is pseudonymised for AI.",
-    "nl": "Betalingen, terugbetalingen, klanten, machtigingen, abonnementen, betaallinks, facturen, uitbetalingen en saldi uit Mollie. Persoonsgegevens worden gepseudonimiseerd voor AI."
+    "en": "Payments, refunds, customers, mandates, subscriptions, payment links, invoices, settlements and balances from Mollie. Personal data uses pseudonyms by default; selected names can be shared under your administrator policy.",
+    "nl": "Betalingen, terugbetalingen, klanten, machtigingen, abonnementen, betaallinks, facturen, uitbetalingen en saldi uit Mollie. Persoonsgegevens krijgen standaard schuilnamen; bepaalde namen kunnen volgens het beheerbeleid gedeeld worden."
   },
   "homepage": "https://docs.mollie.com/reference/overview",
   "category": "Payments",
@@ -1418,7 +1418,8 @@
           "description": "Eigen unieke sleutel (UUID v4). Geef bij een nieuwe poging dezelfde sleutel mee: Mollie voert het verzoek dan maar één keer uit.",
           "apiName": "idempotency-key"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "get_current_profile",
@@ -2275,7 +2276,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "test_webhook",
@@ -2590,7 +2592,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "get_connect_balance_transfer",
@@ -3578,7 +3581,25 @@
         "subject": "id",
         "maxRecords": 1,
         "dailyLimit": 500,
-        "label": "Betaler"
+        "label": "Betaler",
+        "chat": {
+          "allowReal": [
+            "details.consumerName",
+            "details.cardHolder"
+          ]
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -3883,7 +3904,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "release_authorization",
@@ -3929,7 +3951,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_unmatched_credit_transfers",
@@ -4029,7 +4052,24 @@
         ],
         "subject": "id",
         "maxRecords": 1,
-        "label": "Afzender"
+        "label": "Afzender",
+        "chat": {
+          "allowReal": [
+            "source.accountHolderName"
+          ]
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -4104,7 +4144,8 @@
           "description": "Eigen unieke sleutel (UUID v4). Geef bij een nieuwe poging dezelfde sleutel mee: Mollie voert het verzoek dan maar één keer uit.",
           "apiName": "idempotency-key"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "create_checkout_session",
@@ -5133,7 +5174,8 @@
           "description": "Eigen unieke sleutel (UUID v4). Geef bij een nieuwe poging dezelfde sleutel mee: Mollie voert het verzoek dan maar één keer uit.",
           "apiName": "idempotency-key"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "enable_method_issuer",
@@ -5238,7 +5280,8 @@
           "description": "Eigen unieke sleutel (UUID v4). Geef bij een nieuwe poging dezelfde sleutel mee: Mollie voert het verzoek dan maar één keer uit.",
           "apiName": "idempotency-key"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_payment_refunds",
@@ -5443,7 +5486,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "get_payment_refund",
@@ -5554,7 +5598,8 @@
           "description": "Eigen unieke sleutel (UUID v4). Geef bij een nieuwe poging dezelfde sleutel mee: Mollie voert het verzoek dan maar één keer uit.",
           "apiName": "idempotency-key"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_refunds",
@@ -7137,7 +7182,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_payment_link_payments",
@@ -7486,7 +7532,8 @@
           "description": "Eigen unieke sleutel (UUID v4). Geef bij een nieuwe poging dezelfde sleutel mee: Mollie voert het verzoek dan maar één keer uit.",
           "apiName": "idempotency-key"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_payment_routes",
@@ -7617,7 +7664,8 @@
           "description": "Omschrijving van de route.",
           "apiName": "description"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "get_payment_route",
@@ -7887,7 +7935,7 @@
         "nl": "Eén klant met naam en e-mail.",
         "en": "One customer with name and email."
       },
-      "description": "Eén klant op id (cst_…): naam, e-mail, taal en datum. Naam, e-mail en metadata komen als schuilnaam. Machtigingen: list_mandates; betalingen: list_customer_payments.",
+      "description": "Eén klant op id (cst_…): naam, e-mail, taal en datum. Naam, e-mail en metadata komen standaard als schuilnaam. De naam kan expliciet worden aangevraagd als de beheerder dat toestaat. Machtigingen: list_mandates; betalingen: list_customer_payments.",
       "level": "read",
       "method": "GET",
       "path": "/customers/{customerId}",
@@ -7932,7 +7980,24 @@
         ],
         "subject": "id",
         "maxRecords": 1,
-        "label": "Klant"
+        "label": "Klant",
+        "chat": {
+          "allowReal": [
+            "name"
+          ]
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -8070,7 +8135,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_customer_payments",
@@ -8865,7 +8931,8 @@
           "description": "Betaalterminal (term_…) waarop de klant betaalt, bij method pointofsale.",
           "apiName": "terminalId"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_mandates",
@@ -9150,7 +9217,26 @@
         ],
         "subject": "customerId",
         "maxRecords": 1,
-        "label": "Rekeninghouder"
+        "label": "Rekeninghouder",
+        "chat": {
+          "allowReal": [
+            "consumerName",
+            "details.consumerName",
+            "details.cardHolder"
+          ]
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -9196,7 +9282,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_subscriptions",
@@ -9432,7 +9519,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "get_subscription",
@@ -9594,7 +9682,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "cancel_subscription",
@@ -9639,7 +9728,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_all_subscriptions",
@@ -10318,7 +10408,26 @@
         ],
         "subject": "id",
         "maxRecords": 1,
-        "label": "Ontvanger"
+        "label": "Ontvanger",
+        "chat": {
+          "allowReal": [
+            "recipient.givenName",
+            "recipient.familyName",
+            "recipient.organizationName"
+          ]
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -10693,7 +10802,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_business_accounts",
@@ -10963,7 +11073,24 @@
         ],
         "subject": "id",
         "maxRecords": 1,
-        "label": "Tegenpartij"
+        "label": "Tegenpartij",
+        "chat": {
+          "allowReal": [
+            "counterparty.name"
+          ]
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -11113,7 +11240,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "get_transfer",
@@ -11179,7 +11307,24 @@
         ],
         "subject": "id",
         "maxRecords": 1,
-        "label": "Ontvanger"
+        "label": "Ontvanger",
+        "chat": {
+          "allowReal": [
+            "creditor.fullName"
+          ]
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -11410,7 +11555,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "get_draft_transfer",
@@ -11475,7 +11621,24 @@
         ],
         "subject": "id",
         "maxRecords": 1,
-        "label": "Ontvanger"
+        "label": "Ontvanger",
+        "chat": {
+          "allowReal": [
+            "creditor.fullName"
+          ]
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
       }
     },
     {
@@ -11514,7 +11677,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "list_payouts",
@@ -11651,7 +11815,8 @@
           "description": "true = testgegevens in plaats van live. Werkt alleen als het token ook test mag.",
           "apiName": "testmode"
         }
-      }
+      },
+      "confirmationRequired": true
     },
     {
       "name": "get_payout",
@@ -11727,7 +11892,8 @@
           "description": "Eigen unieke sleutel (UUID v4). Geef bij een nieuwe poging dezelfde sleutel mee: Mollie voert het verzoek dan maar één keer uit.",
           "apiName": "idempotency-key"
         }
-      }
+      },
+      "confirmationRequired": true
     }
   ]
 }
