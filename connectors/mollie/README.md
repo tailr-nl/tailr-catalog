@@ -70,3 +70,9 @@ Mollie publiceert de API als OpenAPI-specificatie ([github.com/mollie/openapi](h
 4. Kies het **niveau**: `read` voor `GET`, `write` voor aanmaken en wijzigen, `admin` voor verwijderen en alles waarbij geld weggaat zonder dat de klant zelf betaalt.
 5. **Persoonsgegevens:** geeft de functie namen, e-mail, IBAN of adressen? Laat ze in een lijst weg met `transform.exclude`, en markeer een functie die één object opvraagt met `privacy` (zie *Persoonsgegevens* hierboven).
 6. Verhoog `version` in `connector.json` en in `connectors/index.json`, en draai `tailr check connectors/mollie`: zonder waarschuwingen.
+
+## Gerichte gegevensverstrekking en bevestiging
+
+Individuele detailfuncties markeren de naamvelden die met `privacy.chat.allowReal` expliciet voor de chat aangevraagd mogen worden. Gewone opvragen blijven schuilnamen geven. In Tailr Core kiest de beheerder per functie **Altijd toestaan**, **Elke keer vragen** of **Blokkeren**, en kan de toegestane velden beperken. E-mailadressen, rekeningnummers, adressen en metadata vallen buiten deze uitzondering. Lijsten en API-only functies blijven afgeschermd.
+
+Alle functies op niveau `admin` stellen met `confirmationRequired: true` bevestiging van elke concrete aanroep verplicht. Uitvoerschema's bewaken de basisvorm van de individuele privacygevoelige detailantwoorden; een onjuist antwoord wordt niet verstrekt.

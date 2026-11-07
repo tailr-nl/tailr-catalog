@@ -44,6 +44,32 @@
           "items": {
             "type": "object",
             "properties": {
+              "title": {
+                "description": "Short, task-focused title for the question, e.g. Which orders need attention? The full prompt is copied unchanged.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "en": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "nl": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
+              },
               "prompt": {
                 "anyOf": [
                   {

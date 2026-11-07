@@ -48,16 +48,16 @@
           "$ref": "#/$defs/__schema35"
         },
         "context": {
-          "$ref": "#/$defs/__schema83"
+          "$ref": "#/$defs/__schema93"
         },
         "readme": {
-          "$ref": "#/$defs/__schema84"
+          "$ref": "#/$defs/__schema94"
         },
         "setup": {
-          "$ref": "#/$defs/__schema85"
+          "$ref": "#/$defs/__schema95"
         },
         "requires": {
-          "$ref": "#/$defs/__schema90"
+          "$ref": "#/$defs/__schema100"
         },
         "type": {
           "type": "string",
@@ -72,7 +72,7 @@
             "type": "none"
           },
           "description": "How Tailr Core signs in at the source: oauth2, bearer, basic, header, query or none.",
-          "$ref": "#/$defs/__schema92"
+          "$ref": "#/$defs/__schema102"
         },
         "headers": {
           "default": {},
@@ -88,7 +88,7 @@
           "minItems": 1,
           "type": "array",
           "items": {
-            "$ref": "#/$defs/__schema93"
+            "$ref": "#/$defs/__schema103"
           },
           "description": "The functions: each one is one call."
         }
@@ -146,16 +146,16 @@
           "$ref": "#/$defs/__schema35"
         },
         "context": {
-          "$ref": "#/$defs/__schema83"
+          "$ref": "#/$defs/__schema93"
         },
         "readme": {
-          "$ref": "#/$defs/__schema84"
+          "$ref": "#/$defs/__schema94"
         },
         "setup": {
-          "$ref": "#/$defs/__schema85"
+          "$ref": "#/$defs/__schema95"
         },
         "requires": {
-          "$ref": "#/$defs/__schema90"
+          "$ref": "#/$defs/__schema100"
         },
         "type": {
           "type": "string",
@@ -168,7 +168,7 @@
           "default": {
             "type": "none"
           },
-          "$ref": "#/$defs/__schema92"
+          "$ref": "#/$defs/__schema102"
         },
         "headers": {
           "default": {},
@@ -205,10 +205,13 @@
             "type": "object",
             "properties": {
               "audience": {
-                "$ref": "#/$defs/__schema64"
+                "$ref": "#/$defs/__schema72"
               },
               "privacy": {
-                "$ref": "#/$defs/__schema66"
+                "$ref": "#/$defs/__schema74"
+              },
+              "confirmationRequired": {
+                "type": "boolean"
               }
             },
             "additionalProperties": false
@@ -267,31 +270,31 @@
           "$ref": "#/$defs/__schema35"
         },
         "context": {
-          "$ref": "#/$defs/__schema83"
+          "$ref": "#/$defs/__schema93"
         },
         "readme": {
-          "$ref": "#/$defs/__schema84"
+          "$ref": "#/$defs/__schema94"
         },
         "setup": {
-          "$ref": "#/$defs/__schema85"
+          "$ref": "#/$defs/__schema95"
         },
         "requires": {
-          "$ref": "#/$defs/__schema90"
-        },
-        "type": {
-          "$ref": "#/$defs/__schema97"
-        },
-        "engine": {
-          "$ref": "#/$defs/__schema98"
-        },
-        "connection": {
-          "$ref": "#/$defs/__schema99"
-        },
-        "maxRows": {
           "$ref": "#/$defs/__schema100"
         },
+        "type": {
+          "$ref": "#/$defs/__schema110"
+        },
+        "engine": {
+          "$ref": "#/$defs/__schema111"
+        },
+        "connection": {
+          "$ref": "#/$defs/__schema112"
+        },
+        "maxRows": {
+          "$ref": "#/$defs/__schema113"
+        },
         "tools": {
-          "$ref": "#/$defs/__schema101"
+          "$ref": "#/$defs/__schema114"
         }
       },
       "required": [
@@ -347,19 +350,19 @@
           "$ref": "#/$defs/__schema35"
         },
         "context": {
-          "$ref": "#/$defs/__schema83"
+          "$ref": "#/$defs/__schema93"
         },
         "readme": {
-          "$ref": "#/$defs/__schema84"
+          "$ref": "#/$defs/__schema94"
         },
         "setup": {
-          "$ref": "#/$defs/__schema85"
+          "$ref": "#/$defs/__schema95"
         },
         "requires": {
-          "$ref": "#/$defs/__schema90"
+          "$ref": "#/$defs/__schema100"
         },
         "type": {
-          "$ref": "#/$defs/__schema103"
+          "$ref": "#/$defs/__schema118"
         }
       },
       "required": [
@@ -746,35 +749,44 @@
         "description": {
           "$ref": "#/$defs/__schema41"
         },
-        "version": {
+        "confirmationRequired": {
           "$ref": "#/$defs/__schema42"
         },
-        "level": {
+        "outputSchema": {
           "$ref": "#/$defs/__schema43"
         },
-        "file": {
-          "$ref": "#/$defs/__schema44"
-        },
-        "code": {
-          "$ref": "#/$defs/__schema46"
-        },
-        "uses": {
+        "idempotent": {
           "$ref": "#/$defs/__schema47"
         },
-        "requests": {
+        "version": {
+          "$ref": "#/$defs/__schema48"
+        },
+        "level": {
+          "$ref": "#/$defs/__schema49"
+        },
+        "file": {
           "$ref": "#/$defs/__schema50"
         },
-        "params": {
+        "code": {
+          "$ref": "#/$defs/__schema52"
+        },
+        "uses": {
           "$ref": "#/$defs/__schema53"
         },
+        "requests": {
+          "$ref": "#/$defs/__schema56"
+        },
+        "params": {
+          "$ref": "#/$defs/__schema59"
+        },
         "limits": {
-          "$ref": "#/$defs/__schema62"
+          "$ref": "#/$defs/__schema70"
         },
         "audience": {
-          "$ref": "#/$defs/__schema63"
+          "$ref": "#/$defs/__schema71"
         },
         "privacy": {
-          "$ref": "#/$defs/__schema65"
+          "$ref": "#/$defs/__schema73"
         }
       },
       "required": [
@@ -797,11 +809,34 @@
       "type": "string"
     },
     "__schema42": {
+      "type": "boolean"
+    },
+    "__schema43": {
+      "$ref": "#/$defs/__schema44"
+    },
+    "__schema44": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/__schema45"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/__schema46"
+      },
+      "description": "The result after transforms, before privacy protection. A self-contained JSON Schema 2020-12; invalid results are withheld. For privacy-marked tools Core omits this schema from the AI-facing definition because fields may be hidden or pseudonymized."
+    },
+    "__schema45": {
+      "type": "string"
+    },
+    "__schema46": {},
+    "__schema47": {
+      "type": "boolean"
+    },
+    "__schema48": {
       "default": "1.0.0",
       "type": "string",
       "maxLength": 32
     },
-    "__schema43": {
+    "__schema49": {
       "default": "read",
       "type": "string",
       "enum": [
@@ -810,47 +845,47 @@
         "admin"
       ]
     },
-    "__schema44": {
-      "description": "File in the connector folder, e.g. tools/settlement_breakdown.ts. Give file or code.",
-      "$ref": "#/$defs/__schema45"
-    },
-    "__schema45": {
-      "type": "string",
-      "maxLength": 200
-    },
-    "__schema46": {
-      "type": "string",
-      "maxLength": 200000
-    },
-    "__schema47": {
-      "default": [],
-      "description": "Functions the code may call with ctx.call: a function of this connector (\"list_items\") or alias.function for a connection from requires.",
-      "$ref": "#/$defs/__schema48"
-    },
-    "__schema48": {
-      "maxItems": 50,
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/__schema49"
-      }
-    },
-    "__schema49": {
-      "type": "string",
-      "pattern": "^([a-z][a-z0-9_]{0,31}\\.)?[a-zA-Z0-9_]{1,64}$"
-    },
     "__schema50": {
-      "default": [],
-      "description": "Requests the code may make with ctx.request: method plus path relative to baseUrl (* = one segment, ** = the rest).",
+      "description": "File in the connector folder, e.g. tools/settlement_breakdown.ts. Give file or code.",
       "$ref": "#/$defs/__schema51"
     },
     "__schema51": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "__schema52": {
+      "type": "string",
+      "maxLength": 200000
+    },
+    "__schema53": {
+      "default": [],
+      "description": "Functions the code may call with ctx.call: a function of this connector (\"list_items\") or alias.function for a connection from requires.",
+      "$ref": "#/$defs/__schema54"
+    },
+    "__schema54": {
       "maxItems": 50,
       "type": "array",
       "items": {
-        "$ref": "#/$defs/__schema52"
+        "$ref": "#/$defs/__schema55"
       }
     },
-    "__schema52": {
+    "__schema55": {
+      "type": "string",
+      "pattern": "^([a-z][a-z0-9_]{0,31}\\.)?[a-zA-Z0-9_]{1,64}$"
+    },
+    "__schema56": {
+      "default": [],
+      "description": "Requests the code may make with ctx.request: method plus path relative to baseUrl (* = one segment, ** = the rest).",
+      "$ref": "#/$defs/__schema57"
+    },
+    "__schema57": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/__schema58"
+      }
+    },
+    "__schema58": {
       "type": "object",
       "properties": {
         "method": {
@@ -877,51 +912,57 @@
       ],
       "additionalProperties": false
     },
-    "__schema53": {
+    "__schema59": {
       "default": {},
       "type": "object",
       "propertyNames": {
-        "type": "string"
+        "$ref": "#/$defs/__schema60"
       },
       "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "in": {
-            "default": "body",
-            "type": "string",
-            "enum": [
-              "path",
-              "query",
-              "body",
-              "header"
-            ]
-          },
-          "type": {
-            "$ref": "#/$defs/__schema54"
-          },
-          "required": {
-            "$ref": "#/$defs/__schema55"
-          },
-          "description": {
-            "$ref": "#/$defs/__schema56"
-          },
-          "enum": {
-            "$ref": "#/$defs/__schema58"
-          },
-          "apiName": {
-            "$ref": "#/$defs/__schema59"
-          },
-          "default": {
-            "$ref": "#/$defs/__schema60"
-          },
-          "schema": {
-            "$ref": "#/$defs/__schema61"
-          }
-        },
-        "additionalProperties": false
+        "$ref": "#/$defs/__schema61"
       }
     },
-    "__schema54": {
+    "__schema60": {
+      "type": "string"
+    },
+    "__schema61": {
+      "type": "object",
+      "properties": {
+        "in": {
+          "default": "body",
+          "type": "string",
+          "enum": [
+            "path",
+            "query",
+            "body",
+            "header"
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/__schema62"
+        },
+        "required": {
+          "$ref": "#/$defs/__schema63"
+        },
+        "description": {
+          "$ref": "#/$defs/__schema64"
+        },
+        "enum": {
+          "$ref": "#/$defs/__schema66"
+        },
+        "apiName": {
+          "$ref": "#/$defs/__schema67"
+        },
+        "default": {
+          "$ref": "#/$defs/__schema68"
+        },
+        "schema": {
+          "$ref": "#/$defs/__schema69"
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema62": {
       "default": "string",
       "type": "string",
       "enum": [
@@ -933,18 +974,18 @@
         "object"
       ]
     },
-    "__schema55": {
+    "__schema63": {
       "default": false,
       "type": "boolean"
     },
-    "__schema56": {
+    "__schema64": {
       "description": "For the AI: what to fill in, with the format.",
-      "$ref": "#/$defs/__schema57"
+      "$ref": "#/$defs/__schema65"
     },
-    "__schema57": {
+    "__schema65": {
       "type": "string"
     },
-    "__schema58": {
+    "__schema66": {
       "type": "array",
       "items": {
         "type": [
@@ -953,20 +994,20 @@
         ]
       }
     },
-    "__schema59": {
+    "__schema67": {
       "type": "string"
     },
-    "__schema60": {
+    "__schema68": {
       "type": "string"
     },
-    "__schema61": {
+    "__schema69": {
       "type": "object",
       "propertyNames": {
         "type": "string"
       },
       "additionalProperties": {}
     },
-    "__schema62": {
+    "__schema70": {
       "type": "object",
       "properties": {
         "cpuMs": {
@@ -992,10 +1033,10 @@
       },
       "additionalProperties": false
     },
-    "__schema63": {
-      "$ref": "#/$defs/__schema64"
+    "__schema71": {
+      "$ref": "#/$defs/__schema72"
     },
-    "__schema64": {
+    "__schema72": {
       "type": "string",
       "enum": [
         "all",
@@ -1003,56 +1044,59 @@
       ],
       "description": "Who may call this function: \"all\" (the AI and the API, default) or \"api\" (only dashboards, tools and apps; never the AI over MCP). Use \"api\" when the data may go to a dashboard or tool but not into the chat. The connector sets the minimum: an administrator can make a function API-only, never undo it. See docs/koppelingen-maken.md, \"Privacygevoelige velden en functies\"."
     },
-    "__schema65": {
-      "$ref": "#/$defs/__schema66"
+    "__schema73": {
+      "$ref": "#/$defs/__schema74"
     },
-    "__schema66": {
+    "__schema74": {
       "type": "object",
       "properties": {
         "sensitivity": {
-          "$ref": "#/$defs/__schema67"
+          "$ref": "#/$defs/__schema75"
         },
         "subject": {
-          "$ref": "#/$defs/__schema70"
-        },
-        "lookup": {
-          "$ref": "#/$defs/__schema72"
-        },
-        "records": {
-          "$ref": "#/$defs/__schema74"
-        },
-        "maxRecords": {
-          "$ref": "#/$defs/__schema76"
-        },
-        "dailyLimit": {
           "$ref": "#/$defs/__schema78"
         },
-        "label": {
+        "lookup": {
           "$ref": "#/$defs/__schema80"
+        },
+        "records": {
+          "$ref": "#/$defs/__schema82"
+        },
+        "maxRecords": {
+          "$ref": "#/$defs/__schema84"
+        },
+        "dailyLimit": {
+          "$ref": "#/$defs/__schema86"
+        },
+        "label": {
+          "$ref": "#/$defs/__schema88"
+        },
+        "chat": {
+          "$ref": "#/$defs/__schema90"
         }
       },
       "required": [
         "sensitivity",
         "lookup"
       ],
-      "description": "Mark a function that returns data about people (names, email, phone, address, bank account, salary, health). Tailr Core then lets only the fields in sensitivity pass, gives the AI pseudonyms, works one person at a time (lookup required, at most maxRecords), applies a daily limit per user, never caches it, and logs every lookup. The connector sets the minimum: an administrator can only make it stricter. See docs/koppelingen-maken.md, \"Privacygevoelige velden en functies\".",
+      "description": "Mark a function that returns data about people (names, email, phone, address, bank account, salary, health). Tailr Core then lets only the fields in sensitivity pass, gives the AI pseudonyms by default, works one person at a time (lookup required, at most maxRecords), applies a daily limit per user, never caches it, and logs every lookup. The connector sets the minimum: an administrator can only make it stricter. See docs/koppelingen-maken.md, \"Privacygevoelige velden en functies\".",
       "additionalProperties": false
     },
-    "__schema67": {
+    "__schema75": {
       "type": "object",
       "propertyNames": {
-        "$ref": "#/$defs/__schema68"
+        "$ref": "#/$defs/__schema76"
       },
       "additionalProperties": {
-        "$ref": "#/$defs/__schema69"
+        "$ref": "#/$defs/__schema77"
       },
       "description": "Per field of a record: \"none\", \"personal\" (name, email, address), \"financial\" (IBAN, salary) or \"special\" (health, citizen service number). Only these fields pass (allowlist); fields that are not \"none\" get a pseudonym for the AI."
     },
-    "__schema68": {
+    "__schema76": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
+      "pattern": "^(?!(?:.*\\.)?(?:__proto__|prototype|constructor)(?:\\.|$))[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
     },
-    "__schema69": {
+    "__schema77": {
       "type": "string",
       "enum": [
         "none",
@@ -1061,67 +1105,88 @@
         "special"
       ]
     },
-    "__schema70": {
+    "__schema78": {
       "default": "id",
       "description": "Field with the id of the person in each record (default id).",
-      "$ref": "#/$defs/__schema71"
+      "$ref": "#/$defs/__schema79"
     },
-    "__schema71": {
+    "__schema79": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
+      "pattern": "^(?!(?:.*\\.)?(?:__proto__|prototype|constructor)(?:\\.|$))[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
     },
-    "__schema72": {
+    "__schema80": {
       "minItems": 1,
       "maxItems": 10,
       "type": "array",
       "items": {
-        "$ref": "#/$defs/__schema73"
+        "$ref": "#/$defs/__schema81"
       },
       "description": "Parameters to look up one person (id, number or email). At least one is required on every call; a list without a filter is refused."
-    },
-    "__schema73": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 64
-    },
-    "__schema74": {
-      "description": "Where the records are in the response, e.g. items. Default: the response itself.",
-      "$ref": "#/$defs/__schema75"
-    },
-    "__schema75": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
-    },
-    "__schema76": {
-      "default": 1,
-      "description": "At most this many records per call (default 1).",
-      "$ref": "#/$defs/__schema77"
-    },
-    "__schema77": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 50
-    },
-    "__schema78": {
-      "default": 100,
-      "description": "At most this many different people per user per day (default 100).",
-      "$ref": "#/$defs/__schema79"
-    },
-    "__schema79": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 10000
-    },
-    "__schema80": {
-      "description": "Word for the pseudonym, e.g. \"Customer\" gives \"Customer #K7Q2MX\".",
-      "$ref": "#/$defs/__schema81"
     },
     "__schema81": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 40
+      "maxLength": 64
     },
     "__schema82": {
+      "description": "Where the records are in the response, e.g. items. Default: the response itself.",
+      "$ref": "#/$defs/__schema83"
+    },
+    "__schema83": {
+      "type": "string",
+      "pattern": "^(?!(?:.*\\.)?(?:__proto__|prototype|constructor)(?:\\.|$))[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
+    },
+    "__schema84": {
+      "default": 1,
+      "description": "At most this many records per call (default 1).",
+      "$ref": "#/$defs/__schema85"
+    },
+    "__schema85": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50
+    },
+    "__schema86": {
+      "default": 100,
+      "description": "At most this many different people per user per day (default 100).",
+      "$ref": "#/$defs/__schema87"
+    },
+    "__schema87": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000
+    },
+    "__schema88": {
+      "description": "Word for the pseudonym, e.g. \"Customer\" gives \"Customer #K7Q2MX\".",
+      "$ref": "#/$defs/__schema89"
+    },
+    "__schema89": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "__schema90": {
+      "type": "object",
+      "properties": {
+        "allowReal": {
+          "maxItems": 50,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema91"
+          },
+          "description": "Sensitive scalar fields eligible for explicit disclosure to an AI client. Omitted fields stay pseudonymized. Core applies its own allow/ask/deny policy; this is not consent."
+        }
+      },
+      "required": [
+        "allowReal"
+      ],
+      "additionalProperties": false
+    },
+    "__schema91": {
+      "type": "string",
+      "pattern": "^(?!(?:.*\\.)?(?:__proto__|prototype|constructor)(?:\\.|$))[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+)*$"
+    },
+    "__schema92": {
       "type": "object",
       "properties": {
         "entry": {
@@ -1147,19 +1212,19 @@
       ],
       "additionalProperties": false
     },
-    "__schema83": {
+    "__schema93": {
       "type": "string",
       "maxLength": 8000
     },
-    "__schema84": {
+    "__schema94": {
       "type": "string",
       "maxLength": 100000
     },
-    "__schema85": {
+    "__schema95": {
       "description": "Improvements to the standard setup guide: steps at the source, testWith, prerequisites.",
-      "$ref": "#/$defs/__schema86"
+      "$ref": "#/$defs/__schema96"
     },
-    "__schema86": {
+    "__schema96": {
       "type": "object",
       "properties": {
         "minutes": {
@@ -1171,19 +1236,19 @@
           "maxItems": 8,
           "type": "array",
           "items": {
-            "$ref": "#/$defs/__schema87"
+            "$ref": "#/$defs/__schema97"
           }
         },
         "steps": {
           "maxItems": 10,
           "type": "array",
           "items": {
-            "$ref": "#/$defs/__schema88"
+            "$ref": "#/$defs/__schema98"
           }
         },
         "loginNote": {
           "description": "Tip at the step where the admin signs in at the source, e.g. a warning the source shows.",
-          "$ref": "#/$defs/__schema89"
+          "$ref": "#/$defs/__schema99"
         },
         "testWith": {
           "type": "string",
@@ -1192,11 +1257,11 @@
       },
       "additionalProperties": false
     },
-    "__schema87": {
+    "__schema97": {
       "type": "string",
       "maxLength": 200
     },
-    "__schema88": {
+    "__schema98": {
       "type": "object",
       "properties": {
         "id": {
@@ -1238,19 +1303,19 @@
       ],
       "additionalProperties": false
     },
-    "__schema89": {
+    "__schema99": {
       "type": "string",
       "maxLength": 500
     },
-    "__schema90": {
+    "__schema100": {
       "default": [],
       "maxItems": 10,
       "type": "array",
       "items": {
-        "$ref": "#/$defs/__schema91"
+        "$ref": "#/$defs/__schema101"
       }
     },
-    "__schema91": {
+    "__schema101": {
       "type": "object",
       "properties": {
         "alias": {
@@ -1273,7 +1338,7 @@
       ],
       "additionalProperties": false
     },
-    "__schema92": {
+    "__schema102": {
       "oneOf": [
         {
           "type": "object",
@@ -1455,7 +1520,7 @@
         }
       ]
     },
-    "__schema93": {
+    "__schema103": {
       "type": "object",
       "properties": {
         "name": {
@@ -1471,6 +1536,13 @@
         "description": {
           "type": "string",
           "description": "For the AI: what the function returns, when to use it, and the shape of the parameters."
+        },
+        "confirmationRequired": {
+          "description": "Require confirmation of every exact invocation. An administrator cannot turn this requirement off.",
+          "$ref": "#/$defs/__schema104"
+        },
+        "outputSchema": {
+          "$ref": "#/$defs/__schema44"
         },
         "level": {
           "type": "string",
@@ -1495,16 +1567,16 @@
         "path": {
           "default": "/",
           "description": "Path after baseUrl, with {param} for path parameters.",
-          "$ref": "#/$defs/__schema94"
+          "$ref": "#/$defs/__schema105"
         },
         "params": {
           "default": {},
           "description": "Parameters the AI fills in, by name.",
-          "$ref": "#/$defs/__schema95"
+          "$ref": "#/$defs/__schema106"
         },
         "transform": {
           "description": "Leave out (exclude) or pick (select) fields before the answer goes to the AI.",
-          "$ref": "#/$defs/__schema96"
+          "$ref": "#/$defs/__schema109"
         },
         "graphql": {
           "type": "object",
@@ -1557,10 +1629,10 @@
           "type": "boolean"
         },
         "audience": {
-          "$ref": "#/$defs/__schema64"
+          "$ref": "#/$defs/__schema72"
         },
         "privacy": {
-          "$ref": "#/$defs/__schema66"
+          "$ref": "#/$defs/__schema74"
         }
       },
       "required": [
@@ -1570,56 +1642,65 @@
       ],
       "additionalProperties": false
     },
-    "__schema94": {
+    "__schema104": {
+      "type": "boolean"
+    },
+    "__schema105": {
       "type": "string"
     },
-    "__schema95": {
+    "__schema106": {
       "type": "object",
       "propertyNames": {
-        "type": "string"
+        "$ref": "#/$defs/__schema107"
       },
       "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "in": {
-            "type": "string",
-            "enum": [
-              "path",
-              "query",
-              "body",
-              "header"
-            ],
-            "description": "Where the parameter goes: path ({name} in path), query, body or header."
-          },
-          "type": {
-            "$ref": "#/$defs/__schema54"
-          },
-          "required": {
-            "$ref": "#/$defs/__schema55"
-          },
-          "description": {
-            "$ref": "#/$defs/__schema56"
-          },
-          "enum": {
-            "$ref": "#/$defs/__schema58"
-          },
-          "apiName": {
-            "$ref": "#/$defs/__schema59"
-          },
-          "default": {
-            "$ref": "#/$defs/__schema60"
-          },
-          "schema": {
-            "$ref": "#/$defs/__schema61"
-          }
-        },
-        "required": [
-          "in"
-        ],
-        "additionalProperties": false
+        "$ref": "#/$defs/__schema108"
       }
     },
-    "__schema96": {
+    "__schema107": {
+      "type": "string"
+    },
+    "__schema108": {
+      "type": "object",
+      "properties": {
+        "in": {
+          "type": "string",
+          "enum": [
+            "path",
+            "query",
+            "body",
+            "header"
+          ],
+          "description": "Where the parameter goes: path ({name} in path), query, body or header."
+        },
+        "type": {
+          "$ref": "#/$defs/__schema62"
+        },
+        "required": {
+          "$ref": "#/$defs/__schema63"
+        },
+        "description": {
+          "$ref": "#/$defs/__schema64"
+        },
+        "enum": {
+          "$ref": "#/$defs/__schema66"
+        },
+        "apiName": {
+          "$ref": "#/$defs/__schema67"
+        },
+        "default": {
+          "$ref": "#/$defs/__schema68"
+        },
+        "schema": {
+          "$ref": "#/$defs/__schema69"
+        }
+      },
+      "required": [
+        "in"
+      ],
+      "additionalProperties": false
+    },
+    "__schema109": {
       "type": "object",
       "properties": {
         "exclude": {
@@ -1648,11 +1729,11 @@
       },
       "additionalProperties": false
     },
-    "__schema97": {
+    "__schema110": {
       "type": "string",
       "const": "database"
     },
-    "__schema98": {
+    "__schema111": {
       "type": "string",
       "enum": [
         "postgres",
@@ -1661,7 +1742,7 @@
         "sqlite"
       ]
     },
-    "__schema99": {
+    "__schema112": {
       "default": {
         "ssl": "disable"
       },
@@ -1700,20 +1781,20 @@
       },
       "additionalProperties": false
     },
-    "__schema100": {
+    "__schema113": {
       "default": 200,
       "type": "integer",
       "minimum": 1,
       "maximum": 10000
     },
-    "__schema101": {
+    "__schema114": {
       "minItems": 1,
       "type": "array",
       "items": {
-        "$ref": "#/$defs/__schema102"
+        "$ref": "#/$defs/__schema115"
       }
     },
-    "__schema102": {
+    "__schema115": {
       "type": "object",
       "properties": {
         "name": {
@@ -1727,6 +1808,12 @@
         },
         "description": {
           "type": "string"
+        },
+        "confirmationRequired": {
+          "type": "boolean"
+        },
+        "outputSchema": {
+          "$ref": "#/$defs/__schema44"
         },
         "level": {
           "type": "string",
@@ -1744,44 +1831,10 @@
           "default": {},
           "type": "object",
           "propertyNames": {
-            "type": "string"
+            "$ref": "#/$defs/__schema116"
           },
           "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "in": {
-                "default": "body",
-                "type": "string",
-                "enum": [
-                  "path",
-                  "query",
-                  "body",
-                  "header"
-                ]
-              },
-              "type": {
-                "$ref": "#/$defs/__schema54"
-              },
-              "required": {
-                "$ref": "#/$defs/__schema55"
-              },
-              "description": {
-                "$ref": "#/$defs/__schema56"
-              },
-              "enum": {
-                "$ref": "#/$defs/__schema58"
-              },
-              "apiName": {
-                "$ref": "#/$defs/__schema59"
-              },
-              "default": {
-                "$ref": "#/$defs/__schema60"
-              },
-              "schema": {
-                "$ref": "#/$defs/__schema61"
-              }
-            },
-            "additionalProperties": false
+            "$ref": "#/$defs/__schema117"
           }
         },
         "maxRows": {
@@ -1790,7 +1843,7 @@
           "maximum": 10000
         },
         "transform": {
-          "$ref": "#/$defs/__schema96"
+          "$ref": "#/$defs/__schema109"
         },
         "cacheTtlSeconds": {
           "type": "integer",
@@ -1806,10 +1859,10 @@
           "type": "boolean"
         },
         "audience": {
-          "$ref": "#/$defs/__schema64"
+          "$ref": "#/$defs/__schema72"
         },
         "privacy": {
-          "$ref": "#/$defs/__schema66"
+          "$ref": "#/$defs/__schema74"
         }
       },
       "required": [
@@ -1820,7 +1873,47 @@
       ],
       "additionalProperties": false
     },
-    "__schema103": {
+    "__schema116": {
+      "type": "string"
+    },
+    "__schema117": {
+      "type": "object",
+      "properties": {
+        "in": {
+          "default": "body",
+          "type": "string",
+          "enum": [
+            "path",
+            "query",
+            "body",
+            "header"
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/__schema62"
+        },
+        "required": {
+          "$ref": "#/$defs/__schema63"
+        },
+        "description": {
+          "$ref": "#/$defs/__schema64"
+        },
+        "enum": {
+          "$ref": "#/$defs/__schema66"
+        },
+        "apiName": {
+          "$ref": "#/$defs/__schema67"
+        },
+        "default": {
+          "$ref": "#/$defs/__schema68"
+        },
+        "schema": {
+          "$ref": "#/$defs/__schema69"
+        }
+      },
+      "additionalProperties": false
+    },
+    "__schema118": {
       "type": "string",
       "const": "composite"
     }
