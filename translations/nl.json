@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "Updated Dutch labels and help for settings, access policies and emergency controls.",
-      "nl": "Bijgewerkte Nederlandse teksten en uitleg voor instellingen, toegangsbeleid en noodbediening."
+      "en": "Connected tools now live in the account menu. View your available systems and functions from Overview.",
+      "nl": "Verbonden tools staan nu in het accountmenu. Bekijk je beschikbare systemen en functies vanuit Overzicht."
     }
   },
   "messages": {
@@ -1931,6 +1931,35 @@
     "The plugin is loaded immediately after installation. If loading fails, the previous version is kept.": "De plugin wordt direct na installatie geladen. Als laden mislukt, blijft de vorige versie behouden.",
     "A plugin runs without a sandbox and can access all data and connection credentials. Uploading requires an authenticator app. Enabled plugins become active immediately.": "Een plugin draait zonder zandbak en kan bij alle gegevens en inloggegevens van koppelingen. Uploaden vereist een authenticator-app. Ingeschakelde plugins worden direct actief.",
     "Review the plugin updates. Dependencies are confirmed separately. Updates take effect immediately.": "Bekijk de pluginupdates. Afhankelijkheden bevestig je apart. Updates worden direct actief.",
-    "Allows Tailr Core to restart when required. Only enable this when a supervisor such as Docker starts it again.": "Sta Tailr Core toe om opnieuw op te starten wanneer dat nodig is. Zet dit alleen aan als bijvoorbeeld Docker het daarna weer start."
+    "Allows Tailr Core to restart when required. Only enable this when a supervisor such as Docker starts it again.": "Sta Tailr Core toe om opnieuw op te starten wanneer dat nodig is. Zet dit alleen aan als bijvoorbeeld Docker het daarna weer start.",
+    "You can revoke access at any time under your account menu → Connected tools.": "Je kunt de toegang altijd intrekken via je accountmenu → Verbonden tools.",
+    "Revoke access for all my tools": "Toegang voor al mijn tools intrekken",
+    "Your access to {name}": "Jouw toegang tot {name}",
+    "No functions are available for you in this system. Your access or the connection may have changed.": "Er zijn geen functies voor je beschikbaar in dit systeem. Je toegang of de koppeling kan zijn gewijzigd.",
+    "This system is temporarily unavailable. Your permissions are kept; ask your administrator to check the connection.": "Dit systeem is tijdelijk niet beschikbaar. Je rechten blijven behouden; vraag je beheerder de koppeling te controleren.",
+    "No matching functions": "Geen functies gevonden",
+    "{n} functions found": "{n} functies gevonden",
+    "Your available systems": "Jouw beschikbare systemen",
+    "Available to you:": "Beschikbaar voor jou:",
+    "View your access to {name}": "Bekijk jouw toegang tot {name}",
+    "Connect a tool, view its recent use or revoke its access. Your tools follow your user permissions.": "Verbind een tool, bekijk het recente gebruik of trek de toegang in. Je tools volgen jouw gebruikersrechten.",
+    "Choose a tool": "Kies een tool",
+    "Privacy filters and person limits apply only to AI chat. Ordinary API calls keep the original output.": "Privacyfilters en persoonslimieten gelden alleen voor AI-chat. Gewone API-aanroepen behouden de oorspronkelijke uitvoer.",
+    "All your connected tools lose access immediately. Connect them again to use them later.": "Al je verbonden tools verliezen direct hun toegang. Verbind ze opnieuw om ze later weer te gebruiken.",
+    "Manage app permissions, API keys and employee sign-in in one place.": "Beheer apprechten, API-sleutels en inloggen voor medewerkers op één plek.",
+    "Connect or build an app": "Een app verbinden of bouwen",
+    "Create an app, choose its permissions, then connect it with an API key or employee sign-in.": "Maak een app, kies de rechten en verbind hem met een API-sleutel of laat medewerkers inloggen.",
+    "No active keys": "Geen actieve sleutels",
+    "1 active key": "1 actieve sleutel",
+    "{n} active keys": "{n} actieve sleutels",
+    "Employee sign-in": "Inloggen voor medewerkers",
+    "Key expires soon": "Sleutel verloopt binnenkort",
+    "Keys & sign-in": "Sleutels en inloggen",
+    "Keys & sign-in for {name}": "Sleutels en inloggen voor {name}",
+    "App keys": "App-sleutels",
+    "For a server or automation. API keys use the app permissions you set in this overview. Keep keys on the server.": "Voor een server of automatisering. API-sleutels volgen de apprechten die je in dit overzicht instelt. Bewaar sleutels op de server.",
+    "Read docs/tools.md in the repository, or ask me to share the full guide from Access → App permissions. The app runs outside Tailr Core and uses its REST API.": "Lees docs/tools.md in de repository, of vraag me de volledige handleiding te delen vanuit Toegang → Apprechten. De app draait buiten Tailr Core en gebruikt de REST API.",
+    "For an organization app or a scheduled task, guide me through registering it under Access → App permissions, setting its permissions, and creating an app key. Start with the least access needed. I enter the key directly in the server's environment, never in the chat, source code or browser code.": "Help me voor een organisatie-app of geplande taak bij het registreren onder Toegang → Apprechten, het instellen van de rechten en het aanmaken van een app-sleutel. Begin met zo min mogelijk toegang. Ik vul de sleutel rechtstreeks in de omgeving van de server in, nooit in de chat, broncode of browsercode.",
+    "1 function found": "1 functie gevonden"
   }
 }
