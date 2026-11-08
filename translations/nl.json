@@ -1956,6 +1956,13 @@
     "Delete source {name}?": "Bron {name} verwijderen?",
     "Before a change in administration we ask for confirmation; it stays valid for {n} minutes. Your account signs in with Microsoft or Google: sign in again to continue.": "Vóór een wijziging in het beheer vragen we om een bevestiging; die blijft {n} minuten geldig. Je account logt in met Microsoft of Google: log opnieuw in om verder te gaan.",
     "Before a change in administration we ask for the code from your authenticator app; it stays valid for {n} minutes.": "Vóór een wijziging in het beheer vragen we om de code uit je authenticator-app; die blijft {n} minuten geldig.",
-    "Before a change in administration we ask for your password; it stays valid for {n} minutes.": "Vóór een wijziging in het beheer vragen we om je wachtwoord; dat blijft {n} minuten geldig."
+    "Before a change in administration we ask for your password; it stays valid for {n} minutes.": "Vóór een wijziging in het beheer vragen we om je wachtwoord; dat blijft {n} minuten geldig.",
+    "AI proposal": "AI-voorstel",
+    "View the proposal": "Bekijk het voorstel",
+    "Handled proposals are in the audit log.": "Afgehandelde voorstellen staan in het auditlog.",
+    "View handled proposals": "Afgehandelde voorstellen bekijken",
+    "View result": "Resultaat bekijken",
+    "Close log": "Log sluiten",
+    "Open {page}": "Open {page}"
   }
 }
