@@ -4,10 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Koppelingen goedkeuren</title>
-  <style>
-    .pl-stack { display: grid; gap: 10px; max-width: 640px; }
-    label.check { display: flex; gap: 8px; align-items: center; }
-  </style>
+  <link rel="stylesheet" href="/tailr-ui.css">
 </head>
 <body>
   <div class="page-head"><div>
@@ -16,23 +13,30 @@
   </div></div>
 
   <div class="card">
-    <h2>Verzoeken</h2>
+    <div class="card-head"><h2>Verzoeken</h2><a class="btn btn-primary btn-sm" href="/pending" target="_top">Naar Te bevestigen</a></div>
     <p>De verzoeken staan bij de rest in <strong>Te bevestigen</strong>, met <em>Van: Koppelingen goedkeuren</em>. Daar bevestig je ze of wijs je ze af.</p>
-    <div class="row"><a class="btn btn-primary" href="/pending" target="_top">Naar Te bevestigen</a></div>
   </div>
 
-  <form id="settings" class="card pl-stack">
-    <h2>Instellingen</h2>
-    <label class="check"><input type="radio" name="scope" value="ai"> Alleen wat via de AI komt</label>
-    <label class="check"><input type="radio" name="scope" value="always"> Altijd, ook wat beheerders in de beheeromgeving doen</label>
-    <div>
-      <strong>Wie mag goedkeuren</strong>
-      <div class="hint">Niemand aangevinkt = alle beheerders.</div>
-      <div id="approvers"></div>
+  <form id="settings" class="card">
+    <div class="card-head"><h2>Instellingen</h2></div>
+    <fieldset class="field">
+      <legend>Wat wacht op goedkeuring</legend>
+      <div class="choice-list">
+        <label class="choice"><input type="radio" name="scope" value="ai"><span class="choice-text"><strong>Alleen wat via de AI komt</strong></span></label>
+        <label class="choice"><input type="radio" name="scope" value="always"><span class="choice-text"><strong>Altijd</strong><span class="hint">Ook wat beheerders in de beheeromgeving doen.</span></span></label>
+      </div>
+    </fieldset>
+    <fieldset class="field">
+      <legend>Wie mag goedkeuren</legend>
+      <div id="approvers" class="choice-list"></div>
+      <span class="hint">Niemand aangevinkt = alle beheerders.</span>
+    </fieldset>
+    <div class="field">
+      <label class="switch"><input type="checkbox" name="allowSelf" role="switch"> De aanvrager mag zijn eigen verzoek goedkeuren</label>
+      <span class="hint">Alleen handig met één beheerder.</span>
     </div>
-    <label class="check"><input type="checkbox" name="allowSelf"> De aanvrager mag zijn eigen verzoek goedkeuren (alleen handig met één beheerder)</label>
-    <div class="hint" id="mail"></div>
-    <div class="row"><button class="btn btn-primary" type="submit">Opslaan</button></div>
+    <p class="hint" id="mail"></p>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">Opslaan</button></div>
   </form>
 
   <script>
@@ -46,9 +50,9 @@
       const form = document.getElementById("settings");
       form.querySelector(`input[name=scope][value=${cfg.scope}]`).checked = true;
       form.elements.allowSelf.checked = cfg.allowSelf;
-      document.getElementById("approvers").innerHTML = cfg.admins.map((a) => `<label class="check"><input type="checkbox" name="approver" value="${esc(a.id)}" ${cfg.approvers.includes(a.id) ? "checked" : ""}> ${esc(a.name)} <span class="muted small">${esc(a.email)}</span></label>`).join("");
+      document.getElementById("approvers").innerHTML = cfg.admins.map((a) => `<label class="choice"><input type="checkbox" name="approver" value="${esc(a.id)}" ${cfg.approvers.includes(a.id) ? "checked" : ""}><span class="choice-text"><strong>${esc(a.name)}</strong><span class="hint">${esc(a.email)}</span></span></label>`).join("");
       document.getElementById("mail").textContent = cfg.mailEnabled ? "Goedkeurders krijgen een mail bij een nieuw verzoek; de aanvrager hoort de beslissing per mail. Wie mag goedkeuren, geldt voor nieuwe verzoeken." : "Er is geen mailserver ingesteld: goedkeurders zien nieuwe verzoeken alleen in Te bevestigen.";
-      if (cfg.admins.length === 1 && !cfg.allowSelf) document.getElementById("mail").textContent += " Let op: er is maar één beheerder. Vink aan dat de aanvrager zelf mag goedkeuren, of voeg een beheerder toe.";
+      if (cfg.admins.length === 1 && !cfg.allowSelf) document.getElementById("mail").textContent += " Let op: er is maar één beheerder. Zet aan dat de aanvrager zelf mag goedkeuren, of voeg een beheerder toe.";
     }
     document.getElementById("settings").addEventListener("submit", async (e) => {
       e.preventDefault();

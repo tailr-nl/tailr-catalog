@@ -4,17 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mededeling</title>
+  <link rel="stylesheet" href="/tailr-ui.css">
   <base target="_top">
-  <style>
-    /* Klassen als alert zetten display; hidden moet altijd winnen */
-    [hidden] { display: none !important; }
-    .md-form { display: grid; gap: 14px; max-width: 760px; }
-    .md-form .field { margin-bottom: 0; }
-    .md-form textarea { min-height: 110px; }
-    label.check { display: flex; gap: 8px; align-items: center; }
-    .md-roles { display: grid; gap: 6px; margin: 6px 0 0 26px; }
-    .md-preview { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; }
-  </style>
 </head>
 <body>
   <div class="page-head"><div>
@@ -23,48 +14,53 @@
   </div></div>
 
   <p class="muted" id="loading" data-t="Laden…">Laden…</p>
-  <div class="alert alert-info" id="status" hidden></div>
-  <div class="alert alert-danger" id="error" hidden></div>
+  <div id="status" role="status" hidden><div class="alert alert-info" id="status-text"></div></div>
+  <div id="error" hidden><div class="alert alert-danger" id="error-text"></div></div>
 
-  <form id="form" class="card md-form" hidden>
+  <form id="form" class="card" hidden>
     <div class="field">
       <label for="text-nl" data-t="Tekst (Nederlands)">Tekst (Nederlands)</label>
-      <textarea class="textarea" id="text-nl" maxlength="2000" required></textarea>
-      <div class="hint" data-t="Markdown: **vet**, *cursief*, [tekst](https://…) en lijsten. HTML wordt niet uitgevoerd.">Markdown: **vet**, *cursief*, [tekst](https://…) en lijsten. HTML wordt niet uitgevoerd.</div>
+      <textarea class="textarea" id="text-nl" maxlength="2000" rows="4" required></textarea>
+      <span class="hint" data-t="Markdown: **vet**, *cursief*, [tekst](https://…) en lijsten. HTML wordt niet uitgevoerd.">Markdown: **vet**, *cursief*, [tekst](https://…) en lijsten. HTML wordt niet uitgevoerd.</span>
     </div>
     <div class="field">
       <label for="text-en" data-t="Tekst (Engels, optioneel)">Tekst (Engels, optioneel)</label>
-      <textarea class="textarea" id="text-en" maxlength="2000"></textarea>
-      <div class="hint" data-t="Leeg: wie Engels gebruikt, ziet de Nederlandse tekst.">Leeg: wie Engels gebruikt, ziet de Nederlandse tekst.</div>
+      <textarea class="textarea" id="text-en" maxlength="2000" rows="4"></textarea>
+      <span class="hint" data-t="Leeg: wie Engels gebruikt, ziet de Nederlandse tekst.">Leeg: wie Engels gebruikt, ziet de Nederlandse tekst.</span>
     </div>
     <div class="field">
       <label for="until" data-t="Einddatum">Einddatum</label>
-      <input class="input" id="until" type="date" style="max-width: 200px;">
-      <div class="hint" data-t="Tot en met deze dag. Leeg: tot je hem weghaalt.">Tot en met deze dag. Leeg: tot je hem weghaalt.</div>
+      <input class="input narrow" id="until" type="date">
+      <span class="hint" data-t="Tot en met deze dag. Leeg: tot je hem weghaalt.">Tot en met deze dag. Leeg: tot je hem weghaalt.</span>
     </div>
-    <div class="field">
-      <label data-t="Voor wie">Voor wie</label>
-      <label class="check"><input type="radio" name="audience" value="all" checked> <span data-t="Iedereen">Iedereen</span></label>
-      <label class="check"><input type="radio" name="audience" value="roles"> <span data-t="Alleen deze rollen">Alleen deze rollen</span></label>
-      <div class="md-roles" id="roles"></div>
-    </div>
+    <fieldset class="field">
+      <legend data-t="Voor wie">Voor wie</legend>
+      <div class="choice-list">
+        <label class="choice"><input type="radio" name="audience" value="all" checked><span class="choice-text"><strong data-t="Iedereen">Iedereen</strong></span></label>
+        <label class="choice"><input type="radio" name="audience" value="roles"><span class="choice-text"><strong data-t="Alleen deze rollen">Alleen deze rollen</strong></span></label>
+      </div>
+    </fieldset>
+    <fieldset class="field" id="roles-field">
+      <legend data-t="Rollen">Rollen</legend>
+      <div class="choice-list" id="roles"></div>
+    </fieldset>
     <div class="field">
       <label for="tone" data-t="Kleur">Kleur</label>
-      <select class="input" id="tone" style="max-width: 200px;">
+      <select class="select narrow" id="tone">
         <option value="info" data-t="Informatie">Informatie</option>
         <option value="success" data-t="Goed nieuws">Goed nieuws</option>
         <option value="warning" data-t="Waarschuwing">Waarschuwing</option>
       </select>
     </div>
     <div class="field">
-      <label class="check"><input type="checkbox" id="dismissible" checked> <span data-t="Wegklikken toestaan">Wegklikken toestaan</span></label>
-      <div class="hint" data-t="Iemand die hem wegklikt, ziet hem pas weer als je de mededeling opnieuw opslaat.">Iemand die hem wegklikt, ziet hem pas weer als je de mededeling opnieuw opslaat.</div>
+      <label class="switch"><input type="checkbox" id="dismissible" role="switch" checked> <span data-t="Wegklikken toestaan">Wegklikken toestaan</span></label>
+      <span class="hint" data-t="Iemand die hem wegklikt, ziet hem pas weer als je de mededeling opnieuw opslaat.">Iemand die hem wegklikt, ziet hem pas weer als je de mededeling opnieuw opslaat.</span>
     </div>
     <div class="field">
-      <label data-t="Voorbeeld">Voorbeeld</label>
-      <div class="md-preview markdown" id="preview"></div>
+      <span class="hint" data-t="Voorbeeld">Voorbeeld</span>
+      <div class="alert alert-info" id="preview"><div class="markdown" id="preview-text"></div></div>
     </div>
-    <div class="row">
+    <div class="form-actions">
       <button type="button" class="btn-link danger" id="remove" hidden data-t="Weghalen">Weghalen</button>
       <span class="spacer"></span>
       <button class="btn btn-primary" type="submit" data-t="Opslaan">Opslaan</button>
@@ -82,9 +78,10 @@
     const BASE = "/api/admin/p/mededeling";
     const locale = tailr?.locale === "nl" ? "nl" : "en";
     const date = (iso) => new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString(locale === "nl" ? "nl-NL" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
-    const showError = (msg) => { $("error").textContent = msg || ""; $("error").hidden = !msg; };
+    const showError = (msg) => { $("error-text").textContent = msg || ""; $("error").hidden = !msg; };
     const audience = () => document.querySelector('input[name="audience"]:checked').value;
     const syncRoles = () => { for (const box of document.querySelectorAll('input[name="role"]')) box.disabled = audience() !== "roles"; };
+    const syncTone = () => { $("preview").className = `alert alert-${$("tone").value}`; };
 
     function showStatus(state) {
       const m = state.announcement;
@@ -97,8 +94,8 @@
         if (m.dismissible) text += " " + t("{n} keer weggeklikt.", { n: state.dismissed });
         text += " " + t("Bericht van {name}, {date}", { name: m.by, date: date(m.at) });
       }
-      $("status").textContent = text;
-      $("status").className = `alert ${m && state.expired ? "alert-warning" : "alert-info"}`;
+      $("status-text").textContent = text;
+      $("status-text").className = `alert ${m && state.expired ? "alert-warning" : "alert-info"}`;
       $("status").hidden = false;
       $("remove").hidden = !m;
     }
@@ -113,8 +110,9 @@
       $("tone").value = m?.tone ?? "info";
       $("dismissible").checked = m ? m.dismissible : true;
       document.querySelector(`input[name="audience"][value="${m?.roles.length ? "roles" : "all"}"]`).checked = true;
-      $("roles").innerHTML = roles.map((r) => `<label class="check"><input type="checkbox" name="role" value="${esc(r.id)}" ${m?.roles.includes(r.id) ? "checked" : ""}> ${esc(r.name)}</label>`).join("") || `<span class="muted">${esc(t("Nog geen rollen."))}</span>`;
+      $("roles").innerHTML = roles.map((r) => `<label class="choice"><input type="checkbox" name="role" value="${esc(r.id)}" ${m?.roles.includes(r.id) ? "checked" : ""}><span class="choice-text"><strong>${esc(r.name)}</strong></span></label>`).join("") || `<span class="muted">${esc(t("Nog geen rollen."))}</span>`;
       syncRoles();
+      syncTone();
       showStatus(state);
       preview();
     }
@@ -124,12 +122,13 @@
       clearTimeout(timer);
       timer = setTimeout(() => {
         const text = (locale === "en" && $("text-en").value.trim()) || $("text-nl").value;
-        if (!text.trim()) { $("preview").innerHTML = ""; return; }
-        call("/api/p/mededeling/preview", { method: "POST", body: { text } }).then((r) => ($("preview").innerHTML = r.html)).catch(() => undefined);
+        if (!text.trim()) { $("preview-text").innerHTML = `<p class="muted">${esc(t("Typ een tekst om het voorbeeld te zien."))}</p>`; return; }
+        call("/api/p/mededeling/preview", { method: "POST", body: { text } }).then((r) => ($("preview-text").innerHTML = r.html)).catch(() => undefined);
       }, 300);
     }
     $("text-nl").addEventListener("input", preview);
     $("text-en").addEventListener("input", preview);
+    $("tone").addEventListener("change", syncTone);
     for (const radio of document.querySelectorAll('input[name="audience"]')) radio.addEventListener("change", syncRoles);
 
     $("form").addEventListener("submit", async (e) => {

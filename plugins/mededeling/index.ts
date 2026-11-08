@@ -45,6 +45,8 @@ const TEXTS_EN: Record<string, string> = {
   "Iedereen": "Everyone",
   "Alleen deze rollen": "Only these roles",
   "Nog geen rollen.": "No roles yet.",
+  "Rollen": "Roles",
+  "Typ een tekst om het voorbeeld te zien.": "Type a text to see the preview.",
   "Kleur": "Colour",
   "Informatie": "Information",
   "Goed nieuws": "Good news",

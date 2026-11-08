@@ -1,11 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>My dashboards</title>
-<style>
-.db-stack{display:grid;gap:16px}.db-head,.db-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.db-head h2{margin:0;flex:1}.db-actions{margin-top:16px}.db-review{border-left:3px solid var(--warning)}.db-code{max-height:320px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.db-menu{position:relative}.db-menu summary{list-style:none}.db-menu-items{position:absolute;z-index:10;right:0;min-width:200px;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px #0002}.db-menu-items button{display:block;margin:4px 0;padding:8px;width:100%;text-align:left}.db-versions{margin-top:16px}
-</style></head><body>
+<link rel="stylesheet" href="/tailr-ui.css"></head><body>
 <div class="page-head"><div><h1 data-i18n="My dashboards">My dashboards</h1><p data-i18n="Dashboards built by your AI. Review each new version before it can use your data."></p></div></div>
-<div id="notice" role="status"></div><div id="pending" class="db-stack"></div><div id="list" class="db-stack" style="margin-top:16px"></div>
-<section class="card" style="margin-top:24px"><h2 data-i18n="Have your AI build a dashboard"></h2><p data-i18n="Ask your connected AI tool to build and save a dashboard. It appears here for you to review before opening."></p><p class="hint" id="limits"></p></section>
+<div id="notice" role="status"></div><div id="pending"></div><div id="list"></div>
+<section class="card"><div class="card-head"><h2 data-i18n="Have your AI build a dashboard"></h2></div><p data-i18n="Ask your connected AI tool to build and save a dashboard. It appears here for you to review before opening."></p><p class="hint" id="limits"></p></section>
 <script src="/api/frame/host.js"></script><script src="/api/p/dashboards/ui/shared.js"></script><script>
 const { t, esc, name, call, toast, when, theme } = DashboardUI;
 const base = "/api/p/dashboards", focus = new URLSearchParams(location.search).get("confirm");
@@ -14,11 +12,12 @@ const statuses = { active: ["Active", "badge-success"], disabled: ["Off", "badge
 const versionStatus = { pending: "To confirm", confirmed: "Confirmed", rejected: "Rejected", replaced: "Replaced" };
 const problems = { not_available: "No access", write_not_allowed: "Read functions only", admin_not_allowed: "Admin functions are not allowed", not_allowed: "Not allowed in a dashboard" };
 const used = (d, n) => name(d.usedTools?.find((tool) => tool.name === n) || { name: n });
+const dots = '<svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><circle cx="64" cy="128" r="16"/><circle cx="128" cy="128" r="16"/><circle cx="192" cy="128" r="16"/></svg>';
 async function review(d) {
     const v = await call(`${base}/dashboards/${d.id}/versions/${d.pendingVersion}`), el = document.createElement("section");
-    el.className = "card db-review";
+    el.className = "card";
     el.id = `review-${d.id}`;
-    el.innerHTML = `<div class="db-head"><h2>${esc(v.title)}</h2><span class="badge badge-warning">${esc(t("To confirm"))}</span><span class="hint">${esc(t("Version {n}", { n: v.version }))}</span></div>${v.description ? `<p>${esc(v.description)}</p>` : ""}<p class="hint">${esc(when(v.createdAt))} · ${Math.ceil(v.size / 1024)} kB</p><h3>${esc(t("Functions this dashboard may use"))}</h3><div class="table-wrap"><table class="data"><thead><tr><th>${esc(t("Function"))}</th><th>${esc(t("Level"))}</th></tr></thead><tbody>${v.tools.map(tool => `<tr><td><strong title="${esc(tool.name)}">${esc(name(tool))}</strong>${tool.problem ? `<p class="danger">${esc(t(problems[tool.problem] || tool.problem))}</p>` : ""}</td><td>${esc(t(levels[tool.level] || "None"))}</td></tr>`).join("")}</tbody></table></div><p class="hint">${esc(t("Only confirm a dashboard you asked for. It runs in a sandbox with your permissions and cannot send data outside Tailr Core."))}</p><div class="db-actions"><button class="btn btn-primary" data-act="confirm" ${v.problems ? "disabled" : ""}>${esc(t("Confirm"))}</button><button class="btn btn-secondary" data-act="preview">${esc(t("Preview without data"))}</button><button class="btn btn-secondary" data-act="code">${esc(t("View code"))}</button><button class="btn btn-secondary danger" data-act="reject">${esc(t("Reject"))}</button></div><div data-slot="extra"></div>`;
+    el.innerHTML = `<div class="card-head"><h2>${esc(v.title)}</h2><div class="row"><span class="badge badge-warning">${esc(t("To confirm"))}</span><span class="hint">${esc(t("Version {n}", { n: v.version }))}</span></div></div>${v.description ? `<p>${esc(v.description)}</p>` : ""}<p class="hint">${esc(when(v.createdAt))} · ${Math.ceil(v.size / 1024)} kB</p><h3 class="section-title">${esc(t("Functions this dashboard may use"))}</h3><div class="table-wrap"><table class="data"><thead><tr><th>${esc(t("Function"))}</th><th>${esc(t("Level"))}</th></tr></thead><tbody>${v.tools.map(tool => `<tr><td><strong title="${esc(tool.name)}">${esc(name(tool))}</strong>${tool.problem ? `<span class="field-error">${esc(t(problems[tool.problem] || tool.problem))}</span>` : ""}</td><td>${esc(t(levels[tool.level] || "None"))}</td></tr>`).join("") || `<tr class="no-hover"><td colspan="2" class="muted">${esc(t("No functions"))}</td></tr>`}</tbody></table></div><p class="hint">${esc(t("Only confirm a dashboard you asked for. It runs in a sandbox with your permissions and cannot send data outside Tailr Core."))}</p><div class="form-actions"><button class="btn-link danger" data-act="reject">${esc(t("Reject"))}</button><span class="spacer"></span><button class="btn btn-secondary" data-act="code">${esc(t("View code"))}</button><button class="btn btn-secondary" data-act="preview">${esc(t("Preview without data"))}</button><button class="btn btn-primary" data-act="confirm" ${v.problems ? "disabled" : ""}>${esc(t("Confirm"))}</button></div><div data-slot="extra"></div>`;
     let preview;
     el.addEventListener("click", async (e) => {
         const button = e.target.closest("button[data-act]");
@@ -40,14 +39,17 @@ async function review(d) {
             if (action === "code") {
                 preview?.destroy();
                 extra.innerHTML = "";
-                const code = document.createElement("pre");
-                code.className = "code db-code";
-                code.textContent = v.html;
+                const code = document.createElement("textarea");
+                code.className = "textarea mono";
+                code.readOnly = true;
+                code.rows = 18;
+                code.setAttribute("aria-label", t("View code"));
+                code.value = v.html;
                 extra.append(code);
             }
             if (action === "preview") {
                 preview?.destroy();
-                extra.innerHTML = '<div class="db-preview"></div>';
+                extra.innerHTML = "<div></div>";
                 preview = TailrFrame.mount(extra.firstChild, { html: v.html, libraries: v.libraries, tools: v.tools.filter(tool => !tool.problem), locale: window.parent.tailr?.locale, theme: theme(), title: v.title });
             }
         }
@@ -64,9 +66,9 @@ function card(d) {
     const el = document.createElement("section");
     el.className = "card";
     const [label, cls] = statuses[d.status] || [d.status, "badge-neutral"];
-    el.innerHTML = `<div class="db-head"><h2>${esc(d.title)}</h2><span class="badge ${cls}">${esc(t(label))}</span></div>${d.description ? `<p>${esc(d.description)}</p>` : ""}${d.uses.length ? `<p class="hint">${esc(t("Uses"))}: ${d.uses.map(n => `<span title="${esc(n)}">${esc(used(d, n))}</span>`).join(", ")}</p>` : ""}<div class="db-actions">${d.status === "active" ? `<a class="btn btn-primary" href="/p/dashboards/view?id=${encodeURIComponent(d.id)}" target="_top">${esc(t("Open"))}</a>` : ""}<details class="db-menu"><summary class="btn btn-secondary" aria-label="${esc(t("More actions for {name}", { name: d.title }))}">⋯</summary><div class="db-menu-items">${d.activeVersion ? `<button class="btn-link ${d.enabled ? "danger" : ""}" data-act="toggle">${esc(t(d.enabled ? "Turn off" : "Switch on"))}</button>` : ""}<button class="btn-link danger" data-act="delete">${esc(t("Delete"))}</button></div></details></div><details class="db-versions connection-section"><summary>${esc(t("Versions ({n})", { n: d.versions.length }))}</summary><div class="table-wrap"><table class="data"><thead><tr><th>${esc(t("Version"))}</th><th>${esc(t("Status"))}</th><th>${esc(t("Created"))}</th><th></th></tr></thead><tbody>${d.versions.map(v => `<tr><td>${v.version}${v.active ? ` <span class="badge badge-success">${esc(t("Active"))}</span>` : ""}</td><td>${esc(t(versionStatus[v.status] || v.status))}</td><td>${esc(when(v.createdAt))}</td><td>${v.status === "confirmed" && !v.active ? `<button class="btn btn-secondary btn-sm" data-act="activate" data-v="${v.version}">${esc(t("Restore"))}</button>` : ""}</td></tr>`).join("")}</tbody></table></div></details>`;
+    el.innerHTML = `<div class="card-head"><div class="row"><h2>${esc(d.title)}</h2><span class="badge ${cls}">${esc(t(label))}</span></div><div class="row">${d.status === "active" ? `<a class="btn btn-secondary btn-sm" href="/p/dashboards/view?id=${encodeURIComponent(d.id)}" target="_top">${esc(t("Open"))}</a>` : ""}<details class="menu"><summary class="btn-icon" aria-label="${esc(t("More actions for {name}", { name: d.title }))}" title="${esc(t("More actions for {name}", { name: d.title }))}">${dots}</summary><div class="menu-list">${d.activeVersion ? `<button type="button" class="${d.enabled ? "danger" : ""}" data-act="toggle">${esc(t(d.enabled ? "Turn off" : "Switch on"))}</button>` : ""}<button type="button" class="danger" data-act="delete">${esc(t("Delete"))}</button></div></details></div></div>${d.description ? `<p>${esc(d.description)}</p>` : ""}${d.uses.length ? `<p class="hint">${esc(t("Uses"))}: ${d.uses.map(n => `<span title="${esc(n)}">${esc(used(d, n))}</span>`).join(", ")}</p>` : ""}<details class="disclosure"><summary>${esc(t("Versions ({n})", { n: d.versions.length }))}</summary><div class="disclosure-body"><div class="table-wrap"><table class="data"><thead><tr><th>${esc(t("Version"))}</th><th>${esc(t("Status"))}</th><th>${esc(t("Created"))}</th><th class="table-actions"></th></tr></thead><tbody>${d.versions.map(v => `<tr><td>${v.version}${v.active ? ` <span class="badge badge-success">${esc(t("Active"))}</span>` : ""}</td><td>${esc(t(versionStatus[v.status] || v.status))}</td><td class="nowrap">${esc(when(v.createdAt))}</td><td class="table-actions">${v.status === "confirmed" && !v.active ? `<button class="btn btn-secondary btn-sm" data-act="activate" data-v="${v.version}">${esc(t("Restore"))}</button>` : ""}</td></tr>`).join("")}</tbody></table></div></div></details>`;
     el.addEventListener("click", async (e) => { const button = e.target.closest("button[data-act]"); if (!button)
-        return; const action = button.dataset.act; if (action === "delete" && !confirm(t("Delete dashboard {name} and all its versions?", { name: d.title })))
+        return; const action = button.dataset.act; button.closest("details.menu")?.removeAttribute("open"); if (action === "delete" && !confirm(t("Delete dashboard {name} and all its versions?", { name: d.title })))
         return; if (action === "toggle" && d.enabled && !confirm(t("Turn off dashboard {name}?", { name: d.title })))
         return; if (action === "activate" && !confirm(t("Restore version {n}?", { n: button.dataset.v })))
         return; button.disabled = true; try {
@@ -91,7 +93,7 @@ async function load() { const notice = document.getElementById("notice"), pendin
     const cfg = await call(`${base}/config`);
     document.getElementById("limits").textContent = t("Maximum {n} kB per dashboard.", { n: cfg.maxKb }) + (cfg.readOnly ? " " + t("Read functions only.") : "");
     if (!cfg.enabled) {
-        notice.textContent = t("Dashboards are turned off. Ask your administrator to enable them.");
+        notice.innerHTML = `<div class="alert alert-info">${esc(t("Dashboards are turned off. Ask your administrator to enable them."))}</div>`;
         return;
     }
     const items = await call(`${base}/dashboards`);
@@ -100,7 +102,7 @@ async function load() { const notice = document.getElementById("notice"), pendin
     for (const d of items.filter(d => d.activeVersion || !d.pendingVersion))
         list.append(card(d));
     if (!items.length)
-        list.innerHTML = `<section class="empty-state compact"><h2>${esc(t("No dashboards yet"))}</h2><p>${esc(t("Ask your connected AI tool to build and save a dashboard. It appears here for you to review before opening."))}</p></section>`;
+        list.innerHTML = `<section class="empty-state compact"><div class="empty-state-head"><h2>${esc(t("No dashboards yet"))}</h2><p>${esc(t("Ask your connected AI tool to build and save a dashboard. It appears here for you to review before opening."))}</p></div></section>`;
     if (focus)
         document.getElementById(`review-${focus}`)?.scrollIntoView({ block: "start" });
 }

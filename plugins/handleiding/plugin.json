@@ -22,8 +22,8 @@
   },
   "$schema": "../../schemas/plugin.json",
   "id": "handleiding",
-  "version": "1.0.1",
-  "api": "1.5",
+  "version": "1.1.0",
+  "api": "1.7",
   "title": { "nl": "Handleiding", "en": "Guide" },
   "summary": {
     "nl": "Een handleiding voor iedereen, met de koppelingen en voorbeeldvragen per lezer; de beheerder past hem aan in markdown",

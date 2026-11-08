@@ -13,8 +13,8 @@
     document.documentElement.lang = host()?.locale ?? "en";
     document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape")
-        document.querySelectorAll("details.db-menu[open]").forEach((el) => { el.open = false; el.querySelector("summary").focus(); }); });
-    document.addEventListener("pointerdown", (e) => document.querySelectorAll("details.db-menu[open]").forEach((el) => { if (!el.contains(e.target))
+        document.querySelectorAll("details.menu[open]").forEach((el) => { el.open = false; el.querySelector("summary").focus(); }); });
+    document.addEventListener("pointerdown", (e) => document.querySelectorAll("details.menu[open]").forEach((el) => { if (!el.contains(e.target))
         el.open = false; }));
     window.DashboardUI = { t, esc, text, name, call, toast, when, theme };
 })();

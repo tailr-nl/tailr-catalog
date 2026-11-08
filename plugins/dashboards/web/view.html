@@ -1,18 +1,19 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard</title>
-<style>.db-frame{background:transparent}.db-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}.db-toolbar h1{flex:1;margin:0}.db-toolbar h1[hidden]{display:none}</style></head><body>
-<a class="connection-back" href="/p/dashboards" target="_top">← <span data-i18n="My dashboards"></span></a>
-<div class="db-toolbar"><h1 id="title">Dashboard</h1><span class="badge badge-neutral" id="version"></span><button class="btn btn-secondary btn-sm" id="reload" type="button" data-i18n="Refresh"></button></div>
-<div id="notice" role="status"></div><div class="db-frame" id="frame"></div><details class="connection-section"><summary data-i18n="About this dashboard"></summary><p class="hint" id="footer"></p></details>
+<link rel="stylesheet" href="/tailr-ui.css"></head><body>
+<a class="back-link" href="/p/dashboards" target="_top">‹ <span data-i18n="My dashboards"></span></a>
+<div class="page-head"><div><h1 id="title">Dashboard</h1></div><div class="row"><span id="version" hidden></span><button class="btn btn-secondary btn-sm" id="reload" type="button" data-i18n="Refresh"></button></div></div>
+<div id="notice" role="status"></div><div id="frame"></div><details class="disclosure"><summary data-i18n="About this dashboard"></summary><div class="disclosure-body"><p class="hint" id="footer"></p></div></details>
 <script src="/api/frame/host.js"></script><script src="/api/p/dashboards/ui/shared.js"></script><script>
 const { t, esc, name, call, theme } = DashboardUI, base = "/api/p/dashboards", id = new URLSearchParams(location.search).get("id") || "";
 const notice = (tone, html) => document.getElementById("notice").innerHTML = html ? `<div class="alert ${tone}">${html}</div>` : "";
 const reviewLink = () => `<a href="/p/dashboards?confirm=${encodeURIComponent(id)}" target="_top">${esc(t("Review and confirm"))}</a>`;
 let frame;
-async function show() { const button = document.getElementById("reload"); button.disabled = true; frame?.destroy(); notice("", ""); const holder = document.getElementById("frame"); holder.innerHTML = ""; try {
+async function show() { const button = document.getElementById("reload"); button.disabled = true; frame?.destroy(); notice("", ""); document.getElementById("version").hidden = true; const holder = document.getElementById("frame"); holder.innerHTML = ""; try {
     const d = await call(`${base}/dashboards/${encodeURIComponent(id)}/frame`);
     document.getElementById("title").textContent = d.title;
     document.getElementById("title").hidden = false;
-    document.getElementById("version").textContent = t("Version {n}", { n: d.version });
+    document.getElementById("version").innerHTML = `<span class="badge badge-neutral">${esc(t("Version {n}", { n: d.version }))}</span>`;
+    document.getElementById("version").hidden = false;
     document.title = d.title;
     if (d.missing.length)
         notice("alert-warning", esc(t("Some required functions are no longer accessible. Parts of this dashboard may not work.")));

@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Handleiding</title>
+  <link rel="stylesheet" href="/tailr-ui.css">
   <!-- Links in de handleiding openen de pagina zelf, niet dit frame -->
   <base target="_top">
-  <style>[hidden] { display: none !important; }</style>
 </head>
 <body>
-  <div class="row" id="edit" style="justify-content: flex-end; margin-bottom: 8px;" hidden>
-    <a class="btn btn-secondary btn-sm" href="/p/handleiding/beheer" target="_top" data-t="Handleiding aanpassen">Handleiding aanpassen</a>
+  <div id="edit" hidden>
+    <div class="toolbar"><div class="toolbar-actions"><a class="btn btn-secondary btn-sm" href="/p/handleiding/beheer" target="_top" data-t="Handleiding aanpassen">Handleiding aanpassen</a></div></div>
   </div>
-  <div class="alert alert-danger" id="error" hidden></div>
+  <div id="error" hidden><div class="alert alert-danger" id="error-text"></div></div>
   <p class="muted" id="loading" data-t="Laden…">Laden…</p>
   <!-- De HTML komt van de server: de veilige omzetter van de kern (api.markdown.render) -->
   <article class="card markdown" id="guide" hidden></article>
@@ -32,9 +32,8 @@
         document.getElementById("edit").hidden = !doc.canEdit;
       })
       .catch((err) => {
-        const box = document.getElementById("error");
-        box.textContent = err.message;
-        box.hidden = false;
+        document.getElementById("error-text").textContent = err.message;
+        document.getElementById("error").hidden = false;
       })
       .finally(() => (document.getElementById("loading").hidden = true));
   </script>

@@ -4,12 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI-tools toestaan</title>
-  <style>
-    .pl-stack { display: grid; gap: 10px; max-width: 680px; }
-    label.check { display: flex; gap: 8px; align-items: center; }
-    .users { font-size: 13px; margin-top: 4px; }
-    select.input { width: auto; }
-  </style>
+  <link rel="stylesheet" href="/tailr-ui.css">
 </head>
 <body>
   <div class="page-head"><div>
@@ -18,29 +13,34 @@
   </div></div>
 
   <form id="form">
-    <div class="card pl-stack">
-      <h2>Standaard</h2>
-      <label class="check"><input type="radio" name="defaultAi" value="allow"> Nieuwe AI-tools mogen verbinden, tenzij je ze hieronder blokkeert</label>
-      <label class="check"><input type="radio" name="defaultAi" value="approve"> Nieuwe AI-tools hebben eerst goedkeuring nodig. Ze komen in <a href="/pending" target="_top">Te bevestigen</a> (beheerders krijgen een mail), en de medewerker ziet het al op het toestemmingsscherm.</label>
-      <label class="check"><input type="radio" name="defaultAi" value="block"> Alleen AI-tools die je hieronder toestaat (bijv. alleen de connector van je Claude- of ChatGPT-organisatie)</label>
-      <div class="hint">Eigen apps (onder Apps en dashboards) mogen altijd, tenzij je ze hieronder blokkeert.</div>
-      <div>
-        <strong>Rollen die elke AI-tool mogen gebruiken</strong>
-        <div id="roles"></div>
-      </div>
+    <div class="card">
+      <div class="card-head"><h2>Standaard</h2></div>
+      <fieldset class="field">
+        <legend>Nieuwe AI-tools</legend>
+        <div class="choice-list">
+          <label class="choice"><input type="radio" name="defaultAi" value="allow"><span class="choice-text"><strong>Mogen verbinden</strong><span class="hint">Tenzij je ze hieronder blokkeert.</span></span></label>
+          <label class="choice"><input type="radio" name="defaultAi" value="approve"><span class="choice-text"><strong>Hebben eerst goedkeuring nodig</strong><span class="hint">Ze komen in <a href="/pending" target="_top">Te bevestigen</a> (beheerders krijgen een mail), en de medewerker ziet het al op het toestemmingsscherm.</span></span></label>
+          <label class="choice"><input type="radio" name="defaultAi" value="block"><span class="choice-text"><strong>Alleen wat je hieronder toestaat</strong><span class="hint">Bijvoorbeeld alleen de connector van je Claude- of ChatGPT-organisatie.</span></span></label>
+        </div>
+        <span class="hint">Eigen apps (onder Apps en dashboards) mogen altijd, tenzij je ze hieronder blokkeert.</span>
+      </fieldset>
+      <fieldset class="field">
+        <legend>Rollen die elke AI-tool mogen gebruiken</legend>
+        <div id="roles" class="choice-list"></div>
+      </fieldset>
     </div>
 
     <div id="list"></div>
-    <div class="row" style="margin-top:12px"><button class="btn btn-primary" type="submit">Opslaan</button></div>
+    <div class="save-bar"><div class="form-actions"><button class="btn btn-primary" type="submit">Opslaan</button></div></div>
   </form>
 
-  <div class="card" style="margin-top:16px">
-    <h2>Alleen het zakelijke account</h2>
+  <div class="card">
+    <div class="card-head"><h2>Alleen het zakelijke account</h2></div>
     <p class="small">Een gratis of privé-account van een AI-tool (bijvoorbeeld ChatGPT Free) kan je data gebruiken om van te leren. Zo laat je alleen het account van je organisatie toe:</p>
     <ol class="small">
-      <li>Voeg de connector toe in je Claude- of ChatGPT-organisatie en verbind één keer met je werkaccount. De client verschijnt hieronder; zet hem op <strong>Toestaan</strong>.</li>
+      <li>Voeg de connector toe in je Claude- of ChatGPT-organisatie en verbind één keer met je werkaccount. De client verschijnt hierboven; zet hem op <strong>Toestaan</strong>.</li>
       <li>Zet de standaard op <strong>goedkeuring nodig</strong> (of op alleen toegestane AI-tools).</li>
-      <li>Verbindt iemand met een privé-account, dan ziet hij op het toestemmingsscherm dat de AI-tool op goedkeuring wacht. De client staat in <a href="/pending" target="_top">Te bevestigen</a>: bevestigen staat hem toe, afwijzen blokkeert hem. Je kunt ook hieronder kiezen.</li>
+      <li>Verbindt iemand met een privé-account, dan ziet hij op het toestemmingsscherm dat de AI-tool op goedkeuring wacht. De client staat in <a href="/pending" target="_top">Te bevestigen</a>: bevestigen staat hem toe, afwijzen blokkeert hem. Je kunt ook hierboven kiezen.</li>
     </ol>
     <p class="small muted">Testen of een privé-account een eigen client krijgt: zie <code>docs/ai-clients-test.md</code>. Let op de aanmelding (CIMD-URL of DCR), de redirect en het aantal gebruikers per client.</p>
     <p class="small muted">Tailr Core ziet de client (naam, redirect) en de gebruiker, niet het account aan de kant van de AI-tool. Gebruikt een AI-tool één client voor iedereen, dan zie je hier geen nieuwe client en kan het alleen per gebruiker of rol, of met de instellingen van de AI-tool zelf.</p>
@@ -66,31 +66,31 @@
       const form = document.getElementById("form");
       form.querySelector(`input[name=defaultAi][value=${data.config.defaultAi}]`).checked = true;
       document.getElementById("roles").innerHTML = data.roles.filter((r) => !r.name.startsWith("__")).map((r) =>
-        `<label class="check"><input type="checkbox" name="role" value="${esc(r.id)}" ${data.config.exemptRoles.includes(r.id) ? "checked" : ""}> ${esc(r.name)}</label>`).join("") || `<div class="hint">Nog geen rollen.</div>`;
+        `<label class="choice"><input type="checkbox" name="role" value="${esc(r.id)}" ${data.config.exemptRoles.includes(r.id) ? "checked" : ""}><span class="choice-text"><strong>${esc(r.name)}</strong></span></label>`).join("") || `<span class="hint">Nog geen rollen.</span>`;
       const el = document.getElementById("list");
       if (!data.clients.length) {
-        el.innerHTML = `<div class="card"><p class="muted" style="margin:0">Er heeft nog geen AI-tool of app met OAuth verbonden.</p></div>`;
+        el.innerHTML = `<div class="card card-flush"><div class="empty-row"><strong>Nog geen AI-tool of app</strong><span>Er heeft nog geen AI-tool of app met OAuth verbonden.</span></div></div>`;
         return;
       }
-      el.innerHTML = `<div class="card card-flush"><table class="data"><thead><tr><th>Client</th><th>Gebruikers</th><th>Keuze</th></tr></thead><tbody>${data.clients.map((c) => {
+      el.innerHTML = `<div class="card card-flush"><div class="table-wrap"><table class="data"><thead><tr><th>Client</th><th>Gebruikers</th><th>Keuze</th></tr></thead><tbody>${data.clients.map((c) => {
         const kind = c.app ? `<span class="badge badge-info">App: ${esc(c.app)}</span>` : `<span class="badge badge-neutral">AI-tool</span>`;
         const effective = c.pending ? `<span class="badge badge-warning">Wacht op goedkeuring</span>` : c.effective === "allow" ? `<span class="badge badge-success">Mag</span>` : `<span class="badge badge-danger">Geblokkeerd</span>`;
-        const quick = c.pending ? `<div class="row" style="margin-top:6px">${c.pendingId ? `<a class="btn btn-secondary btn-sm" href="/pending?id=${encodeURIComponent(c.pendingId)}" target="_top">In Te bevestigen</a> ` : ""}<button type="button" class="btn btn-primary btn-sm" data-quick="allow" data-id="${esc(c.clientId)}">Toestaan</button> <button type="button" class="btn btn-secondary btn-sm" data-quick="block" data-id="${esc(c.clientId)}">Blokkeren</button></div>` : "";
+        const quick = c.pending ? `<p class="row">${c.pendingId ? `<a class="btn btn-secondary btn-sm" href="/pending?id=${encodeURIComponent(c.pendingId)}" target="_top">In Te bevestigen</a>` : ""}<button type="button" class="btn btn-primary btn-sm" data-quick="allow" data-id="${esc(c.clientId)}">Toestaan</button><button type="button" class="btn btn-secondary btn-sm" data-quick="block" data-id="${esc(c.clientId)}">Blokkeren</button></p>` : "";
         const users = c.users.length ? c.users.map((u) => `${esc(u.name)} <span class="muted">laatst ${when(u.lastAt)}${u.blocked ? `, ${u.blocked}× geweigerd` : ""}</span>`).join("<br>") : `<span class="muted">nog niet gebruikt</span>`;
         const standard = c.app ? "Standaard (toestaan)" : `Standaard (${{ allow: "toestaan", block: "blokkeren", approve: "goedkeuring nodig" }[data.config.defaultAi]})`;
         return `<tr>
-          <td><strong>${esc(c.name ?? "Zonder naam")}</strong> ${kind} ${effective}
+          <td><div class="row"><strong>${esc(c.name ?? "Zonder naam")}</strong> ${kind} ${effective}</div>
             <div class="small muted">${registration(c)} · aangemeld ${when(c.createdAt)}${c.disabled ? " · uitgeschakeld" : ""} · ${c.users.length === 1 ? "1 gebruiker" : `${c.users.length} gebruikers`}</div>
             <div class="small muted">Redirect: ${c.redirectUris.length ? c.redirectUris.map((u) => `<code>${esc(u)}</code>`).join(", ") : "geen"}</div>
             ${c.softwareId || c.softwareVersion ? `<div class="small muted">Software: ${esc([c.softwareId, c.softwareVersion].filter(Boolean).join(" "))}</div>` : ""}
             <div class="small muted">Client-id: <code>${esc(c.clientId)}</code></div>${quick}</td>
-          <td class="users">${users}</td>
-          <td><select class="input" data-client="${esc(c.clientId)}">
+          <td class="small">${users}</td>
+          <td><select class="select-sm" data-client="${esc(c.clientId)}" aria-label="Keuze voor ${esc(c.name ?? "client zonder naam")}">
             <option value="" ${!c.choice ? "selected" : ""}>${standard}</option>
             <option value="allow" ${c.choice === "allow" ? "selected" : ""}>Toestaan</option>
             <option value="block" ${c.choice === "block" ? "selected" : ""}>Blokkeren</option>
           </select></td></tr>`;
-      }).join("")}</tbody></table></div>`;
+      }).join("")}</tbody></table></div></div>`;
     }
 
     document.getElementById("list").addEventListener("click", async (e) => {

@@ -4,11 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Extra logging</title>
-  <style>
-    .pl-stack { display: grid; gap: 12px; max-width: 640px; }
-    label.check { display: flex; gap: 8px; align-items: center; }
-    .stats { font-size: 13px; }
-  </style>
+  <link rel="stylesheet" href="/tailr-ui.css">
 </head>
 <body>
   <div class="page-head"><div>
@@ -16,44 +12,53 @@
     <p>Stuur elke functie-aanroep en elke beheerwijziging door naar een bestand, een webhook of syslog. De log van Tailr Core zelf blijft bestaan.</p>
   </div></div>
 
-  <form id="form" class="card pl-stack">
-    <h2>Wat</h2>
-    <label class="check"><input type="checkbox" name="calls"> Functie-aanroepen</label>
-    <label class="check"><input type="checkbox" name="onlyWrites"> Alleen schrijfacties en beheer (geen leesaanroepen)</label>
-    <label class="check"><input type="checkbox" name="admin"> Beheerwijzigingen</label>
+  <form id="form">
+    <div class="card">
+      <div class="card-head"><h2>Wat</h2></div>
+      <div class="stack">
+        <label class="switch"><input type="checkbox" name="calls" role="switch"> Functie-aanroepen</label>
+        <label class="switch"><input type="checkbox" name="onlyWrites" role="switch"> Alleen schrijfacties en beheer (geen leesaanroepen)</label>
+        <label class="switch"><input type="checkbox" name="admin" role="switch"> Beheerwijzigingen</label>
+      </div>
+    </div>
 
-    <h2>Waarheen</h2>
-    <div class="field">
-      <label for="file">Bestand (JSON per regel)</label>
-      <input class="input" id="file" name="file" placeholder="/data/logs/tailr-core.jsonl">
-      <div class="hint">Absoluut pad op de server. Leeg = niet naar een bestand.</div>
+    <div class="card">
+      <div class="card-head"><h2>Waarheen</h2></div>
+      <div class="field">
+        <label for="file">Bestand (JSON per regel)</label>
+        <input class="input" id="file" name="file" placeholder="/data/logs/tailr-core.jsonl">
+        <span class="hint">Absoluut pad op de server. Leeg = niet naar een bestand.</span>
+      </div>
+      <div class="field">
+        <label for="webhookUrl">Webhook</label>
+        <input class="input" id="webhookUrl" name="webhookUrl" placeholder="https://logs.example.nl/tailr">
+        <span class="hint">Elke regel als POST met JSON.</span>
+      </div>
+      <div class="field">
+        <label for="webhookSecret">Geheim voor de webhook (optioneel)</label>
+        <input class="input" id="webhookSecret" name="webhookSecret" type="password" autocomplete="new-password">
+        <span class="hint" id="secretHint">Met een geheim krijgt elke aanroep de header <code>X-Tailr-Signature: sha256=…</code> (HMAC van de body).</span>
+      </div>
+      <div class="field">
+        <label for="syslog">Syslog (UDP)</label>
+        <input class="input" id="syslog" name="syslog" placeholder="syslog.example.nl:514">
+      </div>
     </div>
-    <div class="field">
-      <label for="webhookUrl">Webhook</label>
-      <input class="input" id="webhookUrl" name="webhookUrl" placeholder="https://logs.example.nl/tailr">
-      <div class="hint">Elke regel als POST met JSON.</div>
+
+    <div class="save-bar">
+      <span class="hint" id="stats"></span>
+      <div class="form-actions">
+        <button class="btn btn-secondary" type="button" id="test">Testbericht sturen</button>
+        <button class="btn btn-primary" type="submit">Opslaan</button>
+      </div>
     </div>
-    <div class="field">
-      <label for="webhookSecret">Geheim voor de webhook (optioneel)</label>
-      <input class="input" id="webhookSecret" name="webhookSecret" type="password" autocomplete="new-password">
-      <div class="hint" id="secretHint">Met een geheim krijgt elke aanroep de header <code>X-Tailr-Signature: sha256=…</code> (HMAC van de body).</div>
-    </div>
-    <div class="field">
-      <label for="syslog">Syslog (UDP)</label>
-      <input class="input" id="syslog" name="syslog" placeholder="syslog.example.nl:514">
-    </div>
-    <div class="row">
-      <button class="btn btn-primary" type="submit">Opslaan</button>
-      <button class="btn btn-secondary" type="button" id="test">Testbericht sturen</button>
-    </div>
-    <div class="stats muted" id="stats"></div>
   </form>
 
-  <section class="card pl-stack" style="margin-top: 16px;">
-    <h2>Klopt niet</h2>
-    <p class="hint">Meldingen die gebruikers via hun AI doen met de functie <code>extra-logging__feedback</code>. Geef rollen toegang onder <em>Toegang → Rechten</em> (rij Extra logging, niveau Schrijven).</p>
+  <h2 class="section-title">Klopt niet</h2>
+  <p class="hint">Meldingen die gebruikers via hun AI doen met de functie <code>extra-logging__feedback</code>. Geef rollen toegang onder <em>Toegang → Rechten</em> (rij Extra logging, niveau Schrijven).</p>
+  <div class="card card-flush"><div class="table-wrap">
     <table class="data"><thead><tr><th>Wanneer</th><th>Wie</th><th>Functie</th><th>Wat klopt niet</th></tr></thead><tbody id="feedback"></tbody></table>
-  </section>
+  </div></div>
 
   <script>
     const tailr = window.parent.tailr;
@@ -95,9 +100,13 @@
     async function loadFeedback() {
       const rows = await call(`${base}/feedback`);
       const body = document.getElementById("feedback");
-      body.replaceChildren(...(rows.length ? rows : [null]).map((f) => {
+      if (!rows.length) {
+        body.innerHTML = `<tr class="no-hover"><td colspan="4"><div class="empty-row"><strong>Nog geen meldingen</strong><span>Wat gebruikers via hun AI melden, komt hier te staan.</span></div></td></tr>`;
+        return;
+      }
+      body.replaceChildren(...rows.map((f) => {
         const tr = document.createElement("tr");
-        const cells = f ? [new Date(f.at).toLocaleString(), f.userName, f.tool, f.comment] : ["Nog geen meldingen."];
+        const cells = [new Date(f.at).toLocaleString(), f.userName, f.tool, f.comment];
         for (const text of cells) { const td = document.createElement("td"); td.textContent = text ?? ""; tr.append(td); }
         return tr;
       }));
