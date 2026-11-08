@@ -30,7 +30,7 @@ De connector markeert zelf waar gegevens van mensen staan. Dat is de ondergrens:
 
 - **Lijsten geven geen persoonsgegevens.** In lijsten van betalingen, klanten, machtigingen, verkoopfacturen, betaallinks, niet-gekoppelde overboekingen, transacties en conceptoverboekingen zijn naam, e-mail, rekeningnummer (IBAN), kaarthouder en adressen weggelaten (`transform.exclude`). Dat geldt ook voor betalingen die met `embed=payment` meekomen bij captures, terugbetalingen en chargebacks, en voor het object bij een webhookgebeurtenis.
 - **Opzoeken gaat één tegelijk**, met `privacy`: `get_payment`, `get_customer`, `get_mandate`, `get_sales_invoice`, `get_unmatched_credit_transfer`, `get_business_account_transaction`, `get_transfer` en `get_draft_transfer`. Alleen de velden in `sensitivity` gaan door; de AI krijgt schuilnamen, er is een plafond per dag en elke inzage staat in het inzagelog.
-- **Een overzicht met namen** is er alleen voor dashboards en tools: `list_customers_with_names` (`audience: "api"`). De AI ziet die functie niet.
+- **Een overzicht met namen** is er alleen voor *Apps (API)*, zoals dashboards en tools: `list_customers_with_names` (`audience: "api"`). De AI ziet die functie niet: in *AI-tools (MCP)* bestaat hij niet.
 - **Schrijffuncties** houden hun eigen niveau (`write` of `admin`) en geen privacy-markering: wat ze terugsturen, heeft de aanroeper zelf meegegeven.
 - `list_business_accounts` heeft de parameter `account` (in de API `iban`): dat is het IBAN van je eigen zakelijke rekening, geen persoonsgegeven.
 
@@ -73,6 +73,6 @@ Mollie publiceert de API als OpenAPI-specificatie ([github.com/mollie/openapi](h
 
 ## Gerichte gegevensverstrekking en bevestiging
 
-Individuele detailfuncties markeren de naamvelden die met `privacy.chat.allowReal` expliciet voor de chat aangevraagd mogen worden. Gewone opvragen blijven schuilnamen geven. In Tailr Core kiest de beheerder per functie **Altijd toestaan**, **Elke keer vragen** of **Blokkeren**, en kan de toegestane velden beperken. E-mailadressen, rekeningnummers, adressen en metadata vallen buiten deze uitzondering. Lijsten en API-only functies blijven afgeschermd.
+Individuele detailfuncties markeren de naamvelden die met `privacy.chat.allowReal` expliciet voor *AI-tools (MCP)* aangevraagd mogen worden. Gewone opvragen blijven schuilnamen geven. In Tailr Core kiest de beheerder per functie **Altijd toestaan**, **Elke keer vragen** of **Blokkeren**, en kan de toegestane velden beperken. E-mailadressen, rekeningnummers, adressen en metadata vallen buiten deze uitzondering. Lijsten en functies die alleen voor *Apps (API)* zijn, blijven afgeschermd.
 
 Alle functies op niveau `admin` stellen met `confirmationRequired: true` bevestiging van elke concrete aanroep verplicht. Uitvoerschema's bewaken de basisvorm van de individuele privacygevoelige detailantwoorden; een onjuist antwoord wordt niet verstrekt.
