@@ -42,7 +42,6 @@ const TEXTS_EN: Record<string, string> = {
   "Mededeling": "Announcement",
   "Een korte mededeling bovenaan elke pagina, voor iedereen of voor bepaalde rollen.": "A short announcement at the top of every page, for everyone or for certain roles.",
   "Laden…": "Loading…",
-  "Aanpassen": "Edit",
   "Voorbeeld": "Preview",
   "Er staat nu geen mededeling.": "There is no announcement right now.",
   "Te zien voor iedereen.": "Visible to everyone.",
@@ -198,7 +197,7 @@ export function register(api: PluginApi) {
       text: { nl: `${m.text.nl}${footer("nl")}`, ...(m.text.en ? { en: `${m.text.en}${footer("en")}` } : {}) },
       actions: [
         ...(opts.dismiss ? [{ id: "dismiss", label: { nl: "Sluiten", en: "Dismiss" }, post: "dismiss" }] : []),
-        ...(opts.isAdmin ? [{ id: "edit", label: { nl: "Aanpassen", en: "Edit" }, href: "/plugins/mededeling/settings" }] : []),
+        ...(opts.isAdmin ? [{ id: "edit", label: { nl: "Aanpassen", en: "Edit" }, href: "/plugins/mededeling" }] : []),
       ],
     };
   }

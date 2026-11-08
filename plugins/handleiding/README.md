@@ -28,7 +28,7 @@ Geef rollen toegang onder **Toegang → Rechten**, rij *Handleiding*, niveau *Le
 ## Instellen
 
 1. Installeer de plugin onder *Plugins → Beschikbaar* (of via *Aanbevolen plugins* in de welkomstwizard).
-2. Vul op het tabblad *Handleiding aanpassen* van de pluginpagina de naam van de organisatie en het contact in, en pas de tekst aan als je wilt.
+2. Vul op het tabblad *Instellingen* van de pluginpagina de naam van de organisatie en het contact in, en pas op het tabblad *Handleiding aanpassen* de tekst aan als je wilt.
 3. Geef rollen eventueel toegang tot `handleiding__read` (zie hierboven).
 
 Uitzetten (*Uitzetten* in het menu van de pluginpagina of van zijn rij op *Plugins → Geïnstalleerd*) haalt na de herstart het menu-item, het blok op *Verbonden tools* en de functie weg. De aangepaste tekst blijft bewaard (`tp_handleiding_texts`).
@@ -38,8 +38,7 @@ Uitzetten (*Uitzetten* in het menu van de pluginpagina of van zijn rij op *Plugi
 | Route | Wie | Wat |
 | --- | --- | --- |
 | `GET /api/p/handleiding/guide?locale=nl` | iedereen | `{ locale, markdown, html, customized, canEdit }` |
-| `GET /api/admin/p/handleiding/settings` | beheerder | naam, contact, en per taal de tekst, de standaard en de verschillen |
-| `PUT /api/admin/p/handleiding/settings` | beheerder | `{ orgName, contact }` |
+| `GET /api/admin/p/handleiding/texts` | beheerder | per taal de tekst, de standaard en de verschillen |
 | `PUT /api/admin/p/handleiding/text/<taal>` | beheerder | `{ text }`: aanpassing opslaan |
 | `DELETE /api/admin/p/handleiding/text/<taal>` | beheerder | terug naar de standaard |
 | `POST /api/admin/p/handleiding/text/<taal>/accept-default` | beheerder | nieuwe standaard bekeken |

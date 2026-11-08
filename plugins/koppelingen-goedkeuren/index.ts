@@ -345,7 +345,7 @@ export function register(api: PluginApi) {
         en: "There is only one administrator, and requesters may not approve their own requests. Their own requests then stay waiting. Allow self-approval, or add an administrator.",
         nl: "Er is maar één beheerder, en een aanvrager mag zijn eigen verzoek niet goedkeuren. Zijn eigen verzoeken blijven dan wachten. Sta zelf goedkeuren toe, of voeg een beheerder toe.",
       },
-      actions: [{ id: "settings", label: { en: "Settings", nl: "Instellingen" }, href: "/plugins/koppelingen-goedkeuren/settings" }],
+      actions: [{ id: "settings", label: { en: "Settings", nl: "Instellingen" }, href: "/plugins/koppelingen-goedkeuren" }],
     };
   });
 

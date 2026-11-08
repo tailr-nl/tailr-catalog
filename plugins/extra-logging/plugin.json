@@ -12,7 +12,7 @@
   },
   "$schema": "../../schemas/plugin.json",
   "id": "extra-logging",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "api": "1.8",
   "title": {
     "nl": "Extra logging",
