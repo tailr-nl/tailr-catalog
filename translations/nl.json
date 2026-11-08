@@ -1916,6 +1916,27 @@
     "Choose a tool": "Kies een tool",
     "Privacy filters and person limits apply only to AI chat. Ordinary API calls keep the original output.": "Privacyfilters en persoonslimieten gelden alleen voor AI-chat. Gewone API-aanroepen behouden de oorspronkelijke uitvoer.",
     "All your connected tools lose access immediately. Connect them again to use them later.": "Al je verbonden tools verliezen direct hun toegang. Verbind ze opnieuw om ze later weer te gebruiken.",
-    "1 function found": "1 functie gevonden"
+    "1 function found": "1 functie gevonden",
+    "Details of {name}": "Details van {name}",
+    "Plugins add features to Tailr Core itself. Install and update them here from the plugin sources; what runs is managed on the Plugins page. They run without a sandbox, as part of Tailr Core.": "Plugins voegen functionaliteit toe aan Tailr Core zelf. Installeer en werk ze hier bij vanuit de plugin-bronnen; wat er draait beheer je op de pagina Plugins. Ze draaien zonder zandbak, als onderdeel van Tailr Core.",
+    "Search for a plugin": "Zoek een plugin",
+    "Plugins add features to Tailr Core itself. They run without a sandbox, as part of Tailr Core; only an administrator installs them.": "Plugins voegen functionaliteit toe aan Tailr Core zelf. Ze draaien zonder zandbak, als onderdeel van Tailr Core; alleen een beheerder installeert ze.",
+    "Install a plugin from the catalog, or put your own plugin as a folder in the plugin folder on the server (/data/plugins by default) and restart Tailr Core.": "Installeer een plugin uit de catalogus, of zet een eigen plugin als map in de pluginmap op de server (standaard /data/plugins) en start Tailr Core opnieuw.",
+    "Connected, switched off": "Gekoppeld, uitgeschakeld",
+    "Connected ({n})": "Gekoppeld ({n})",
+    "Connected as {names}": "Gekoppeld als {names}",
+    "Add your own": "Zelf toevoegen",
+    "Check now": "Nu controleren",
+    "English is built into Tailr Core. Add other languages, Dutch too, from a translation source, or upload your own translation. Added languages are managed under Settings → General.": "Engels zit in Tailr Core. Andere talen, ook Nederlands, voeg je toe uit een vertaalbron, of je uploadt je eigen vertaling. Toegevoegde talen beheer je onder Instellingen → Algemeen.",
+    "Search for a language": "Zoek een taal",
+    "Nothing matches this filter.": "Niets komt overeen met dit filter.",
+    "Category": "Categorie",
+    "All categories": "Alle categorieën",
+    "Languages": "Talen",
+    "Add language": "Taal toevoegen",
+    "English is built in. Other languages come from the catalog or from your own translation file; everyone chooses their language in the menu under their name.": "Engels zit ingebouwd. Andere talen komen uit de catalogus of uit je eigen vertaalbestand; iedereen kiest zijn eigen taal in het menu onder zijn naam.",
+    "No additional languages are installed yet.": "Er zijn nog geen extra talen geïnstalleerd.",
+    "Upload translation": "Vertaling uploaden",
+    "Manage languages": "Talen beheren"
   }
 }
