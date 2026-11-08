@@ -16,9 +16,9 @@ import { createHash, randomBytes } from "node:crypto";
 import type { PluginApi } from "@tailr/plugin";
 
 /**
- * De instellingen (sinds 1.3.0 met api.settings.define, plugin-API 1.8): de kern toont ze op
- * /plugins/dashboards/settings en bewaart elk veld onder zijn eigen sleutel. Aan- en uitzetten
- * gebeurt op de pagina Plugins van de kern; een eigen aan/uit is er niet meer. Wie dashboards mag
+ * De instellingen (sinds 1.3.0 met api.settings.define, plugin-API 1.8): de kern toont ze op het
+ * tabblad Instellingen van /plugins/dashboards en bewaart elk veld onder zijn eigen sleutel. Aan- en
+ * uitzetten gebeurt via het menu bij de plugin in de kern; een eigen aan/uit is er niet meer. Wie dashboards mag
  * maken is een recht (schrijven op dashboards__save onder Toegang → Rechten), geen instelling
  * (tailr-core #298): de rechtencontrole van de kern doet dat werk.
  */
@@ -195,7 +195,7 @@ export function register(api: PluginApi) {
     api.settings.remove("config");
     api.log.info(`instellingen overgezet naar de instellingenpagina van de kern: ${moved.join(", ") || "niets"}`);
     if (Array.isArray(legacy.creatorRoles) && legacy.creatorRoles.length) api.log.warn(`Alleen bepaalde rollen mochten dashboards maken (${legacy.creatorRoles.join(", ")}). Dat is geen instelling meer: geef alleen die rollen Schrijven op Mijn dashboards onder Toegang → Rechten.`);
-    if (legacy.enabled === false) api.log.warn("Dashboards stonden uit in de eigen instelling van de plugin. Die bestaat niet meer: zet de plugin uit op de pagina Plugins als dashboards uit moeten.");
+    if (legacy.enabled === false) api.log.warn("Dashboards stonden uit in de eigen instelling van de plugin. Die bestaat niet meer: zet de plugin uit via het menu bij de plugin als dashboards uit moeten.");
   }
 
   const libraryOptions = api.frame.libraries.map((l) => ({ value: l.id, label: l.title }));
@@ -613,7 +613,7 @@ export function register(api: PluginApi) {
 
   // --- Menu -----------------------------------------------------------------------------------
 
+  // De instellingen (api.settings.define) staan op de pluginpagina van de kern; een eigen
+  // beheer-menu-item zou daar een dubbel tabblad naast Instellingen geven.
   api.nav({ label: { nl: "Mijn dashboards", en: "My dashboards" }, path: "" });
-  // De instellingenpagina van de kern (api.settings.define): het menu wijst daarheen
-  api.nav({ label: { nl: "Dashboards", en: "Dashboards" }, path: "settings", adminOnly: true });
 }

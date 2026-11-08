@@ -18,21 +18,7 @@
 
   <p class="muted" id="loading" data-t="Laden…">Laden…</p>
   <div id="main" hidden>
-    <form class="card" id="place">
-      <div class="card-head"><h2 data-t="Gegevens voor de placeholders">Gegevens voor de placeholders</h2></div>
-      <div class="grid">
-        <div class="field">
-          <label for="hb-org"><span data-t="Naam van de organisatie">Naam van de organisatie</span> <code>{{organisatie}}</code></label>
-          <input id="hb-org" class="input" maxlength="120">
-        </div>
-        <div class="field">
-          <label for="hb-contact"><span data-t="Bij wie kun je terecht">Bij wie kun je terecht</span> <code>{{beheerder}}</code></label>
-          <input id="hb-contact" class="input" maxlength="500">
-        </div>
-      </div>
-      <p class="hint"><span data-t="Leeg laten: dan staan hier de beheerders met hun e-mailadres. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.">Leeg laten: dan staan hier de beheerders met hun e-mailadres. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.</span> <code>{{koppelingen}}</code></p>
-      <div class="form-actions"><button class="btn btn-secondary" data-t="Opslaan">Opslaan</button></div>
-    </form>
+    <p class="hint"><span data-t="De naam van de organisatie en wie je kunt vragen, vul je in op het tabblad Instellingen. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.">De naam van de organisatie en wie je kunt vragen, vul je in op het tabblad Instellingen. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.</span> <code>{{organisatie}}</code> <code>{{beheerder}}</code> <code>{{koppelingen}}</code></p>
 
     <div id="outdated" role="status" hidden>
       <div class="alert alert-warning">
@@ -68,10 +54,12 @@
         </div>
         <div class="md-editor-preview"><div class="markdown" id="preview"></div></div>
       </div>
+    </div>
+
+    <div class="save-bar">
+      <button type="button" class="btn-link danger" id="reset" hidden data-t="Terug naar standaard">Terug naar standaard</button>
       <div class="form-actions">
-        <button type="button" class="btn-link danger" id="reset" hidden data-t="Terug naar standaard">Terug naar standaard</button>
-        <button type="button" class="btn-link danger" id="discard" hidden data-t="Wijzigingen weggooien">Wijzigingen weggooien</button>
-        <span class="spacer"></span>
+        <button type="button" class="btn btn-secondary" id="discard" hidden data-t="Wijzigingen weggooien">Wijzigingen weggooien</button>
         <button type="button" class="btn btn-primary" id="save" disabled data-t="Opslaan">Opslaan</button>
       </div>
     </div>
@@ -110,8 +98,6 @@
       }
       $("state").className = `badge ${state.customized ? "badge-accent" : "badge-neutral"}`;
       $("state").textContent = state.customized ? (state.updatedBy ? t("Aangepast door {name}", { name: state.updatedBy }) : t("Aangepast")) : t("Standaardtekst");
-      $("hb-contact").placeholder = data.contactFallback[lang];
-      $("hb-org").placeholder = t("je organisatie");
       $("outdated").hidden = !(state.outdated && state.defaultChanges);
       $("toggle-diff").textContent = showDiff ? t("Verschillen verbergen") : t("Verschillen tonen");
       $("diff").hidden = !showDiff;
@@ -128,14 +114,12 @@
     function updateButtons() {
       const state = data.locales[lang];
       $("save").disabled = !dirty();
-      $("reset").hidden = !state.customized;
-      $("discard").hidden = state.customized || !dirty();
+      $("reset").hidden = !state.customized || dirty();
+      $("discard").hidden = !dirty();
     }
 
     async function load(keepText) {
-      data = await call(`${BASE}/settings`);
-      $("hb-org").value = data.orgName;
-      $("hb-contact").value = data.contact;
+      data = await call(`${BASE}/texts`);
       if (!keepText) text.value = data.locales[lang].text;
       render();
       preview();
@@ -174,10 +158,6 @@
         $("editor").className = `md-editor show-${b.dataset.view}`;
       };
     }
-    $("place").addEventListener("submit", (e) => {
-      e.preventDefault();
-      run(() => call(`${BASE}/settings`, { method: "PUT", body: { orgName: $("hb-org").value, contact: $("hb-contact").value } }), t("Opgeslagen"), true);
-    });
     $("toggle-diff").onclick = () => { showDiff = !showDiff; render(); };
     $("accept").onclick = () => run(() => call(`${BASE}/text/${lang}/accept-default`, { method: "POST" }), t("Gemarkeerd als bijgewerkt"), true);
     $("reset").onclick = () => {

@@ -11,6 +11,10 @@
  *   lezer krijgt, met per koppeling voorbeeldvragen op basis van zijn leesfuncties.
  * - De markdown gaat naar HTML met de veilige omzetter van de kern (api.markdown.render).
  *
+ * - Naam van de organisatie en contact staan sinds 1.2.0 in api.settings.define: de kern toont ze op
+ *   het tabblad Instellingen van /plugins/handleiding. Het eigen scherm (web/beheer.html) is alleen
+ *   nog de teksteditor, als tabblad naast Instellingen.
+ *
  * Los van de bedrijfsregels van de kern: die gaan altijd mee naar de AI. De handleiding is uitleg
  * en inspiratie; de AI leest hem met handleiding__read als de beheerder die functie toestaat.
  */
@@ -96,13 +100,7 @@ const TEXTS_EN: Record<string, string> = {
   "Bekijk de handleiding": "View the guide",
   "Laden…": "Loading…",
   "Uitleg en ideeën voor iedereen in je organisatie, onder Handleiding in het menu. Pas hem aan in markdown; de standaardtekst van de plugin blijft bewaard.": "Explanation and ideas for everyone in your organisation, under Guide in the menu. Edit it in markdown; the default text of the plugin is kept.",
-  "Gegevens voor de placeholders": "Values for the placeholders",
-  "Naam van de organisatie": "Organisation name",
-  "je organisatie": "your organisation",
-  "Bij wie kun je terecht": "Who to ask",
-  "Leeg laten: dan staan hier de beheerders met hun e-mailadres. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.": "Leave empty to show the administrators with their e-mail address. The list of connections is filled in for each reader, with example questions.",
   "Opslaan": "Save",
-  "Opgeslagen": "Saved",
   "Er is een nieuwe standaardversie.": "There is a new default version.",
   "Je aanpassing is gebaseerd op een oudere standaardtekst. Bekijk wat er in de standaard is veranderd en neem over wat je wilt.": "Your version is based on an older default text. See what changed in the default and copy what you want.",
   "Verschillen tonen": "Show changes",
@@ -122,6 +120,7 @@ const TEXTS_EN: Record<string, string> = {
   "Terug naar de standaardtekst": "Back to the default text",
   "Wijzigingen weggooien": "Discard changes",
   "Handleiding opgeslagen": "Guide saved",
+  "De naam van de organisatie en wie je kunt vragen, vul je in op het tabblad Instellingen. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.": "Fill in the organisation name and who to ask on the Settings tab. The list of connections is filled in for each reader, with example questions.",
   "Je AI-tool kan de handleiding ook lezen, met de functie Handleiding lezen. Geef rollen daar toegang toe onder Toegang → Rechten, rij Handleiding.": "Your AI tool can read the guide too, with the function Read the guide. Give roles access under Access → Permissions, row Guide.",
 };
 
@@ -183,11 +182,38 @@ export function register(api: PluginApi) {
 
   // --- Placeholders ----------------------------------------------------------------------------
 
+  // Naam van de organisatie en contact: het tabblad Instellingen van de kern (sinds 1.2.0, plugin-API
+  // 1.8). Dezelfde sleutels als de eigen beheerroute van daarvoor, dus zonder migratie.
+  api.settings.define({
+    fields: [
+      {
+        name: "orgName",
+        type: "text",
+        label: { en: "Organisation name", nl: "Naam van de organisatie" },
+        description: { en: "Fills in {{organisation}}. Empty: “your organisation”.", nl: "Vult {{organisatie}} in. Leeg: ‘je organisatie’." },
+        maxLength: 120,
+        group: { en: "Values for the placeholders", nl: "Gegevens voor de placeholders" },
+      },
+      {
+        name: "contact",
+        type: "text",
+        label: { en: "Who to ask", nl: "Bij wie kun je terecht" },
+        description: {
+          en: "Fills in {{admin}}. Empty: the administrators with their e-mail address. {{connections}} is filled in for each reader, with example questions.",
+          nl: "Vult {{beheerder}} in. Leeg: de beheerders met hun e-mailadres. {{koppelingen}} wordt voor elke lezer ingevuld, met voorbeeldvragen.",
+        },
+        maxLength: 500,
+        group: { en: "Values for the placeholders", nl: "Gegevens voor de placeholders" },
+      },
+    ],
+    onChange: (_values, changed, ctx) => api.log.info(`${ctx.principal.name} wijzigde ${changed.join(" en ")} van de handleiding`),
+  });
+
   const organisationName = (l: Lang) => api.settings.get<string>("orgName")?.trim() || (l === "nl" ? "je organisatie" : "your organisation");
 
   /** Contact uit de instellingen, anders de namen en e-mailadressen van de beheerders. */
-  function adminContact(l: Lang, opts: { ignoreSetting?: boolean } = {}): string {
-    const contact = opts.ignoreSetting ? undefined : api.settings.get<string>("contact")?.trim();
+  function adminContact(l: Lang): string {
+    const contact = api.settings.get<string>("contact")?.trim();
     if (contact) return contact;
     const admins = api.users.list().filter((u) => u.isAdmin && !u.disabled);
     if (!admins.length) return l === "nl" ? "je beheerder" : "your administrator";
@@ -281,24 +307,8 @@ export function register(api: PluginApi) {
   });
 
   api.adminRoutes((r) => {
-    r.get("/settings", (c) =>
-      c.json({
-        orgName: api.settings.get<string>("orgName") ?? "",
-        contact: api.settings.get<string>("contact") ?? "",
-        contactFallback: Object.fromEntries(LANGS.map((l) => [l, adminContact(l, { ignoreSetting: true })])),
-        locales: Object.fromEntries(LANGS.map((l) => [l, adminState(l)])),
-      }),
-    );
-
-    // Naam van de organisatie en contactpersoon voor de placeholders
-    r.put("/settings", async (c) => {
-      const body = ((await c.req.json().catch(() => null)) ?? {}) as { orgName?: unknown; contact?: unknown };
-      if (body.orgName !== undefined && (typeof body.orgName !== "string" || body.orgName.length > 120)) return c.json({ error: "orgName must be a text of at most 120 characters" }, 400);
-      if (body.contact !== undefined && (typeof body.contact !== "string" || body.contact.length > 500)) return c.json({ error: "contact must be a text of at most 500 characters" }, 400);
-      if (typeof body.orgName === "string") api.settings.set("orgName", body.orgName.trim());
-      if (typeof body.contact === "string") api.settings.set("contact", body.contact.trim());
-      return c.json({ ok: true });
-    });
+    // De editor: per taal de tekst, de standaard en de verschillen
+    r.get("/texts", (c) => c.json({ locales: Object.fromEntries(LANGS.map((l) => [l, adminState(l)])) }));
 
     // Opslaan: de aanpassing is gebaseerd op de huidige standaardtekst
     r.put("/text/:locale", async (c) => {

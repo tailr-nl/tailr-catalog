@@ -38,8 +38,7 @@ Uitzetten in de Catalogus haalt na de herstart het menu-item, het blok op *Verbi
 | Route | Wie | Wat |
 | --- | --- | --- |
 | `GET /api/p/handleiding/guide?locale=nl` | iedereen | `{ locale, markdown, html, customized, canEdit }` |
-| `GET /api/admin/p/handleiding/settings` | beheerder | naam, contact, en per taal de tekst, de standaard en de verschillen |
-| `PUT /api/admin/p/handleiding/settings` | beheerder | `{ orgName, contact }` |
+| `GET /api/admin/p/handleiding/texts` | beheerder | per taal de tekst, de standaard en de verschillen |
 | `PUT /api/admin/p/handleiding/text/<taal>` | beheerder | `{ text }`: aanpassing opslaan |
 | `DELETE /api/admin/p/handleiding/text/<taal>` | beheerder | terug naar de standaard |
 | `POST /api/admin/p/handleiding/text/<taal>/accept-default` | beheerder | nieuwe standaard bekeken |
