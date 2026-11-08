@@ -4,13 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Handleiding aanpassen</title>
+  <link rel="stylesheet" href="/tailr-ui.css">
   <base target="_top">
-  <style>
-    /* Klassen als alert zetten display; hidden moet altijd winnen */
-    [hidden] { display: none !important; }
-    .hb-place { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-    .hb-place .field { margin-bottom: 0; }
-  </style>
 </head>
 <body>
   <div class="page-head"><div>
@@ -23,40 +18,44 @@
 
   <p class="muted" id="loading" data-t="Laden…">Laden…</p>
   <div id="main" hidden>
-    <div class="card">
+    <form class="card" id="place">
       <div class="card-head"><h2 data-t="Gegevens voor de placeholders">Gegevens voor de placeholders</h2></div>
-      <form class="hb-place" id="place">
-        <div class="field" style="flex: 1; min-width: 200px;">
+      <div class="grid">
+        <div class="field">
           <label for="hb-org"><span data-t="Naam van de organisatie">Naam van de organisatie</span> <code>{{organisatie}}</code></label>
           <input id="hb-org" class="input" maxlength="120">
         </div>
-        <div class="field" style="flex: 2; min-width: 240px;">
+        <div class="field">
           <label for="hb-contact"><span data-t="Bij wie kun je terecht">Bij wie kun je terecht</span> <code>{{beheerder}}</code></label>
           <input id="hb-contact" class="input" maxlength="500">
         </div>
-        <button class="btn btn-secondary" data-t="Opslaan">Opslaan</button>
-      </form>
-      <p class="hint" style="margin-bottom: 0;"><span data-t="Leeg laten: dan staan hier de beheerders met hun e-mailadres. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.">Leeg laten: dan staan hier de beheerders met hun e-mailadres. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.</span> <code>{{koppelingen}}</code></p>
-    </div>
+      </div>
+      <p class="hint"><span data-t="Leeg laten: dan staan hier de beheerders met hun e-mailadres. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.">Leeg laten: dan staan hier de beheerders met hun e-mailadres. De lijst met koppelingen wordt voor elke lezer ingevuld, met voorbeeldvragen.</span> <code>{{koppelingen}}</code></p>
+      <div class="form-actions"><button class="btn btn-secondary" data-t="Opslaan">Opslaan</button></div>
+    </form>
 
-    <div class="alert alert-warning" role="status" id="outdated" hidden>
-      <div style="min-width: 0; flex: 1;">
-        <strong data-t="Er is een nieuwe standaardversie.">Er is een nieuwe standaardversie.</strong>
-        <span data-t="Je aanpassing is gebaseerd op een oudere standaardtekst. Bekijk wat er in de standaard is veranderd en neem over wat je wilt.">Je aanpassing is gebaseerd op een oudere standaardtekst. Bekijk wat er in de standaard is veranderd en neem over wat je wilt.</span>
-        <div class="row" style="margin-top: 8px; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-secondary btn-sm" id="toggle-diff"></button>
-          <button type="button" class="btn btn-secondary btn-sm" id="accept" data-t="Bekeken, mijn tekst houden">Bekeken, mijn tekst houden</button>
+    <div id="outdated" role="status" hidden>
+      <div class="alert alert-warning">
+        <div class="stack spacer">
+          <div>
+            <strong data-t="Er is een nieuwe standaardversie.">Er is een nieuwe standaardversie.</strong>
+            <span data-t="Je aanpassing is gebaseerd op een oudere standaardtekst. Bekijk wat er in de standaard is veranderd en neem over wat je wilt.">Je aanpassing is gebaseerd op een oudere standaardtekst. Bekijk wat er in de standaard is veranderd en neem over wat je wilt.</span>
+          </div>
+          <div class="row">
+            <button type="button" class="btn btn-secondary btn-sm" id="toggle-diff"></button>
+            <button type="button" class="btn btn-secondary btn-sm" id="accept" data-t="Bekeken, mijn tekst houden">Bekeken, mijn tekst houden</button>
+          </div>
+          <pre class="code" id="diff" hidden></pre>
         </div>
-        <pre class="diff" id="diff" hidden></pre>
       </div>
     </div>
 
+    <div class="page-tabs">
+      <div class="tabs" role="tablist" id="langs"></div>
+      <div class="page-tabs-actions"><span class="badge" id="state"></span></div>
+    </div>
     <div class="card">
-      <div class="card-head" style="flex-wrap: wrap;">
-        <div class="tabs" role="tablist" id="langs" style="margin-bottom: 0;"></div>
-        <span class="badge" id="state"></span>
-      </div>
-      <div class="alert alert-danger" id="error" hidden></div>
+      <div id="error" hidden><div class="alert alert-danger" id="error-text"></div></div>
       <div class="tabs editor-switch" role="tablist">
         <button type="button" role="tab" class="tab active" data-view="edit" data-t="Bewerken">Bewerken</button>
         <button type="button" role="tab" class="tab" data-view="preview" data-t="Voorbeeld">Voorbeeld</button>
@@ -69,7 +68,7 @@
         </div>
         <div class="md-editor-preview"><div class="markdown" id="preview"></div></div>
       </div>
-      <div class="row" style="margin-top: 16px;">
+      <div class="form-actions">
         <button type="button" class="btn-link danger" id="reset" hidden data-t="Terug naar standaard">Terug naar standaard</button>
         <button type="button" class="btn-link danger" id="discard" hidden data-t="Wijzigingen weggooien">Wijzigingen weggooien</button>
         <span class="spacer"></span>
@@ -93,7 +92,7 @@
     let showDiff = false;
     const text = $("hb-text");
 
-    const showError = (msg) => { $("error").textContent = msg || ""; $("error").hidden = !msg; };
+    const showError = (msg) => { $("error-text").textContent = msg || ""; $("error").hidden = !msg; };
     const dirty = () => data && text.value !== data.locales[lang].text;
 
     function render() {
@@ -119,14 +118,10 @@
       if (state.defaultChanges) {
         const lines = state.defaultChanges;
         // Alleen de veranderde regels, met twee regels eromheen
-        $("diff").innerHTML = "";
-        lines.forEach((l, i) => {
-          if (l.type === "same" && !lines.slice(Math.max(0, i - 2), i + 3).some((x) => x.type !== "same")) return;
-          const row = document.createElement("div");
-          row.className = `diff-${l.type}`;
-          row.textContent = (l.type === "added" ? "+ " : l.type === "removed" ? "− " : "  ") + l.text;
-          $("diff").append(row);
-        });
+        $("diff").textContent = lines
+          .filter((l, i) => l.type !== "same" || lines.slice(Math.max(0, i - 2), i + 3).some((x) => x.type !== "same"))
+          .map((l) => (l.type === "added" ? "+ " : l.type === "removed" ? "− " : "  ") + l.text)
+          .join("\n");
       }
       updateButtons();
     }
@@ -175,7 +170,7 @@
 
     for (const b of document.querySelectorAll("[data-view]")) {
       b.onclick = () => {
-        for (const x of document.querySelectorAll("[data-view]")) x.classList.toggle("active", x === b);
+        for (const x of document.querySelectorAll("[data-view]")) { x.classList.toggle("active", x === b); x.setAttribute("aria-selected", String(x === b)); }
         $("editor").className = `md-editor show-${b.dataset.view}`;
       };
     }

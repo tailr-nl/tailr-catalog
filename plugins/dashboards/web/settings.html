@@ -1,16 +1,18 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboards</title></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboards</title>
+<link rel="stylesheet" href="/tailr-ui.css"></head><body>
 <div class="page-head"><div><h1>Dashboards</h1><p data-i18n="Control who can build dashboards and which functions they may use."></p></div></div>
-<form id="form" class="card"><fieldset class="connection-fieldset" id="fields" disabled>
-<label class="checkbox"><input type="checkbox" name="enabled"><strong data-i18n="Enable dashboards"></strong></label><p class="hint" data-i18n="When turned off, nobody can save or open dashboards and the AI cannot see their functions."></p>
-<div class="field"><label data-i18n="Who may create dashboards"></label><div id="roles" class="stack"></div><p class="hint"><span data-i18n="No selection: everyone with write access to this plugin."></span> <a href="/permissions" target="_top" data-i18n="Access → Permissions"></a></p></div>
-<div class="field"><label for="maxKb" data-i18n="Maximum size per dashboard (kB)"></label><input id="maxKb" class="input" name="maxKb" type="number" min="1" step="1" required style="max-width:160px"><span id="maxHint" class="hint"></span></div>
-<div class="field"><label data-i18n="Libraries"></label><div id="libraries" class="stack"></div><p class="hint" data-i18n="Only libraries from Tailr Core’s reviewed list are available."></p></div>
-<label class="checkbox"><input type="checkbox" name="readOnly"><span data-i18n="Read functions only (recommended)"></span></label><p class="hint" data-i18n="This prevents dashboards from changing data, even if the AI is misled."></p>
-<div class="form-actions"><button class="btn btn-primary" type="submit" id="save" disabled data-i18n="Save"></button></div></fieldset><p id="stats" class="hint"></p></form>
+<form id="form" class="card"><fieldset id="fields" disabled>
+<div class="field"><label class="switch"><input type="checkbox" name="enabled" role="switch"> <strong data-i18n="Enable dashboards"></strong></label><span class="hint" data-i18n="When turned off, nobody can save or open dashboards and the AI cannot see their functions."></span></div>
+<fieldset class="field"><legend data-i18n="Who may create dashboards"></legend><div id="roles" class="choice-list"></div><span class="hint"><span data-i18n="No selection: everyone with write access to this plugin."></span> <a href="/permissions" target="_top" data-i18n="Access → Permissions"></a></span></fieldset>
+<div class="field"><label for="maxKb" data-i18n="Maximum size per dashboard (kB)"></label><input id="maxKb" class="input narrow" name="maxKb" type="number" min="1" step="1" required><span id="maxHint" class="hint"></span></div>
+<fieldset class="field"><legend data-i18n="Libraries"></legend><div id="libraries" class="choice-list"></div><span class="hint" data-i18n="Only libraries from Tailr Core’s reviewed list are available."></span></fieldset>
+<div class="field"><label class="switch"><input type="checkbox" name="readOnly" role="switch"> <span data-i18n="Read functions only (recommended)"></span></label><span class="hint" data-i18n="This prevents dashboards from changing data, even if the AI is misled."></span></div>
+<div class="save-bar"><span id="stats" class="hint"></span><div class="form-actions"><button class="btn btn-primary" type="submit" id="save" disabled data-i18n="Save"></button></div></div></fieldset></form>
 <script src="/api/p/dashboards/ui/shared.js"></script><script>
 const { t, esc, call, toast } = DashboardUI, form = document.getElementById("form"), fields = document.getElementById("fields"), save = document.getElementById("save");
 let initial = "";
 const values = () => ({ enabled: form.elements.enabled.checked, readOnly: form.elements.readOnly.checked, maxKb: Number(form.elements.maxKb.value), creatorRoles: [...form.querySelectorAll('[name="role"]:checked')].map(i => i.value), libraries: [...form.querySelectorAll('[name="library"]:checked')].map(i => i.value) });
+const choice = (name, value, checked, title) => `<label class="choice"><input type="checkbox" name="${name}" value="${esc(value)}" ${checked ? "checked" : ""}><span class="choice-text"><strong>${esc(title)}</strong></span></label>`;
 form.addEventListener("input", () => { save.disabled = JSON.stringify(values()) === initial; });
 async function load() { try {
     const [cfg, roles] = await Promise.all([call("/api/admin/p/dashboards/settings"), call("/api/admin/roles")]);
@@ -19,8 +21,8 @@ async function load() { try {
     form.elements.maxKb.value = cfg.maxKb;
     form.elements.maxKb.max = cfg.hardMaxKb;
     document.getElementById("maxHint").textContent = t("Default 200 kB, maximum {n} kB.", { n: cfg.hardMaxKb });
-    document.getElementById("roles").innerHTML = roles.map(r => `<label class="checkbox"><input type="checkbox" name="role" value="${esc(r.id)}" ${cfg.creatorRoles.includes(r.id) ? "checked" : ""}>${esc(r.name)}</label>`).join("") || esc(t("No roles yet"));
-    document.getElementById("libraries").innerHTML = cfg.availableLibraries.map(l => `<label class="checkbox"><input type="checkbox" name="library" value="${esc(l.id)}" ${cfg.libraries.includes(l.id) ? "checked" : ""}>${esc(l.title)}</label>`).join("");
+    document.getElementById("roles").innerHTML = roles.map(r => choice("role", r.id, cfg.creatorRoles.includes(r.id), r.name)).join("") || `<span class="muted">${esc(t("No roles yet"))}</span>`;
+    document.getElementById("libraries").innerHTML = cfg.availableLibraries.map(l => choice("library", l.id, cfg.libraries.includes(l.id), l.title)).join("");
     const s = cfg.stats || {};
     document.getElementById("stats").textContent = [s.items === 1 ? t("1 dashboard") : t("{n} dashboards", { n: s.items || 0 }), s.owners === 1 ? t("1 employee") : t("{n} employees", { n: s.owners || 0 }), t("{n} awaiting confirmation", { n: s.pending || 0 })].join(" · ");
     initial = JSON.stringify(values());

@@ -12,8 +12,8 @@
   },
   "$schema": "../../schemas/plugin.json",
   "id": "koppelingen-goedkeuren",
-  "version": "2.0.1",
-  "api": "1.0",
+  "version": "2.1.0",
+  "api": "1.7",
   "title": {
     "nl": "Koppelingen goedkeuren",
     "en": "Approve connections"
