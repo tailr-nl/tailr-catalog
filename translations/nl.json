@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "Each plugin now has its own page with Settings, Access, Tasks and Log tabs, and plugins get a channel policy for apps (API) and AI tools (MCP), just like connections.",
-      "nl": "Elke plugin heeft nu een eigen pagina met de tabbladen Instellingen, Toegang, Taken en Log, en plugins krijgen net als koppelingen een kanaalbeleid voor apps (API) en AI-tools (MCP)."
+      "en": "Texts now point to Installed · Available and Settings → Sources instead of the catalogue, and to AI tools (MCP) instead of Chat.",
+      "nl": "Teksten verwijzen nu naar Geïnstalleerd · Beschikbaar en Instellingen → Bronnen in plaats van de catalogus, en naar AI-tools (MCP) in plaats van Chat."
     }
   },
   "messages": {
@@ -656,7 +656,7 @@
     "Not allowed": "Niet toegestaan",
     "Sandbox workers": "Werkprocessen zandbak",
     "Source added, but fetching failed: {error}": "Bron toegevoegd, maar ophalen mislukte: {error}",
-    "{name} added: {n} plugins. You will find them in Catalog → Plugins.": "{name} toegevoegd: {n} plugins. Je vindt ze in Catalogus → Plugins.",
+    "{name} added: {n} plugins. You will find them in Plugins → Available.": "{name} toegevoegd: {n} plugins. Je vindt ze bij Plugins → Beschikbaar.",
     "AI is off, for apps as well": "AI staat uit, ook voor apps",
     "AI is off; apps keep working": "AI staat uit; apps werken door",
     "AI is back on": "AI staat weer aan",
@@ -1433,7 +1433,7 @@
     "Development": "Ontwikkeling",
     "E-commerce": "Webshop",
     "First read docs/koppelingen-maken.md in the repository, or call tailr__help with topic=building_connectors, and follow that guide.": "Lees eerst docs/koppelingen-maken.md in de repository, of roep tailr__help aan met topic=building_connectors, en volg die handleiding.",
-    "Ask me which system I want to connect, what employees should be able to do with it, and for the API documentation or an OpenAPI specification. Check whether a connector already exists in the catalog.": "Vraag welk systeem ik wil koppelen, wat medewerkers ermee moeten kunnen en om de API-documentatie of een OpenAPI-specificatie. Controleer of er al een connector in de catalogus bestaat.",
+    "Ask me which system I want to connect, what employees should be able to do with it, and for the API documentation or an OpenAPI specification. Check with tailr__admin_catalog whether a connector already exists (Connections → Available).": "Vraag welk systeem ik wil koppelen, wat medewerkers ermee moeten kunnen en om de API-documentatie of een OpenAPI-specificatie. Controleer met tailr__admin_catalog of er al een connector bestaat (Koppelingen → Beschikbaar).",
     "Start with 5 to 15 useful functions. Mark personal data with privacy and sensitivity, use audience for API-only functions, and leave no personal_data_unmarked warnings.": "Begin met 5 tot 15 nuttige functies. Markeer persoonsgegevens met privacy en sensitivity, gebruik audience voor functies die alleen voor de API zijn en laat geen personal_data_unmarked-waarschuwingen staan.",
     "Deliver a JSON connector, or a ZIP with connector.json, README.md, context.md and tools/*.ts if code is needed. Connector code must run in the sandbox. Use the JSON schemas served by my Tailr Core under /schemas/.": "Lever een JSON-connector aan, of een ZIP met connector.json, README.md, context.md en tools/*.ts als er code nodig is. Connectorcode moet in de afgeschermde omgeving draaien. Gebruik de JSON-schema’s van mijn Tailr Core onder /schemas/.",
     "Check the result with tailr check (tailr__help topic=checking), fix all errors, test it against a development gateway, and tell me what works and what does not.": "Controleer het resultaat met tailr check (tailr__help topic=checking), herstel alle fouten, test tegen een ontwikkelgateway en vertel wat wel en niet werkt.",
@@ -1456,7 +1456,7 @@
     "Browsers and devices where you're currently signed in. Don't recognize one? Sign it out and change your password.": "Browsers en apparaten waarop je nu bent ingelogd. Herken je er een niet, log hem dan uit en wijzig je wachtwoord.",
     "Set up Tailr Core for your whole organization in Claude": "Zet Tailr Core klaar voor je hele organisatie in Claude",
     "The connector is set up in our Claude organization": "Connector staat klaar in onze Claude-organisatie",
-    "A Git repository (GitHub, GitLab, Forgejo, Gitea or your own server) with a folder per plugin. The plugins appear in Catalog → Plugins; nothing is installed automatically. Requires two-factor authentication with the app.": "Een Git-repo (GitHub, GitLab, Forgejo, Gitea of een eigen server) met een map per plugin. De plugins verschijnen in Catalogus → Plugins; er wordt niets vanzelf geïnstalleerd. Vraagt tweestapsverificatie met de app.",
+    "A Git repository (GitHub, GitLab, Forgejo, Gitea or your own server) with a folder per plugin. The plugins appear in Plugins → Available; nothing is installed automatically. Requires two-factor authentication with the app.": "Een Git-repo (GitHub, GitLab, Forgejo, Gitea of een eigen server) met een map per plugin. De plugins verschijnen bij Plugins → Beschikbaar; er wordt niets vanzelf geïnstalleerd. Vraagt tweestapsverificatie met de app.",
     "From your own organization. This way only accounts from your Microsoft 365 can sign in.": "Van je eigen organisatie. Zo kunnen alleen accounts uit jouw Microsoft 365 inloggen.",
     "(an app of your organization)": "(een app van je organisatie)",
     "The AI tool provides this name itself. Don't recognize it, or didn't you just connect yourself? Then choose Deny.": "De naam geeft de AI-tool zelf op. Herken je hem niet, of heb je niet net zelf verbinding gemaakt? Kies dan Weigeren.",
@@ -1515,7 +1515,7 @@
     "Configure mail server": "Mailserver instellen",
     "View general settings": "Algemene instellingen",
     "Add a {connector} connection first": "Voeg eerst een {connector}-koppeling toe",
-    "a connection for {name} (connector {id} from the catalog)": "een koppeling voor {name} toe (connector {id} uit de catalogus)",
+    "a connection for {name} (connector {id} from Connections → Available)": "een koppeling voor {name} toe (connector {id} uit Koppelingen → Beschikbaar)",
     "Try a SELECT query before you put it in an connector. Use :name for parameters. Read-only, at most 20 rows; this is logged.": "Probeer een SELECT-query voordat je hem in een connector zet. Gebruik :naam voor parameters. Alleen-lezen, maximaal 20 rijen; wordt gelogd.",
     "This connector is not (or no longer) in the catalog.": "Deze connector staat niet (meer) in de catalogus.",
     "By default the connector's values apply (from the API documentation), otherwise the global rule from Settings. Only fill in what you want to be different for this connection.": "Standaard geldt wat de connector zegt (uit de API-documentatie), anders de algemene regel uit Instellingen. Vul alleen in wat je voor deze koppeling anders wilt.",
@@ -1661,7 +1661,7 @@
     "General availability of {tool}": "Algemene beschikbaarheid van {tool}",
     "Blocked by general access policy": "Geblokkeerd door algemeen toegangsbeleid",
     "Require human confirmation before this function runs": "Menselijke bevestiging vereisen voordat deze functie wordt uitgevoerd",
-    "Protection applies to all roles. Enabling Chat for the connection never overrides an API-only restriction.": "Bescherming geldt voor alle rollen. Chat inschakelen voor de koppeling heft een beperking tot alleen de API nooit op.",
+    "Protection applies to all roles. Turning on AI tools (MCP) never overrides an API-only restriction.": "Bescherming geldt voor alle rollen. AI-tools (MCP) aanzetten heft een beperking tot alleen de API nooit op.",
     "Advanced: error details for AI": "Geavanceerd: foutdetails voor AI",
     "Review {n} configured changes": "Bekijk {n} wijzigingen in de instellingen",
     "General access policy still bounds every configured permission.": "Het algemene toegangsbeleid blijft de bovengrens van elk ingesteld recht.",
