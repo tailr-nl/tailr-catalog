@@ -2,7 +2,7 @@
 
 The official catalog of **connectors**, **plugins** and **translations** for [Tailr Core](https://tailr.nl): the open-source gateway that gives an organisation central, controlled access to AI on top of its own business systems.
 
-Tailr Core uses this repository as its default source. Nothing from it is installed automatically: an administrator chooses what to add, in *Catalogue → Connectors* or *Catalogue → Plugins*. You can also add it, a fork, or your own repository with the same layout as a source for your own installation.
+Tailr Core uses this repository as its default source. Nothing from it is installed automatically: an administrator chooses what to add, in *Connections → Available* or *Plugins → Available*. You can also add it, a fork, or your own repository with the same layout as a source for your own installation, in *Settings → Sources*.
 
 ## Layout
 

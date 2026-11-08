@@ -1,11 +1,11 @@
 # Handleiding
 
-Een handleiding voor iedereen in je organisatie, onder *Handleiding* in het menu: wat je met Tailr Core kunt, de koppelingen waar de lezer bij kan met voorbeeldvragen, en bij wie hij terecht kan. Tot zat dit in de kern; nu is het een plugin, want het is inhoud en geen toegang.
+Een handleiding voor iedereen in je organisatie, onder *Handleiding* in het menu: wat je met Tailr Core kunt, de koppelingen waar de lezer bij kan met voorbeeldvragen, en bij wie hij terecht kan. Vroeger zat dit in de kern; nu is het een plugin, want het is inhoud en geen toegang.
 
 ## Wat het doet
 
 - **Standaardtekst per taal.** De plugin brengt een tekst mee in het Nederlands en het Engels (`content/handleiding.<taal>.md`). Een nieuwe versie van de plugin kan die tekst bijwerken.
-- **Aanpassen in markdown.** Onder **Plugins → Handleiding aanpassen** pas je de tekst per taal aan, met een voorbeeld ernaast. *Terug naar standaard* haalt je aanpassing weg.
+- **Aanpassen in markdown.** Op de pluginpagina, tabblad *Handleiding aanpassen* (via *Plugins → Geïnstalleerd* → *Beheren*), pas je de tekst per taal aan, met een voorbeeld ernaast. *Terug naar standaard* haalt je aanpassing weg.
 - **Na een update.** Is de standaardtekst veranderd sinds je hem aanpaste, dan zie je een melding met de verschillen per regel. Neem over wat je wilt en kies *Bekeken, mijn tekst houden*.
 - **Placeholders,** per lezer ingevuld:
 
@@ -17,7 +17,7 @@ Een handleiding voor iedereen in je organisatie, onder *Handleiding* in het menu
 
   `{{koppelingen}}` komt uit `api.users.tools`: precies wat de AI-tool van de lezer krijgt, met zijn rollen en uitzonderingen. Mijn functies en functies van plugins staan er niet in.
 - **Veilige opmaak.** De markdown gaat naar HTML met de omzetter van de kern (`api.markdown.render`): alle tekst ge-escaped, geen ruwe HTML, alleen veilige links.
-- **Op *Verbinden*** staat een blok met een link naar de handleiding (plek `connect`).
+- **Op *Verbonden tools*** (in het menu onder je naam) staat een blok met een link naar de handleiding (plek `connect`).
 
 ## Voor de AI
 
@@ -27,11 +27,11 @@ Geef rollen toegang onder **Toegang → Rechten**, rij *Handleiding*, niveau *Le
 
 ## Instellen
 
-1. Installeer de plugin in de *Catalogus*, tabblad *Plugins* (of via *Aanbevolen plugins* in de welkomstwizard), en herstart.
-2. Vul onder **Plugins → Handleiding aanpassen** de naam van de organisatie en het contact in, en pas de tekst aan als je wilt.
+1. Installeer de plugin onder *Plugins → Beschikbaar* (of via *Aanbevolen plugins* in de welkomstwizard).
+2. Vul op het tabblad *Instellingen* van de pluginpagina de naam van de organisatie en het contact in, en pas op het tabblad *Handleiding aanpassen* de tekst aan als je wilt.
 3. Geef rollen eventueel toegang tot `handleiding__read` (zie hierboven).
 
-Uitzetten in de Catalogus haalt na de herstart het menu-item, het blok op *Verbinden* en de functie weg. De aangepaste tekst blijft bewaard (`tp_handleiding_texts`).
+Uitzetten (*Uitzetten* in het menu van de pluginpagina of van zijn rij op *Plugins → Geïnstalleerd*) haalt na de herstart het menu-item, het blok op *Verbonden tools* en de functie weg. De aangepaste tekst blijft bewaard (`tp_handleiding_texts`).
 
 ## API
 

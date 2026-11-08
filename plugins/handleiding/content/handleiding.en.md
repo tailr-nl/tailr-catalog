@@ -23,7 +23,7 @@ Missing something? Ask {{admin}}.
 
 ## Getting started
 
-1. Connect your AI tool under **Connect**.
+1. Connect your AI tool under **Connected tools**, in the menu under your name: choose **Connect a tool**.
 2. Ask your AI: *"What can I access in our business data?"*
 3. Ask a real question from your work.
 
@@ -31,8 +31,8 @@ Missing something? Ask {{admin}}.
 
 - You can read everything you have rights to. Changing things is only possible if your role allows it, and your AI will ask for confirmation first.
 - You confirm your own functions under **My functions**. They work in every AI tool and can never do more than you are allowed to.
-- For your own tools and scripts, create a key under **My API keys**. Never share it.
+- You connect your own tools and scripts under **Connected tools** too: you sign in with your Tailr Core account. For a server or automation without a person (such as n8n), ask {{admin}} for an app with its own app key.
 - Under **My account** you can see where you are signed in. Don't recognise a device? Sign it out there and change your password.
-- Something wrong, for example a lost laptop or a tool that behaves oddly? Under **AI & tools**, press **Revoke all AI access now**. All your AI tools and tools stop immediately; afterwards you simply connect them again.
+- Something wrong, for example a lost laptop or a tool that behaves oddly? Under **Connected tools**, choose **Revoke access for all my tools**. All your AI tools and tools stop immediately; afterwards you simply connect them again.
 - Does your AI say that AI is temporarily off (`ai_access_paused`)? Then {{admin}} switched off AI for everyone for a while. Tailr Core itself works as usual.
 - Something not working? Your AI gives you a reference (`err_…`). Send it to {{admin}}.
