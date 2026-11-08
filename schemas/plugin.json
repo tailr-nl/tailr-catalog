@@ -226,10 +226,10 @@
           "additionalProperties": false
         }
       ],
-      "description": "Name in the catalogue: a string (English), or per language { \"en\": \"…\", \"nl\": \"…\" }. English is the default."
+      "description": "Name on the Plugins page (Installed, Available) and the plugin page: a string (English), or per language { \"en\": \"…\", \"nl\": \"…\" }. English is the default."
     },
     "summary": {
-      "description": "One sentence for the catalogue: a string (English), or { \"en\": \"…\", \"nl\": \"…\" }.",
+      "description": "One sentence for the Plugins page (Available) and the plugin page: a string (English), or { \"en\": \"…\", \"nl\": \"…\" }.",
       "anyOf": [
         {
           "type": "string"
@@ -254,7 +254,7 @@
       "type": "string"
     },
     "hooks": {
-      "description": "For the catalogue: where the plugin hooks in, e.g. \"guard tool.before\", \"screen\" or \"tool\".",
+      "description": "For the Plugins page (Available): where the plugin hooks in, e.g. \"guard tool.before\", \"screen\" or \"tool\".",
       "maxItems": 30,
       "type": "array",
       "items": {

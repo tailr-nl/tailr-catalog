@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Tailr Core translation",
-  "description": "A translation file (Catalogue → Translations). The keys are the original Dutch texts; keep placeholders such as {name}.",
+  "description": "A translation file (Settings → Languages). The keys are the original Dutch texts; keep placeholders such as {name}.",
   "x-tailr-version": "0.1.0",
   "anyOf": [
     {
@@ -196,7 +196,7 @@
       "required": [
         "messages"
       ],
-      "description": "A translation file for Tailr Core (Catalogue → Translations). Keys starting with _ are comments.",
+      "description": "A translation file for Tailr Core (Settings → Languages). Keys starting with _ are comments.",
       "additionalProperties": false,
       "patternProperties": {
         "^[_$]": {}
