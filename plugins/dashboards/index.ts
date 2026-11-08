@@ -15,11 +15,14 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { PluginApi } from "@tailr/plugin";
 
+/**
+ * De instellingen (sinds 1.3.0 met api.settings.define, plugin-API 1.8): de kern toont ze op
+ * /plugins/dashboards/settings en bewaart elk veld onder zijn eigen sleutel. Aan- en uitzetten
+ * gebeurt op de pagina Plugins van de kern; een eigen aan/uit is er niet meer. Wie dashboards mag
+ * maken is een recht (schrijven op dashboards__save onder Toegang → Rechten), geen instelling
+ * (tailr-core #298): de rechtencontrole van de kern doet dat werk.
+ */
 interface Config {
-  /** Uit: niet opslaan, niet openen, en de functies zijn niet zichtbaar */
-  enabled: boolean;
-  /** Rollen die mogen maken; leeg = iedereen met de functies in Toegang */
-  creatorRoles: string[];
   /** Maximale grootte van de HTML in kB */
   maxKb: number;
   /** Bibliotheken uit de vaste lijst van de kern */
@@ -27,7 +30,8 @@ interface Config {
   /** Alleen leesfuncties in uses */
   readOnly: boolean;
 }
-const DEFAULTS: Config = { enabled: true, creatorRoles: [], maxKb: 200, libraries: ["chartjs"], readOnly: true };
+const DEFAULTS: Config = { maxKb: 200, libraries: ["chartjs"], readOnly: true };
+const FIELDS = ["maxKb", "libraries", "readOnly"] as const;
 const HARD_MAX_KB = 2048;
 const MAX_USES = 40;
 const NAME = /^[a-z0-9][a-z0-9-]{0,47}$/;
@@ -93,25 +97,7 @@ export function register(api: PluginApi) {
   "Restore version {n}?": "Versie {n} terugzetten?",
   "Dashboard deleted": "Dashboard verwijderd",
   "Maximum {n} kB per dashboard.": "Maximaal {n} kB per dashboard.",
-  "Dashboards are turned off. Ask your administrator to enable them.": "Dashboards staan uit. Vraag je beheerder ze aan te zetten.",
   "No dashboards yet": "Nog geen dashboards",
-  "Control who can build dashboards and which functions they may use.": "Bepaal wie dashboards mag maken en welke functies ze mogen gebruiken.",
-  "Enable dashboards": "Dashboards aanzetten",
-  "When turned off, nobody can save or open dashboards and the AI cannot see their functions.": "Als dit uitstaat kan niemand dashboards opslaan of openen en ziet de AI de functies niet.",
-  "Who may create dashboards": "Wie mag dashboards maken",
-  "No selection: everyone with write access to this plugin.": "Niets aangevinkt: iedereen met schrijfrechten op deze plugin.",
-  "Access → Permissions": "Toegang → Rechten",
-  "Maximum size per dashboard (kB)": "Maximale grootte per dashboard (kB)",
-  "Libraries": "Bibliotheken",
-  "Only libraries from Tailr Core’s reviewed list are available.": "Alleen bibliotheken uit de gecontroleerde lijst van Tailr Core zijn beschikbaar.",
-  "Read functions only (recommended)": "Alleen leesfuncties (aanbevolen)",
-  "This prevents dashboards from changing data, even if the AI is misled.": "Dit voorkomt dat dashboards gegevens wijzigen, ook als de AI is misleid.",
-  "Default 200 kB, maximum {n} kB.": "Standaard 200 kB, maximaal {n} kB.",
-  "1 dashboard": "1 dashboard",
-  "{n} dashboards": "{n} dashboards",
-  "1 employee": "1 medewerker",
-  "{n} employees": "{n} medewerkers",
-  "{n} awaiting confirmation": "{n} te bevestigen",
   "About this dashboard": "Over dit dashboard",
   "Review and confirm": "Bekijken en bevestigen",
   "Some required functions are no longer accessible. Parts of this dashboard may not work.": "Sommige benodigde functies zijn niet meer toegankelijk. Delen van dit dashboard werken mogelijk niet.",
@@ -146,9 +132,6 @@ export function register(api: PluginApi) {
   "Delete": "Verwijderen",
   "Confirm": "Bevestigen",
   "Reject": "Afwijzen",
-  "Save": "Opslaan",
-  "Saved": "Opgeslagen",
-  "Saving…": "Opslaan…",
   "Created": "Aangemaakt",
   "Version": "Versie",
   "Status": "Status",
@@ -157,7 +140,12 @@ export function register(api: PluginApi) {
   "Write": "Schrijven",
   "Admin": "Beheer",
   "None": "Geen",
-  "No roles yet": "Nog geen rollen",
+  "All employees: {dashboards} · {employees} · {pending}": "Alle medewerkers: {dashboards} · {employees} · {pending}",
+  "1 dashboard": "1 dashboard",
+  "{n} dashboards": "{n} dashboards",
+  "1 employee": "1 medewerker",
+  "{n} employees": "{n} medewerkers",
+  "{n} awaiting confirmation": "{n} te bevestigen",
   "More actions for {name}": "Meer acties voor {name}"
 });
   api.migrate([
@@ -191,13 +179,70 @@ export function register(api: PluginApi) {
     )`,
   ]);
 
-  const config = (): Config => {
-    const stored = api.settings.get<Partial<Config>>("config") ?? {};
-    return { ...DEFAULTS, ...stored };
-  };
   const knownLibraries = () => api.frame.libraries.map((l) => l.id);
+
+  // Van 1.2.x: het object "config" eenmalig naar de losse sleutels, voor zover die nog leeg zijn.
+  // Dit gebeurt vóór define, want daarna geeft get voor een leeg veld de standaard.
+  const legacy = api.settings.get<Partial<Config> & { enabled?: boolean; creatorRoles?: string[] }>("config");
+  if (legacy && typeof legacy === "object") {
+    const clean: Partial<Config> = {
+      maxKb: Number.isInteger(legacy.maxKb) && legacy.maxKb! >= 1 && legacy.maxKb! <= HARD_MAX_KB ? legacy.maxKb : undefined,
+      libraries: Array.isArray(legacy.libraries) ? [...new Set(legacy.libraries.map(String))].filter((l) => knownLibraries().includes(l)) : undefined,
+      readOnly: typeof legacy.readOnly === "boolean" ? legacy.readOnly : undefined,
+    };
+    const moved = FIELDS.filter((key) => clean[key] !== undefined && api.settings.get(key) === undefined);
+    for (const key of moved) api.settings.set(key, clean[key]);
+    api.settings.remove("config");
+    api.log.info(`instellingen overgezet naar de instellingenpagina van de kern: ${moved.join(", ") || "niets"}`);
+    if (Array.isArray(legacy.creatorRoles) && legacy.creatorRoles.length) api.log.warn(`Alleen bepaalde rollen mochten dashboards maken (${legacy.creatorRoles.join(", ")}). Dat is geen instelling meer: geef alleen die rollen Schrijven op Mijn dashboards onder Toegang → Rechten.`);
+    if (legacy.enabled === false) api.log.warn("Dashboards stonden uit in de eigen instelling van de plugin. Die bestaat niet meer: zet de plugin uit op de pagina Plugins als dashboards uit moeten.");
+  }
+
+  const libraryOptions = api.frame.libraries.map((l) => ({ value: l.id, label: l.title }));
+  api.settings.define({
+    fields: [
+      {
+        name: "maxKb",
+        type: "number",
+        label: { en: "Maximum size per dashboard", nl: "Maximale grootte per dashboard" },
+        description: {
+          en: `Default ${DEFAULTS.maxKb} kB, at most ${HARD_MAX_KB} kB. Who may build dashboards is a permission: give roles Write on this plugin under Access → Permissions.`,
+          nl: `Standaard ${DEFAULTS.maxKb} kB, maximaal ${HARD_MAX_KB} kB. Wie dashboards mag maken is een recht: geef rollen Schrijven op deze plugin onder Toegang → Rechten.`,
+        },
+        min: 1,
+        max: HARD_MAX_KB,
+        step: 1,
+        default: DEFAULTS.maxKb,
+        unit: "kB",
+      },
+      // Zonder bibliotheken in de kern geen keuzelijst (een select heeft minstens één optie nodig)
+      ...(libraryOptions.length
+        ? [{
+            name: "libraries",
+            type: "select" as const,
+            multiple: true,
+            label: { en: "Libraries", nl: "Bibliotheken" },
+            description: { en: "Only libraries from Tailr Core’s reviewed list are available.", nl: "Alleen bibliotheken uit de gecontroleerde lijst van Tailr Core zijn beschikbaar." },
+            options: libraryOptions,
+            default: DEFAULTS.libraries.filter((l) => knownLibraries().includes(l)),
+          }]
+        : []),
+      {
+        name: "readOnly",
+        type: "boolean",
+        label: { en: "Read functions only (recommended)", nl: "Alleen leesfuncties (aanbevolen)" },
+        description: { en: "This prevents dashboards from changing data, even if the AI is misled.", nl: "Dit voorkomt dat dashboards gegevens wijzigen, ook als de AI is misleid." },
+        default: DEFAULTS.readOnly,
+      },
+    ],
+  });
+
+  const config = (): Config => ({
+    maxKb: api.settings.get<number>("maxKb") ?? DEFAULTS.maxKb,
+    libraries: api.settings.get<string[]>("libraries") ?? [],
+    readOnly: api.settings.get<boolean>("readOnly") ?? DEFAULTS.readOnly,
+  });
   const allowedLibraries = (cfg: Config) => cfg.libraries.filter((id) => knownLibraries().includes(id));
-  const canCreate = (cfg: Config, roleIds: readonly string[]) => cfg.enabled && (!cfg.creatorRoles.length || roleIds.some((r) => cfg.creatorRoles.includes(r)));
   const roleIdsOf = (userId: string) => api.users.list().find((u) => u.id === userId)?.roleIds ?? [];
   const link = (id: string, what: "confirm" | "view") => (what === "view" ? `${api.publicUrl}/p/dashboards/view?id=${id}` : `${api.publicUrl}/p/dashboards?confirm=${id}`);
 
@@ -308,8 +353,6 @@ export function register(api: PluginApi) {
     handler: async (args, ctx) => {
       const cfg = config();
       if (ctx.principal.type !== "user") throw api.tools.error("access_denied", "Only users can have dashboards.");
-      if (!cfg.enabled) throw api.tools.error("access_denied", "Dashboards are turned off by your administrator.");
-      if (!canCreate(cfg, ctx.principal.roleIds)) throw api.tools.error("access_denied", "Your role may not create dashboards. Ask your administrator.");
       const name = String(args.name ?? "").trim().toLowerCase();
       if (!NAME.test(name)) throw api.tools.error("invalid_input", "name: use lowercase letters, digits and hyphens (max 48), e.g. revenue-per-week.");
       const title = String(args.title ?? "").trim().slice(0, 120);
@@ -377,7 +420,6 @@ export function register(api: PluginApi) {
     description: "List the current user's dashboards in Tailr Core (name, title, status, active and pending version, tools used, link). Use dashboards__get to load one for editing.",
     params: {},
     handler: (_args, ctx) => {
-      if (!config().enabled) throw api.tools.error("access_denied", "Dashboards are turned off by your administrator.");
       return api.db.all<ItemRow>("SELECT * FROM tp_dashboards_items WHERE owner_id = ? ORDER BY updated_at DESC", ctx.principal.id).map((row) => {
         const { versions: all, ...rest } = describeItem(row);
         return { ...rest, versionCount: all.length };
@@ -396,7 +438,6 @@ export function register(api: PluginApi) {
       version: { type: "number", description: "A specific version (optional)" },
     },
     handler: (args, ctx) => {
-      if (!config().enabled) throw api.tools.error("access_denied", "Dashboards are turned off by your administrator.");
       const row = itemByName(ctx.principal.id, String(args.name ?? "").trim().toLowerCase());
       if (!row) throw api.tools.error("not_found", `No dashboard named ${args.name}. Use dashboards__list.`);
       const v = args.version !== undefined && args.version !== null && args.version !== "" ? version(row.id, Number(args.version)) : versions(row.id)[0];
@@ -405,18 +446,10 @@ export function register(api: PluginApi) {
     },
   });
 
-  // Uit, of geen rol om te maken: de functies niet tonen (weigeren doen de handlers zelf ook)
-  api.filter("tools.list", (list, ctx) => {
-    const cfg = config();
-    if (!cfg.enabled) return list.filter((t) => !t.qualifiedName.startsWith("dashboards__"));
-    if (!canCreate(cfg, ctx.principal.roleIds)) return list.filter((t) => t.qualifiedName !== "dashboards__save");
-    return list;
-  });
-
   // --- Routes voor de schermen ---------------------------------------------------------------
 
   api.routes((r) => {
-    type P = { type: string; id: string; name: string; via: string; roleIds: string[] };
+    type P = { type: string; id: string; name: string; via: string; roleIds: string[]; isAdmin: boolean };
     type C = { get(key: "principal"): P };
     const user = (c: C) => {
       const p = c.get("principal");
@@ -424,18 +457,23 @@ export function register(api: PluginApi) {
     };
     /** Bevestigen, aanzetten, verwijderen: alleen de mens zelf, in de beheeromgeving */
     const sessionOnly = (c: C) => c.get("principal").via === "session";
-    const OFF = { error: "Dashboards are turned off. Ask your administrator to enable them." };
 
+    // Voor het scherm: de grenzen, en voor een beheerder de tellerregel (dashboards · medewerkers · te
+    // bevestigen; later op een Log-tabblad van de kern, tailr-core #298)
     r.get("/config", (c) => {
       const cfg = config();
       const p = c.get("principal");
-      return c.json({ enabled: cfg.enabled, canCreate: canCreate(cfg, p.roleIds), maxKb: Math.min(cfg.maxKb, HARD_MAX_KB), readOnly: cfg.readOnly, libraries: allowedLibraries(cfg) });
+      const stats = p.isAdmin
+        ? api.db.get<{ items: number; owners: number; pending: number }>(
+            "SELECT (SELECT COUNT(*) FROM tp_dashboards_items) AS items, (SELECT COUNT(DISTINCT owner_id) FROM tp_dashboards_items) AS owners, (SELECT COUNT(*) FROM tp_dashboards_versions WHERE status = 'pending') AS pending",
+          ) ?? null
+        : null;
+      return c.json({ maxKb: Math.min(cfg.maxKb, HARD_MAX_KB), readOnly: cfg.readOnly, libraries: allowedLibraries(cfg), stats });
     });
 
     r.get("/dashboards", async (c) => {
       const p = user(c);
       if (!p) return c.json({ error: "Users only" }, 403);
-      if (!config().enabled) return c.json(OFF, 403);
       const available = new Map((await api.tools.available(p.id)).map((tool) => [tool.qualifiedName, tool]));
       return c.json(api.db.all<ItemRow>("SELECT * FROM tp_dashboards_items WHERE owner_id = ? ORDER BY updated_at DESC", p.id).map((row) => {
         const item = describeItem(row);
@@ -447,7 +485,6 @@ export function register(api: PluginApi) {
       const p = user(c);
       const row = item(c.req.param("id"));
       if (!p || !canView(row, p.id)) return c.json({ error: "Dashboard not found" }, 404);
-      if (!config().enabled) return c.json(OFF, 403);
       return c.json(describeItem(row));
     });
 
@@ -457,7 +494,6 @@ export function register(api: PluginApi) {
       const row = item(c.req.param("id"));
       if (!p || !canView(row, p.id)) return c.json({ error: "Dashboard not found" }, 404);
       const cfg = config();
-      if (!cfg.enabled) return c.json(OFF, 403);
       const v = version(row.id, Number(c.req.param("v")));
       if (!v) return c.json({ error: "Version not found" }, 404);
       const { tools, problems } = await checkUses(p.id, parseList(v.uses), cfg);
@@ -470,7 +506,6 @@ export function register(api: PluginApi) {
       if (!p || !canView(row, p.id)) return c.json({ error: "Dashboard not found" }, 404);
       if (!sessionOnly(c)) return c.json({ error: "Confirm dashboards in Tailr Core" }, 403);
       const cfg = config();
-      if (!cfg.enabled) return c.json(OFF, 403);
       const v = version(row.id, Number(c.req.param("v")));
       if (!v || v.status !== "pending") return c.json({ error: "This version is not awaiting confirmation" }, 409);
       const { problems } = await checkUses(p.id, parseList(v.uses), cfg);
@@ -504,7 +539,6 @@ export function register(api: PluginApi) {
       if (!p || !canView(row, p.id)) return c.json({ error: "Dashboard not found" }, 404);
       if (!sessionOnly(c)) return c.json({ error: "This action is only available in Tailr Core" }, 403);
       const cfg = config();
-      if (!cfg.enabled) return c.json(OFF, 403);
       const v = version(row.id, Number(c.req.param("v")));
       if (!v || v.status !== "confirmed") return c.json({ error: "Only a confirmed version can be restored" }, 409);
       const { problems } = await checkUses(p.id, parseList(v.uses), cfg);
@@ -542,7 +576,6 @@ export function register(api: PluginApi) {
       const row = item(c.req.param("id"));
       if (!p || !canView(row, p.id)) return c.json({ error: "Dashboard not found" }, 404);
       const cfg = config();
-      if (!cfg.enabled) return c.json(OFF, 403);
       if (!row.enabled) return c.json({ error: "Dit dashboard staat uit", code: "disabled" }, 409);
       const v = row.active_version === null ? undefined : version(row.id, row.active_version);
       if (!v) return c.json({ error: "Dit dashboard is nog niet bevestigd", code: "not_confirmed", pendingVersion: pendingOf(row.id)?.version ?? null }, 409);
@@ -560,7 +593,6 @@ export function register(api: PluginApi) {
       if (!p || !canView(row, p.id)) return c.json({ error: "Dashboard not found" }, 404);
       if (!sessionOnly(c)) return c.json({ ok: false, error: { code: "access_denied", message: "Dashboards run in Tailr Core only." } }, 403);
       const cfg = config();
-      if (!cfg.enabled) return c.json({ ok: false, error: { code: "access_denied", message: "Dashboards are turned off by your administrator." } }, 403);
       if (!row.enabled || row.active_version === null) return c.json({ ok: false, error: { code: "not_confirmed", message: "This dashboard is not active." } }, 409);
       const body = (await c.req.json().catch(() => null)) as { name?: unknown; args?: unknown } | null;
       const name = typeof body?.name === "string" ? body.name : "";
@@ -579,36 +611,9 @@ export function register(api: PluginApi) {
     });
   });
 
-  // --- Beheer ---------------------------------------------------------------------------------
-
-  api.adminRoutes((r) => {
-    r.get("/settings", (c) => {
-      const counts = api.db.get<{ items: number; owners: number; pending: number }>(
-        "SELECT (SELECT COUNT(*) FROM tp_dashboards_items) AS items, (SELECT COUNT(DISTINCT owner_id) FROM tp_dashboards_items) AS owners, (SELECT COUNT(*) FROM tp_dashboards_versions WHERE status = 'pending') AS pending",
-      );
-      return c.json({ ...config(), hardMaxKb: HARD_MAX_KB, availableLibraries: api.frame.libraries, stats: counts });
-    });
-    r.put("/settings", async (c) => {
-      const body = ((await c.req.json().catch(() => ({}))) ?? {}) as Partial<Record<keyof Config, unknown>>;
-      const current = config();
-      const next: Config = {
-        enabled: body.enabled === undefined ? current.enabled : Boolean(body.enabled),
-        creatorRoles: body.creatorRoles === undefined ? current.creatorRoles : Array.isArray(body.creatorRoles) ? [...new Set(body.creatorRoles.map(String))] : current.creatorRoles,
-        maxKb: body.maxKb === undefined ? current.maxKb : Number(body.maxKb),
-        libraries: body.libraries === undefined ? current.libraries : Array.isArray(body.libraries) ? [...new Set(body.libraries.map(String))] : current.libraries,
-        readOnly: body.readOnly === undefined ? current.readOnly : Boolean(body.readOnly),
-      };
-      if (!Number.isInteger(next.maxKb) || next.maxKb < 1 || next.maxKb > HARD_MAX_KB) return c.json({ error: `Maximum size: a whole number from 1 to ${HARD_MAX_KB} kB` }, 400);
-      const unknownLibs = next.libraries.filter((l) => !knownLibraries().includes(l));
-      if (unknownLibs.length) return c.json({ error: `Unknown library: ${unknownLibs.join(", ")}` }, 400);
-      api.settings.set("config", next);
-      api.log.info(`instellingen gewijzigd door ${c.get("principal").name}: ${JSON.stringify(next)}`);
-      return c.json(next);
-    });
-  });
-
   // --- Menu -----------------------------------------------------------------------------------
 
   api.nav({ label: { nl: "Mijn dashboards", en: "My dashboards" }, path: "" });
+  // De instellingenpagina van de kern (api.settings.define): het menu wijst daarheen
   api.nav({ label: { nl: "Dashboards", en: "Dashboards" }, path: "settings", adminOnly: true });
 }

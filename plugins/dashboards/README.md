@@ -12,13 +12,17 @@ Medewerkers laten hun AI-tool (bijvoorbeeld Claude.ai, zonder iets te installere
 ## Instellen
 
 1. Installeer de plugin in de *Catalogus*, tabblad *Plugins*, en herstart.
-2. Geef rollen toegang onder **Toegang → Rechten**, rij *Mijn dashboards*: *Schrijven* om dashboards te maken (`dashboards__save`), *Lezen* voor `dashboards__list` en `dashboards__get`.
-3. Onder **Plugins → Dashboards (instellingen)**:
-   - **Aan of uit.**
-   - **Wie mag maken:** leeg = iedereen met recht in Toegang; anders alleen de gekozen rollen.
-   - **Maximale grootte** (standaard 200 kB, hooguit 2 MB).
-   - **Bibliotheken** uit de vaste lijst van Tailr Core (nu Chart.js).
+2. Geef rollen toegang onder **Toegang → Rechten**, rij *Mijn dashboards*: *Schrijven* om dashboards te maken (`dashboards__save`), *Lezen* voor `dashboards__list` en `dashboards__get`. Wie dashboards mag maken is dus een recht, geen instelling van de plugin.
+3. De instellingen staan op de instellingenpagina van Tailr Core (`/plugins/dashboards/settings`): via het menu-item *Dashboards* voor beheerders, of *Plugins → Geïnstalleerd* → *Instellingen* in het rijmenu. De kern toont en controleert de velden, vraagt de sudo-bevestiging en zet elke wijziging in het auditlog (sinds 1.3.0, `api.settings.define`, plugin-API 1.8):
+   - **Maximale grootte per dashboard** (standaard 200 kB, hooguit 2048 kB).
+   - **Bibliotheken** uit de vaste lijst van Tailr Core (standaard Chart.js).
    - **Alleen leesfuncties** (standaard aan): een dashboard kan dan niets wijzigen.
+
+De plugin zelf aan- en uitzetten doe je op de pagina *Plugins* van Tailr Core; een eigen aan/uit heeft hij niet meer. Een beheerder ziet op *Mijn dashboards* ook hoeveel dashboards er zijn, van hoeveel medewerkers, en hoeveel er wachten op bevestiging door hun eigenaar.
+
+**Bijwerken van 1.2.x:** de oude instellingen (één object `config`) gaan bij het laden eenmalig naar de losse velden. Twee oude instellingen bestaan niet meer; staat er een waarschuwing in de log van de plugin, dan:
+- *Dashboards aanzetten* stond uit: zet de plugin uit op de pagina *Plugins*;
+- *Wie mag dashboards maken* was beperkt tot rollen: geef alleen die rollen *Schrijven* op *Mijn dashboards* onder *Toegang → Rechten*.
 
 ## Functies voor de AI
 

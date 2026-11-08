@@ -18,15 +18,24 @@
 import type { PluginApi } from "@tailr/plugin";
 
 type State = "allow" | "block";
+type DefaultAi = State | "approve";
+/**
+ * Sinds 1.5.0 (plugin-API 1.8): defaultAi en exemptRoles staan op de instellingenpagina van de kern
+ * (api.settings.define), elk onder een eigen sleutel. De keuze per client is geen vaste instelling
+ * maar hoort bij de lijst van clients: die blijft op het scherm van de plugin, onder de sleutel "clients".
+ */
 interface Config {
   /** Wat geldt voor een AI-client zonder eigen keuze: toestaan, blokkeren, of eerst goedkeuren */
-  defaultAi: State | "approve";
+  defaultAi: DefaultAi;
   /** Keuze per client-id */
   clients: Record<string, State>;
   /** Rollen die elke client mogen gebruiken */
   exemptRoles: string[];
 }
 const DEFAULTS: Config = { defaultAi: "allow", clients: {}, exemptRoles: [] };
+const isDefaultAi = (v: unknown): v is DefaultAi => v === "allow" || v === "block" || v === "approve";
+const cleanClients = (v: unknown): Record<string, State> =>
+  Object.fromEntries(Object.entries(v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {}).filter((e): e is [string, State] => e[1] === "allow" || e[1] === "block"));
 
 interface ClientRow {
   clientId: string;
@@ -86,7 +95,51 @@ export function register(api: PluginApi) {
     );`,
   ]);
 
-  const config = (): Config => ({ ...DEFAULTS, ...(api.settings.get<Partial<Config>>("config") ?? {}) });
+  // Van 1.4.x: het object "config" eenmalig naar de losse sleutels, voor zover die nog leeg zijn.
+  // Vóór define, want daarna geeft get voor een leeg veld de standaard.
+  const legacy = api.settings.get<Partial<Config>>("config");
+  if (legacy && typeof legacy === "object") {
+    const moved: string[] = [];
+    if (isDefaultAi(legacy.defaultAi) && api.settings.get("defaultAi") === undefined) api.settings.set("defaultAi", legacy.defaultAi), moved.push("defaultAi");
+    if (Array.isArray(legacy.exemptRoles) && api.settings.get("exemptRoles") === undefined) api.settings.set("exemptRoles", [...new Set(legacy.exemptRoles.map(String))]), moved.push("exemptRoles");
+    if (legacy.clients && api.settings.get("clients") === undefined) api.settings.set("clients", cleanClients(legacy.clients)), moved.push("clients");
+    api.settings.remove("config");
+    api.log.info(`instellingen overgezet naar de losse sleutels: ${moved.join(", ") || "niets"}`);
+  }
+
+  api.settings.define({
+    fields: [
+      {
+        name: "defaultAi",
+        type: "select",
+        label: { en: "New AI tools", nl: "Nieuwe AI-tools" },
+        description: {
+          en: "For a client without its own choice on the Allow AI tools screen. With approval, a new client appears under To confirm (administrators get an email) and the employee already sees this on the consent screen. Your own apps (under Apps) are always allowed unless you block them there.",
+          nl: "Voor een client zonder eigen keuze op het scherm AI-tools toestaan. Met goedkeuring komt een nieuwe client in Te bevestigen (beheerders krijgen een mail) en ziet de medewerker het al op het toestemmingsscherm. Eigen apps (onder Apps) mogen altijd, tenzij je ze daar blokkeert.",
+        },
+        options: [
+          { value: "allow", label: { en: "May connect", nl: "Mogen verbinden" }, description: { en: "Unless you block them on the Allow AI tools screen.", nl: "Tenzij je ze blokkeert op het scherm AI-tools toestaan." } },
+          { value: "approve", label: { en: "Need approval first", nl: "Hebben eerst goedkeuring nodig" }, description: { en: "They appear under To confirm (administrators get an email), and the employee already sees this on the consent screen.", nl: "Ze komen in Te bevestigen (beheerders krijgen een mail), en de medewerker ziet het al op het toestemmingsscherm." } },
+          { value: "block", label: { en: "Only what you allow", nl: "Alleen wat je toestaat" }, description: { en: "For example only the connector of your Claude or ChatGPT organisation.", nl: "Bijvoorbeeld alleen de connector van je Claude- of ChatGPT-organisatie." } },
+        ],
+        default: DEFAULTS.defaultAi,
+        group: { en: "Default", nl: "Standaard" },
+      },
+      {
+        name: "exemptRoles",
+        type: "roles",
+        label: { en: "Roles that may use any AI tool", nl: "Rollen die elke AI-tool mogen gebruiken" },
+        description: { en: "For example developers. No selection: no exceptions.", nl: "Bijvoorbeeld ontwikkelaars. Niets aangevinkt: geen uitzonderingen." },
+        group: { en: "Default", nl: "Standaard" },
+      },
+    ],
+  });
+
+  const config = (): Config => ({
+    defaultAi: api.settings.get<DefaultAi>("defaultAi") ?? DEFAULTS.defaultAi,
+    clients: cleanClients(api.settings.get("clients")),
+    exemptRoles: api.settings.get<string[]>("exemptRoles") ?? DEFAULTS.exemptRoles,
+  });
 
   // Tabellen van Tailr Core en Better Auth, alleen lezen (een plugin is vertrouwde code)
   const appClients = () => new Map(api.db.all<{ oauth_client_id: string; name: string }>("SELECT oauth_client_id, name FROM tc_apps WHERE oauth_client_id IS NOT NULL").map((a) => [a.oauth_client_id, a.name]));
@@ -145,11 +198,10 @@ export function register(api: PluginApi) {
   }
 
   function setChoice(clientId: string, choice: State | null) {
-    const cfg = config();
-    const clients = { ...cfg.clients };
+    const clients = { ...config().clients };
     if (choice) clients[clientId] = choice;
     else delete clients[clientId];
-    api.settings.set("config", { ...cfg, clients });
+    api.settings.set("clients", clients);
   }
 
   api.pending.onDecide("client", async (item, decision, approver) => {
@@ -227,7 +279,7 @@ export function register(api: PluginApi) {
   });
 
   api.adminRoutes((r) => {
-    r.get("/clients", async (c) => {
+    r.get("/clients", (c) => {
       const cfg = config();
       const apps = appClients();
       const seen = api.db.all<{ client_id: string; user_id: string; user_name: string; first_at: string; last_at: string; allowed: number; blocked: number }>(
@@ -265,26 +317,10 @@ export function register(api: PluginApi) {
         };
       });
       clients.sort((a, b) => String(b.lastAt ?? b.createdAt ?? "").localeCompare(String(a.lastAt ?? a.createdAt ?? "")));
-      const roles = await api.adminFetch(c.get("principal").id, "GET", "/api/admin/roles");
       clients.sort((a, b) => Number(b.pending) - Number(a.pending));
-      return c.json({ config: cfg, clients, roles: Array.isArray(roles.data) ? roles.data : [], mailEnabled: api.users.mailEnabled() });
+      return c.json({ defaultAi: cfg.defaultAi, exemptRoles: cfg.exemptRoles.length, clients, mailEnabled: api.users.mailEnabled() });
     });
-    r.put("/config", async (c) => {
-      const body = (await c.req.json()) as Partial<Config>;
-      const current = config();
-      const clients: Record<string, State> = {};
-      for (const [id, state] of Object.entries(body.clients ?? current.clients)) if (state === "allow" || state === "block") clients[id] = state;
-      const next: Config = {
-        defaultAi: body.defaultAi === "block" || body.defaultAi === "allow" || body.defaultAi === "approve" ? body.defaultAi : current.defaultAi,
-        clients,
-        exemptRoles: Array.isArray(body.exemptRoles) ? body.exemptRoles.filter((v): v is string => typeof v === "string") : current.exemptRoles,
-      };
-      api.settings.set("config", next);
-      for (const id of Object.keys(clients)) closeRequest(id, c.get("principal").name);
-      api.log.info(`instellingen gewijzigd door ${c.get("principal").name}: standaard ${next.defaultAi}, ${Object.keys(clients).length} eigen keuzes`);
-      return c.json({ ok: true });
-    });
-    // Snel kiezen voor één client (knoppen bij een wachtende client)
+    // De keuze voor één client (keuzelijst per client, en de knoppen bij een wachtende client)
     r.put("/clients/:id", async (c) => {
       const { choice } = (await c.req.json()) as { choice: State | null };
       const id = c.req.param("id");

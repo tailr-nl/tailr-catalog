@@ -13,8 +13,8 @@ import type { PluginApi, SlotContent } from "@tailr/plugin";
 type Tone = "info" | "success" | "warning";
 const TONES: Tone[] = ["info", "success", "warning"];
 const MAX_TEXT = 2_000;
-const MAX_ROLES = 50;
 
+/** De mededeling zoals de banner hem gebruikt, samengesteld uit de velden van de instellingenpagina. */
 export interface Announcement {
   /** Markdown; Nederlands verplicht, Engels optioneel (anders ziet iedereen het Nederlands) */
   text: { nl: string; en?: string };
@@ -25,7 +25,14 @@ export interface Announcement {
   tone: Tone;
   /** Mag iemand hem wegklikken */
   dismissible: boolean;
-  /** Elke opslag een nieuwe versie: wie de vorige wegklikte, ziet de nieuwe weer */
+  /** Elke wijziging een nieuwe versie: wie de vorige wegklikte, ziet de nieuwe weer */
+  version: string;
+  at: string;
+  by: string;
+}
+
+/** Wie de mededeling het laatst wijzigde, en de versie voor het wegklikken (sleutel "meta"). */
+interface Meta {
   version: string;
   at: string;
   by: string;
@@ -35,36 +42,14 @@ const TEXTS_EN: Record<string, string> = {
   "Mededeling": "Announcement",
   "Een korte mededeling bovenaan elke pagina, voor iedereen of voor bepaalde rollen.": "A short announcement at the top of every page, for everyone or for certain roles.",
   "Laden…": "Loading…",
-  "Tekst (Nederlands)": "Text (Dutch)",
-  "Tekst (Engels, optioneel)": "Text (English, optional)",
-  "Leeg: wie Engels gebruikt, ziet de Nederlandse tekst.": "Empty: people who use English see the Dutch text.",
-  "Markdown: **vet**, *cursief*, [tekst](https://…) en lijsten. HTML wordt niet uitgevoerd.": "Markdown: **bold**, *italic*, [text](https://…) and lists. HTML is not executed.",
-  "Einddatum": "End date",
-  "Tot en met deze dag. Leeg: tot je hem weghaalt.": "Up to and including this day. Empty: until you remove it.",
-  "Voor wie": "For whom",
-  "Iedereen": "Everyone",
-  "Alleen deze rollen": "Only these roles",
-  "Nog geen rollen.": "No roles yet.",
-  "Rollen": "Roles",
-  "Typ een tekst om het voorbeeld te zien.": "Type a text to see the preview.",
-  "Kleur": "Colour",
-  "Informatie": "Information",
-  "Goed nieuws": "Good news",
-  "Waarschuwing": "Warning",
-  "Wegklikken toestaan": "Allow dismissing",
-  "Iemand die hem wegklikt, ziet hem pas weer als je de mededeling opnieuw opslaat.": "Someone who dismisses it only sees it again when you save the announcement again.",
+  "Aanpassen": "Edit",
   "Voorbeeld": "Preview",
-  "Opslaan": "Save",
-  "Weghalen": "Remove",
-  "Opgeslagen": "Saved",
-  "Mededeling weggehaald": "Announcement removed",
-  "De mededeling weghalen? Niemand ziet hem dan nog.": "Remove the announcement? Nobody will see it anymore.",
-  "Kies minstens één rol, of kies Iedereen.": "Choose at least one role, or choose Everyone.",
   "Er staat nu geen mededeling.": "There is no announcement right now.",
   "Te zien voor iedereen.": "Visible to everyone.",
   "Te zien voor {n} rol(len).": "Visible to {n} role(s).",
   "Tot en met {date}.": "Up to and including {date}.",
   "Verlopen op {date}: niemand ziet hem nog.": "Expired on {date}: nobody sees it anymore.",
+  "De einddatum {date} klopt niet: niemand ziet de mededeling. Gebruik JJJJ-MM-DD, bijv. 2026-12-31.": "The end date {date} is not valid: nobody sees the announcement. Use YYYY-MM-DD, e.g. 2026-12-31.",
   "{n} keer weggeklikt.": "Dismissed {n} times.",
   "Bericht van {name}, {date}": "Message from {name}, {date}",
 };
@@ -79,6 +64,15 @@ const isDate = (s: string) => {
   const d = new Date(`${s}T00:00:00Z`);
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
 };
+/** De einddatum als JJJJ-MM-DD; ook DD-MM-JJJJ (zoals je hem in het Nederlands typt). Leeg: null; ongeldig: undefined. */
+const normaliseDate = (raw: unknown): string | null | undefined => {
+  if (raw === undefined || raw === null || (typeof raw === "string" && !raw.trim())) return null;
+  if (typeof raw !== "string") return undefined;
+  const s = raw.trim();
+  const dmy = /^(\d{1,2})-(\d{1,2})-(\d{4})$/.exec(s);
+  const iso = dmy ? `${dmy[3]}-${dmy[2].padStart(2, "0")}-${dmy[1].padStart(2, "0")}` : s;
+  return isDate(iso) ? iso : undefined;
+};
 const day = (iso: string, locale: string) => new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString(locale === "nl" ? "nl-NL" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
 
 export function register(api: PluginApi) {
@@ -91,46 +85,120 @@ export function register(api: PluginApi) {
     )`,
   ]);
 
-  const current = () => api.settings.get<Announcement>("announcement") ?? null;
-  const expired = (m: Announcement) => Boolean(m.until && today() > m.until);
-  const dismissedCount = (m: Announcement) => api.db.get<{ n: number }>("SELECT COUNT(*) AS n FROM tp_mededeling_dismissed WHERE version = ?", m.version)?.n ?? 0;
+  // Van 1.1.x: het object "announcement" eenmalig naar de losse sleutels (als die nog leeg zijn)
+  // en "meta". Vóór define, want daarna geeft get voor een leeg veld de standaard.
+  const legacy = api.settings.get<Announcement>("announcement");
+  if (legacy && typeof legacy === "object") {
+    const values: Record<string, unknown> = {
+      textNl: typeof legacy.text?.nl === "string" ? legacy.text.nl : undefined,
+      textEn: typeof legacy.text?.en === "string" ? legacy.text.en : undefined,
+      until: typeof legacy.until === "string" ? legacy.until : undefined,
+      roles: Array.isArray(legacy.roles) ? legacy.roles.filter((r) => typeof r === "string") : undefined,
+      tone: TONES.includes(legacy.tone) ? legacy.tone : undefined,
+      dismissible: typeof legacy.dismissible === "boolean" ? legacy.dismissible : undefined,
+    };
+    const moved = Object.keys(values).filter((key) => values[key] !== undefined && api.settings.get(key) === undefined);
+    for (const key of moved) api.settings.set(key, values[key]);
+    if (!api.settings.get("meta") && legacy.version) api.settings.set("meta", { version: legacy.version, at: legacy.at, by: legacy.by } satisfies Meta);
+    api.settings.remove("announcement");
+    api.log.info(`mededeling overgezet naar de instellingenpagina van de kern: ${moved.join(", ") || "niets"}`);
+  }
 
-  /** Wat een beheerder opslaat: gecontroleerd en schoongemaakt, of een fout in het Engels. */
-  function parse(body: Record<string, unknown>, by: string): Announcement | string {
-    const raw = body.text;
-    const nl = typeof raw === "string" ? raw : raw && typeof raw === "object" ? (raw as Record<string, unknown>).nl : undefined;
-    const en = raw && typeof raw === "object" ? (raw as Record<string, unknown>).en : undefined;
-    if (typeof nl !== "string" || !nl.trim()) return "text.nl is required: the announcement in Dutch (markdown).";
-    if (en !== undefined && en !== null && typeof en !== "string") return "text.en must be a text.";
-    if (nl.length > MAX_TEXT || (typeof en === "string" && en.length > MAX_TEXT)) return `The text is too long (max ${MAX_TEXT} characters per language).`;
-    const until = body.until === undefined || body.until === null || body.until === "" ? null : body.until;
-    if (until !== null && (typeof until !== "string" || !isDate(until))) return "until must be a date as YYYY-MM-DD, or empty.";
-    const roles = body.roles === undefined ? [] : body.roles;
-    if (!Array.isArray(roles) || roles.length > MAX_ROLES || roles.some((r) => typeof r !== "string" || !r || r.length > 100)) return `roles must be a list of role ids (at most ${MAX_ROLES}); empty is everyone.`;
-    const tone = body.tone === undefined ? "info" : body.tone;
-    if (!TONES.includes(tone as Tone)) return "tone must be info, success or warning.";
+  api.settings.define({
+    fields: [
+      {
+        name: "textNl",
+        type: "markdown",
+        label: { en: "Text (Dutch)", nl: "Tekst (Nederlands)" },
+        description: { en: "Markdown: **bold**, *italic*, [text](https://…) and lists. HTML is not executed. Empty: no announcement.", nl: "Markdown: **vet**, *cursief*, [tekst](https://…) en lijsten. HTML wordt niet uitgevoerd. Leeg: geen mededeling." },
+        maxLength: MAX_TEXT,
+      },
+      {
+        name: "textEn",
+        type: "markdown",
+        label: { en: "Text (English)", nl: "Tekst (Engels)" },
+        description: { en: "Empty: people who use English see the Dutch text.", nl: "Leeg: wie Engels gebruikt, ziet de Nederlandse tekst." },
+        maxLength: MAX_TEXT,
+      },
+      {
+        name: "until",
+        type: "text",
+        label: { en: "End date", nl: "Einddatum" },
+        description: { en: "Up to and including this day, as YYYY-MM-DD (or DD-MM-YYYY). Empty: until you remove the text.", nl: "Tot en met deze dag, als JJJJ-MM-DD (of DD-MM-JJJJ). Leeg: tot je de tekst weghaalt." },
+        placeholder: "2026-12-31",
+        maxLength: 10,
+      },
+      {
+        name: "roles",
+        type: "roles",
+        label: { en: "For whom", nl: "Voor wie" },
+        description: { en: "No selection: everyone.", nl: "Niets aangevinkt: iedereen." },
+      },
+      {
+        name: "tone",
+        type: "select",
+        label: { en: "Colour", nl: "Kleur" },
+        options: [
+          { value: "info", label: { en: "Information", nl: "Informatie" } },
+          { value: "success", label: { en: "Good news", nl: "Goed nieuws" } },
+          { value: "warning", label: { en: "Warning", nl: "Waarschuwing" } },
+        ],
+        default: "info",
+      },
+      {
+        name: "dismissible",
+        type: "boolean",
+        label: { en: "Allow dismissing", nl: "Wegklikken toestaan" },
+        description: { en: "Someone who dismisses it only sees it again when you change the announcement.", nl: "Iemand die hem wegklikt, ziet hem pas weer als je de mededeling wijzigt." },
+        default: true,
+      },
+    ],
+    // Elke wijziging is een nieuwe versie: wie de vorige wegklikte, ziet hem weer; oude wegklikken vervallen
+    onChange: (values, changed, ctx) => {
+      const meta: Meta = { version: randomBytes(6).toString("hex"), at: new Date().toISOString(), by: ctx.principal.name };
+      api.settings.set("meta", meta);
+      api.db.run("DELETE FROM tp_mededeling_dismissed WHERE version <> ?", meta.version);
+      const m = current();
+      if (!m) api.log.info(`${ctx.principal.name} haalde de mededeling weg`);
+      else api.log.info(`${ctx.principal.name} wijzigde de mededeling (${changed.join(", ")})${m.roles.length ? ` voor ${m.roles.length} rol(len)` : " voor iedereen"}${m.until ? ` tot en met ${m.until}` : ""}`);
+      if (typeof values.until === "string" && values.until.trim() && normaliseDate(values.until) === undefined) api.log.warn(`De einddatum "${values.until}" klopt niet; niemand ziet de mededeling tot je hem aanpast (JJJJ-MM-DD).`);
+    },
+  });
+
+  /** De mededeling uit de velden; null als er geen Nederlandse tekst is. */
+  function current(): (Announcement & { badDate?: string }) | null {
+    const v = api.settings.values();
+    const nl = typeof v.textNl === "string" ? v.textNl.trim() : "";
+    if (!nl) return null;
+    const en = typeof v.textEn === "string" ? v.textEn.trim() : "";
+    const until = normaliseDate(v.until);
+    const meta = api.settings.get<Meta>("meta");
     return {
-      text: { nl: nl.trim(), ...(typeof en === "string" && en.trim() ? { en: en.trim() } : {}) },
-      until: until as string | null,
-      roles: [...new Set(roles as string[])],
-      tone: tone as Tone,
-      dismissible: body.dismissible === undefined ? true : Boolean(body.dismissible),
-      version: randomBytes(6).toString("hex"),
-      at: new Date().toISOString(),
-      by,
+      text: { nl, ...(en ? { en } : {}) },
+      until: until ?? null,
+      ...(until === undefined ? { badDate: String(v.until) } : {}),
+      roles: Array.isArray(v.roles) ? v.roles : [],
+      tone: TONES.includes(v.tone as Tone) ? (v.tone as Tone) : "info",
+      dismissible: v.dismissible !== false,
+      version: meta?.version ?? "1",
+      at: meta?.at ?? new Date(0).toISOString(),
+      by: meta?.by ?? "",
     };
   }
+  /** Verlopen, of een einddatum die niet klopt: niet tonen */
+  const expired = (m: Announcement & { badDate?: string }) => Boolean(m.badDate) || Boolean(m.until && today() > m.until);
+  const dismissedCount = (m: Announcement) => api.db.get<{ n: number }>("SELECT COUNT(*) AS n FROM tp_mededeling_dismissed WHERE version = ?", m.version)?.n ?? 0;
 
   /** Het blok voor de banner: de tekst met wie hem schreef, wegklikken en (voor beheerders) aanpassen. */
   function block(m: Announcement, opts: { isAdmin: boolean; dismiss: boolean }): SlotContent {
-    const footer = (l: "nl" | "en") => (l === "nl" ? `_Bericht van ${m.by}, ${day(m.at, "nl")}_` : `_Message from ${m.by}, ${day(m.at, "en")}_`);
+    const footer = (l: "nl" | "en") => (!m.by ? "" : l === "nl" ? `\n\n_Bericht van ${m.by}, ${day(m.at, "nl")}_` : `\n\n_Message from ${m.by}, ${day(m.at, "en")}_`);
     return {
       id: "announcement",
       tone: m.tone,
-      text: { nl: `${m.text.nl}\n\n${footer("nl")}`, ...(m.text.en ? { en: `${m.text.en}\n\n${footer("en")}` } : {}) },
+      text: { nl: `${m.text.nl}${footer("nl")}`, ...(m.text.en ? { en: `${m.text.en}${footer("en")}` } : {}) },
       actions: [
         ...(opts.dismiss ? [{ id: "dismiss", label: { nl: "Sluiten", en: "Dismiss" }, post: "dismiss" }] : []),
-        ...(opts.isAdmin ? [{ id: "edit", label: { nl: "Aanpassen", en: "Edit" }, href: "/p/mededeling" }] : []),
+        ...(opts.isAdmin ? [{ id: "edit", label: { nl: "Aanpassen", en: "Edit" }, href: "/plugins/mededeling/settings" }] : []),
       ],
     };
   }
@@ -154,37 +222,16 @@ export function register(api: PluginApi) {
       api.db.run("INSERT OR IGNORE INTO tp_mededeling_dismissed (user_id, version, at) VALUES (?, ?, ?)", p.id, m.version, new Date().toISOString());
       return c.json({ ok: true });
     });
-
-    // Voorbeeld in het beheerscherm: dezelfde omzetter als de banner. Een gewone route, zodat niet
-    // elke toetsaanslag in het auditlog komt; alleen voor beheerders.
-    r.post("/preview", async (c) => {
-      if (!c.get("principal").isAdmin) return c.json({ error: "Only administrators can preview the announcement." }, 403);
-      const body = ((await c.req.json().catch(() => null)) ?? {}) as { text?: unknown };
-      if (typeof body.text !== "string" || body.text.length > MAX_TEXT) return c.json({ error: `text is required (max ${MAX_TEXT} characters)` }, 400);
-      return c.json({ html: api.markdown.render(body.text) });
-    });
   });
 
   api.adminRoutes((r) => {
-    r.get("/settings", (c) => {
+    // Voor het scherm: hoe de mededeling er nu voor staat, met het voorbeeld in de taal van de
+    // beheerder (dezelfde omzetter als de banner). Wijzigen gebeurt op de instellingenpagina van de kern.
+    r.get("/status", (c) => {
       const m = current();
-      return c.json({ announcement: m, expired: m ? expired(m) : false, dismissed: m ? dismissedCount(m) : 0, today: today() });
-    });
-    r.put("/settings", async (c) => {
-      const body = ((await c.req.json().catch(() => null)) ?? {}) as Record<string, unknown>;
-      const m = parse(body, c.get("principal").name);
-      if (typeof m === "string") return c.json({ error: m }, 400);
-      api.settings.set("announcement", m);
-      // Oude wegklikken horen bij een vorige versie: die tellen niet meer
-      api.db.run("DELETE FROM tp_mededeling_dismissed WHERE version <> ?", m.version);
-      api.log.info(`${c.get("principal").name} zette een mededeling${m.roles.length ? ` voor ${m.roles.length} rol(len)` : " voor iedereen"}${m.until ? ` tot en met ${m.until}` : ""}`);
-      return c.json({ announcement: m, expired: expired(m), dismissed: 0, today: today() });
-    });
-    r.delete("/settings", (c) => {
-      api.settings.remove("announcement");
-      api.db.run("DELETE FROM tp_mededeling_dismissed");
-      api.log.info(`${c.get("principal").name} haalde de mededeling weg`);
-      return c.json({ ok: true });
+      const locale = c.req.query("locale") === "en" ? "en" : "nl";
+      const text = m ? (locale === "en" && m.text.en) || m.text.nl : "";
+      return c.json({ announcement: m, expired: m ? expired(m) : false, dismissed: m ? dismissedCount(m) : 0, today: today(), html: text ? api.markdown.render(text) : "" });
     });
   });
 

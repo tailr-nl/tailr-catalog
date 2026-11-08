@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="/tailr-ui.css"></head><body>
 <div class="page-head"><div><h1 data-i18n="My dashboards">My dashboards</h1><p data-i18n="Dashboards built by your AI. Review each new version before it can use your data."></p></div></div>
 <div id="notice" role="status"></div><div id="pending"></div><div id="list"></div>
-<section class="card"><div class="card-head"><h2 data-i18n="Have your AI build a dashboard"></h2></div><p data-i18n="Ask your connected AI tool to build and save a dashboard. It appears here for you to review before opening."></p><p class="hint" id="limits"></p></section>
+<section class="card"><div class="card-head"><h2 data-i18n="Have your AI build a dashboard"></h2></div><p data-i18n="Ask your connected AI tool to build and save a dashboard. It appears here for you to review before opening."></p><p class="hint" id="limits"></p><p class="hint" id="stats" hidden></p></section>
 <script src="/api/frame/host.js"></script><script src="/api/p/dashboards/ui/shared.js"></script><script>
 const { t, esc, name, call, toast, when, theme } = DashboardUI;
 const base = "/api/p/dashboards", focus = new URLSearchParams(location.search).get("confirm");
@@ -92,9 +92,12 @@ function card(d) {
 async function load() { const notice = document.getElementById("notice"), pending = document.getElementById("pending"), list = document.getElementById("list"); notice.innerHTML = pending.innerHTML = list.innerHTML = ""; try {
     const cfg = await call(`${base}/config`);
     document.getElementById("limits").textContent = t("Maximum {n} kB per dashboard.", { n: cfg.maxKb }) + (cfg.readOnly ? " " + t("Read functions only.") : "");
-    if (!cfg.enabled) {
-        notice.innerHTML = `<div class="alert alert-info">${esc(t("Dashboards are turned off. Ask your administrator to enable them."))}</div>`;
-        return;
+    // Alleen voor beheerders: de tellerregel over alle medewerkers
+    const s = cfg.stats;
+    if (s) {
+        const stats = document.getElementById("stats");
+        stats.textContent = t("All employees: {dashboards} · {employees} · {pending}", { dashboards: s.items === 1 ? t("1 dashboard") : t("{n} dashboards", { n: s.items }), employees: s.owners === 1 ? t("1 employee") : t("{n} employees", { n: s.owners }), pending: t("{n} awaiting confirmation", { n: s.pending }) });
+        stats.hidden = false;
     }
     const items = await call(`${base}/dashboards`);
     for (const d of items.filter(d => d.pendingVersion))
