@@ -1937,6 +1937,22 @@
     "English is built in. Other languages come from the catalog or from your own translation file; everyone chooses their language in the menu under their name.": "Engels zit ingebouwd. Andere talen komen uit de catalogus of uit je eigen vertaalbestand; iedereen kiest zijn eigen taal in het menu onder zijn naam.",
     "No additional languages are installed yet.": "Er zijn nog geen extra talen geïnstalleerd.",
     "Upload translation": "Vertaling uploaden",
-    "Manage languages": "Talen beheren"
+    "Manage languages": "Talen beheren",
+    "1 connector": "1 connector",
+    "{n} connectors": "{n} connectors",
+    "1 plugin": "1 plugin",
+    "{n} plugins": "{n} plugins",
+    "Where connectors, plugins and translations come from: Git repositories such as Tailr's official catalog. Tailr Core checks them at startup and every 6 hours; nothing is installed on its own.": "Waar connectors, plugins en vertalingen vandaan komen: Git-repo's zoals de officiële catalogus van Tailr. Tailr Core controleert ze bij het opstarten en elke 6 uur; er wordt niets uit zichzelf geïnstalleerd.",
+    "Connector sources": "Connectorbronnen",
+    "No connector sources.": "Geen connectorbronnen.",
+    "Add connector source": "Connectorbron toevoegen",
+    "A Git repository with JSON connectors, like HACS in Home Assistant. Private works too, with a token.": "Een Git-repo met JSON-connectors, zoals HACS in Home Assistant. Een privé-repo kan ook, met een token.",
+    "No plugin sources.": "Geen plugin-bronnen.",
+    "A plugin is code with full rights in Tailr Core; adding a source is done in the Danger zone with an authenticator app.": "Een plugin is code met alle rechten in Tailr Core; een bron voeg je toe in de Danger zone, met een authenticator-app.",
+    "A Git repository with an index.json and one JSON file per language.": "Een Git-repo met een index.json en één JSON-bestand per taal.",
+    "Back to the catalog": "Terug naar de catalogus",
+    "Not reachable": "Niet bereikbaar",
+    "never checked": "nog niet gecontroleerd",
+    "Delete source {name}?": "Bron {name} verwijderen?"
   }
 }
