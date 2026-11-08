@@ -2,8 +2,8 @@
   "presentation": {
     "adminOnly": true,
     "intro": {
-      "en": "Choose which AI tools and apps may connect, and review requests from new clients under Allow AI tools.",
-      "nl": "Bepaal welke AI-tools en apps mogen verbinden en bekijk aanvragen van nieuwe clients onder AI-tools toestaan."
+      "en": "Choose which AI tools and apps may connect under Allow AI tools, and set the default for new clients in the plugin settings.",
+      "nl": "Bepaal onder AI-tools toestaan welke AI-tools en apps mogen verbinden, en stel de standaard voor nieuwe clients in bij de instellingen van de plugin."
     },
     "whatsNew": {
       "en": "You can now manage which AI clients may connect.",
@@ -12,8 +12,8 @@
   },
   "$schema": "../../schemas/plugin.json",
   "id": "ai-clients",
-  "version": "1.4.0",
-  "api": "1.7",
+  "version": "1.5.0",
+  "api": "1.8",
   "title": {
     "nl": "AI-tools en apps toestaan",
     "en": "Allow AI tools and apps"
@@ -27,6 +27,7 @@
     "guard auth.before",
     "guard oauth.consent",
     "Te bevestigen",
+    "instellingen",
     "beheer-API",
     "scherm",
     "mail"

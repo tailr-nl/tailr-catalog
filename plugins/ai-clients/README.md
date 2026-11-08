@@ -11,6 +11,8 @@ Bepaal per OAuth-client (Claude, ChatGPT, Claude Code, een eigen app) of hij met
 - **Rollen die altijd mogen:** bijvoorbeeld voor ontwikkelaars.
 - **Overzicht:** wie welke client gebruikt, met het aantal geweigerde pogingen. Wachtende clients staan bovenaan.
 
+**Waar:** de standaard voor nieuwe AI-tools en de rollen die altijd mogen, staan op de instellingenpagina van Tailr Core (`/plugins/ai-clients/settings`, ook via *Plugins → Geïnstalleerd* → *Instellingen*, of de knop *Instellingen* op het scherm van de plugin). De kern controleert de waarden, vraagt de sudo-bevestiging en zet elke wijziging in het auditlog (sinds 1.5.0, `api.settings.define`, plugin-API 1.8). De keuze per client (*Standaard*, *Toestaan*, *Blokkeren*) maak je op het scherm *AI-tools toestaan*; die geldt meteen. Bij het bijwerken van 1.4.x gaan de oude instellingen eenmalig mee.
+
 **Alleen het zakelijke account** (geen gratis ChatGPT die op je data traint):
 1. Voeg de connector toe in je Claude- of ChatGPT-organisatie, verbind één keer met je werkaccount, en zet die client op *Toestaan*.
 2. Zet de standaard op *goedkeuring nodig* (of *blokkeren*).

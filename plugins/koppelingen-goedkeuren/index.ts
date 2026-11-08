@@ -13,7 +13,12 @@
  *
  * Sinds 2.0.0 staan de verzoeken in Te bevestigen van Tailr Core (api.pending, #125): dezelfde lijst
  * en teller als de beheeracties van de AI. Tailr Core mailt de goedkeurders; Bevestigen en Afwijzen
- * komen terug in onDecide hieronder. Het eigen scherm houdt alleen de instellingen.
+ * komen terug in onDecide hieronder.
+ *
+ * Sinds 2.2.0 (plugin-API 1.8) staan de instellingen op de instellingenpagina van de kern
+ * (api.settings.define), elk veld onder een eigen sleutel. Het eigen scherm toont nog hoe het nu
+ * staat en verwijst naar Te bevestigen. Wie mag goedkeuren is geen instelling meer (tailr-core #298:
+ * plugins regelen geen toegang in hun instellingen): alle beheerders, zoals Te bevestigen dat doet.
  */
 import { createHash } from "node:crypto";
 import type { PluginApi, PluginPrincipal } from "@tailr/plugin";
@@ -23,12 +28,11 @@ type Kind = "connection" | "connector" | "connector-update" | "source" | "setup"
 interface Config {
   /** "ai": alleen wat via de AI komt; "always": ook de beheeromgeving */
   scope: "ai" | "always";
-  /** Wie mag goedkeuren (gebruikers-id's). Leeg = alle beheerders. */
-  approvers: string[];
   /** Mag de aanvrager zijn eigen verzoek goedkeuren? (handig met één beheerder) */
   allowSelf: boolean;
 }
-const DEFAULTS: Config = { scope: "ai", approvers: [], allowSelf: false };
+const DEFAULTS: Config = { scope: "ai", allowSelf: false };
+const FIELDS = Object.keys(DEFAULTS) as (keyof Config)[];
 const SETUP_GRANT_HOURS = 24;
 
 const LABEL: Record<Kind, string> = {
@@ -147,7 +151,52 @@ export function register(api: PluginApi) {
     );`,
   ]);
 
-  const config = (): Config => ({ ...DEFAULTS, ...(api.settings.get<Partial<Config>>("config") ?? {}) });
+  // Van 2.1.x: het object "config" eenmalig naar de losse sleutels, voor zover die nog leeg zijn.
+  // Vóór define, want daarna geeft get voor een leeg veld de standaard.
+  const legacy = api.settings.get<Partial<Config> & { approvers?: unknown }>("config");
+  if (legacy && typeof legacy === "object") {
+    const clean: Partial<Config> = {
+      scope: legacy.scope === "ai" || legacy.scope === "always" ? legacy.scope : undefined,
+      allowSelf: typeof legacy.allowSelf === "boolean" ? legacy.allowSelf : undefined,
+    };
+    const moved = FIELDS.filter((key) => clean[key] !== undefined && api.settings.get(key) === undefined);
+    for (const key of moved) api.settings.set(key, clean[key]);
+    api.settings.remove("config");
+    api.log.info(`instellingen overgezet naar de losse sleutels: ${moved.join(", ") || "niets"}`);
+    if (Array.isArray(legacy.approvers) && legacy.approvers.length) api.log.warn("Alleen bepaalde beheerders mochten verzoeken goedkeuren. Dat is geen instelling meer: nieuwe verzoeken kunnen alle beheerders goedkeuren.");
+  }
+
+  const activeAdmins = () => api.users.list().filter((u) => u.isAdmin && !u.disabled);
+  api.settings.define({
+    fields: [
+      {
+        name: "scope",
+        type: "select",
+        label: { en: "What waits for approval", nl: "Wat wacht op goedkeuring" },
+        description: { en: "Always: also what administrators do in the admin environment.", nl: "Altijd: ook wat beheerders in de beheeromgeving doen." },
+        options: [
+          { value: "ai", label: { en: "Only what comes through the AI", nl: "Alleen wat via de AI komt" } },
+          { value: "always", label: { en: "Always", nl: "Altijd" }, description: { en: "Also what administrators do in the admin environment.", nl: "Ook wat beheerders in de beheeromgeving doen." } },
+        ],
+        default: DEFAULTS.scope,
+      },
+      {
+        name: "allowSelf",
+        type: "boolean",
+        label: { en: "The requester may approve their own request", nl: "De aanvrager mag zijn eigen verzoek goedkeuren" },
+        description: {
+          en: "Only useful with a single administrator. All administrators can approve requests; they get an email for each new request if a mail server is set up.",
+          nl: "Alleen handig met één beheerder. Alle beheerders kunnen verzoeken goedkeuren; ze krijgen een mail bij elk nieuw verzoek als er een mailserver is.",
+        },
+        default: DEFAULTS.allowSelf,
+      },
+    ],
+  });
+
+  const config = (): Config => ({
+    scope: api.settings.get<Config["scope"]>("scope") === "always" ? "always" : "ai",
+    allowSelf: api.settings.get<boolean>("allowSelf") === true,
+  });
   /** Goedgekeurde verzoeken die de plugin nu zelf uitvoert: één keer doorlaten */
   const replaying = new Set<string>();
   const replayKey = (requesterId: string, method: string, path: string, body: unknown) => `${requesterId}|${method}|${path}|${hash(body)}`;
@@ -177,7 +226,6 @@ export function register(api: PluginApi) {
           },
       details: labelled(summary),
       requester: { id: requester.id, name: requester.name },
-      approvers: cfg.approvers,
       allowSelf: cfg.allowSelf,
       data: { ...data, requesterEmail: requester.email } satisfies RequestData,
     });
@@ -279,21 +327,26 @@ export function register(api: PluginApi) {
   });
 
   api.adminRoutes((r) => {
-    r.get("/config", (c) => {
+    // Voor het scherm: hoe het nu staat. Wijzigen gebeurt op de instellingenpagina van de kern.
+    r.get("/status", (c) => {
       const cfg = config();
-      return c.json({ ...cfg, admins: api.users.list().filter((u) => u.isAdmin && !u.disabled).map((u) => ({ id: u.id, name: u.name, email: u.email })), mailEnabled: api.users.mailEnabled() });
+      return c.json({ scope: cfg.scope, allowSelf: cfg.allowSelf, admins: activeAdmins().length, mailEnabled: api.users.mailEnabled() });
     });
-    r.put("/config", async (c) => {
-      const body = (await c.req.json()) as Partial<Config>;
-      const current = config();
-      const next: Config = {
-        scope: body.scope === "always" ? "always" : body.scope === "ai" ? "ai" : current.scope,
-        approvers: Array.isArray(body.approvers) ? body.approvers.filter((v): v is string => typeof v === "string") : current.approvers,
-        allowSelf: typeof body.allowSelf === "boolean" ? body.allowSelf : current.allowSelf,
-      };
-      api.settings.set("config", next);
-      return c.json({ ok: true });
-    });
+  });
+
+  // Eén beheerder die zijn eigen verzoeken niet mag goedkeuren: die blijven dan wachten
+  api.slots.register("admin.overview", () => {
+    if (config().allowSelf || activeAdmins().length !== 1) return null;
+    return {
+      id: "single-admin",
+      tone: "warning",
+      title: { en: "Approve connections", nl: "Koppelingen goedkeuren" },
+      text: {
+        en: "There is only one administrator, and requesters may not approve their own requests. Their own requests then stay waiting. Allow self-approval, or add an administrator.",
+        nl: "Er is maar één beheerder, en een aanvrager mag zijn eigen verzoek niet goedkeuren. Zijn eigen verzoeken blijven dan wachten. Sta zelf goedkeuren toe, of voeg een beheerder toe.",
+      },
+      actions: [{ id: "settings", label: { en: "Settings", nl: "Instellingen" }, href: "/plugins/koppelingen-goedkeuren/settings" }],
+    };
   });
 
   api.nav({ label: { nl: "Koppelingen goedkeuren", en: "Approve connections" }, path: "", adminOnly: true });

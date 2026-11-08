@@ -2,7 +2,7 @@
   "presentation": {
     "adminOnly": true,
     "intro": {
-      "en": "Write an announcement for everyone or selected roles in the Announcement settings.",
+      "en": "Write an announcement for everyone or selected roles in the settings of Announcement.",
       "nl": "Schrijf via Mededeling een bericht voor iedereen of voor geselecteerde rollen."
     },
     "whatsNew": {
@@ -12,13 +12,13 @@
   },
   "$schema": "../../schemas/plugin.json",
   "id": "mededeling",
-  "version": "1.1.0",
-  "api": "1.7",
+  "version": "1.2.0",
+  "api": "1.8",
   "title": { "nl": "Mededeling", "en": "Announcement" },
   "summary": {
     "nl": "Een mededeling bovenaan elke pagina, voor iedereen of bepaalde rollen, met een einddatum",
     "en": "An announcement at the top of every page, for everyone or certain roles, with an end date"
   },
   "entry": "index.ts",
-  "hooks": ["plek banner", "scherm", "beheer-API", "teksten en"]
+  "hooks": ["plek banner", "instellingen", "scherm", "beheer-API", "teksten en"]
 }
