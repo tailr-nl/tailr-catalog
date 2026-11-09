@@ -52,7 +52,7 @@
   "$schema": "../../schemas/connector.json",
   "id": "google-search-console",
   "name": "Google Search Console",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": {
     "en": "Google Search Console, read only: search performance (clicks, impressions, click-through rate and position by query, page, country, device or date, also for Discover and Google News), sitemap status and URL inspection.",
     "nl": "Google Search Console, alleen lezen: zoekprestaties (klikken, vertoningen, doorklikratio en positie per zoekopdracht, pagina, land, apparaat of dag, ook voor Discover en Google Nieuws), sitemapstatus en URL-inspectie."
@@ -124,7 +124,7 @@
     "perMinute": 600,
     "concurrency": 5,
     "cacheTtlSeconds": 600,
-    "note": "Search Console API: Google noemt 1.200 verzoeken per minuut per site en 30 miljoen per dag per project. URL-inspectie (inspect_url) heeft een eigen, veel krappere limiet: 2.000 inspecties per dag en 600 per minuut per property; Tailr Core bewaart elke inspectie een uur, maar een inspectie van een nieuwe URL telt altijd. Zoekprestaties lopen 2 tot 3 dagen achter. Controleer de actuele limieten bij Google."
+    "note": "Search Console API: Google noemt 1.200 verzoeken per minuut per site en per gebruiker, en 40.000 per minuut en 30 miljoen per dag per project. URL-inspectie (inspect_url) heeft een eigen, veel krappere limiet: 2.000 inspecties per dag en 600 per minuut per property; Tailr Core bewaart elke inspectie een uur, maar een inspectie van een nieuwe URL telt altijd. Zoekprestaties lopen 2 tot 3 dagen achter. Controleer de actuele limieten bij Google."
   },
   "type": "rest",
   "baseUrl": "https://www.googleapis.com/webmasters/v3",
@@ -154,7 +154,7 @@
         "nl": "Laat zien welke websites in Search Console staan en welke het serviceaccount kan zien.",
         "en": "Shows which websites are in Search Console and which the service account can see."
       },
-      "description": "Websites (properties) in Search Console waar het serviceaccount toegang toe heeft, met per website het rechtenniveau (siteOwner, siteFullUser, siteRestrictedUser, siteUnverifiedUser). Een domeinproperty heet sc-domain:voorbeeld.nl, een URL-prefixproperty https://www.voorbeeld.nl/.",
+      "description": "Websites (properties) in Search Console waar het serviceaccount toegang toe heeft, met per website het rechtenniveau (siteOwner, siteFullUser, siteRestrictedUser, siteUnverifiedUser). Een domeinproperty heet sc-domain:voorbeeld.nl, een URL-prefixproperty https://www.voorbeeld.nl/. Een leeg antwoord {} betekent: er zijn er geen. Het account is dan nergens als gebruiker toegevoegd.",
       "level": "read",
       "path": "/sites",
       "params": {},
@@ -273,7 +273,7 @@
         "nl": "Welke sitemaps bij Google bekend zijn, wanneer Google ze voor het laatst las en of er fouten of waarschuwingen zijn.",
         "en": "Which sitemaps Google knows about, when Google last read them and whether there are errors or warnings."
       },
-      "description": "Ingediende sitemaps van een website, met per sitemap: path (URL), type (sitemap, urlList, rssFeed, atomFeed, ...), isSitemapsIndex, isPending (nog niet verwerkt), lastSubmitted, lastDownloaded, errors, warnings en contents (per inhoudstype het aantal ingediende URL's in submitted; indexed is verouderd en zegt niets). Met sitemapIndex krijg je de sitemaps die in één sitemapindex staan. Gebruik get_sitemap voor één sitemap.",
+      "description": "Ingediende sitemaps van een website, met per sitemap: path (URL), type (sitemap, urlList, rssFeed, atomFeed, ...), isSitemapsIndex, isPending (nog niet verwerkt), lastSubmitted, lastDownloaded, errors, warnings en contents (per inhoudstype het aantal ingediende URL's in submitted; indexed is verouderd en zegt niets). Met sitemapIndex krijg je de sitemaps die in één sitemapindex staan. Een leeg antwoord {} betekent: er zijn er geen. Gebruik get_sitemap voor één sitemap.",
       "level": "read",
       "path": "/sites/{site}/sitemaps",
       "params": {

@@ -73,6 +73,18 @@ const googleClientStep = {
   copy: { "Geautoriseerde omleidings-URI": "{{redirectUri}}" },
 };
 
+/** README van een Google-variant: korte verwijzing naar de hoofdconnector. */
+const googleSigninReadme = (main) => `# ${main.name}: inloggen met je eigen Google-account
+
+Dit is een variant van [${main.name}](../${main.id}/README.md) met precies dezelfde functies. Het verschil zit alleen in het inloggen: in plaats van een serviceaccount maak je in Google Cloud Console een OAuth-client, en log je één keer in met een Google-account dat de property kan zien. Kies deze route als je geen beheerder van de property bent.
+
+Dit bestand en \`connector.json\`, \`context.md\` en \`tools/\` in deze map worden gemaakt met \`node scripts/make-variants.mjs ${main.id}\`. Pas ze niet met de hand aan: wijzig de hoofdconnector en draai het script opnieuw (zie \`CONTRIBUTING.md\`).
+
+Scope: \`${(main.auth?.scopes ?? []).join(" ")}\`. Wil je de login stoppen, trek dan de toegang in bij je Google-account (*Beveiliging → Apps van derden*).
+
+Uitleg over de functies, persoonsgegevens en quota: zie de [README van ${main.name}](../${main.id}/README.md).
+`;
+
 /**
  * Per hoofdconnector: welke variant(en) en wat daarin anders is.
  * - description: {main} wordt de beschrijving van de hoofdconnector (per taal).
@@ -131,16 +143,66 @@ export const VARIANTS = {
           "Alle GA4-accounts en properties waar het gekoppelde Google-account bij kan, met property-id.",
         ],
       ],
-      readme: (main) => `# ${main.name}: inloggen met je eigen Google-account
-
-Dit is een variant van [${main.name}](../${main.id}/README.md) met precies dezelfde functies. Het verschil zit alleen in het inloggen: in plaats van een serviceaccount maak je in Google Cloud Console een OAuth-client, en log je één keer in met een Google-account dat de property kan zien. Kies deze route als je geen beheerder van de property bent.
-
-Dit bestand en \`connector.json\`, \`context.md\` en \`tools/\` in deze map worden gemaakt met \`node scripts/make-variants.mjs ${main.id}\`. Pas ze niet met de hand aan: wijzig de hoofdconnector en draai het script opnieuw (zie \`CONTRIBUTING.md\`).
-
-Scope: \`${(main.auth?.scopes ?? []).join(" ")}\`. Wil je de login stoppen, trek dan de toegang in bij je Google-account (*Beveiliging → Apps van derden*).
-
-Uitleg over de functies, persoonsgegevens en quota: zie de [README van ${main.name}](../${main.id}/README.md).
-`,
+      readme: googleSigninReadme,
+    },
+  ],
+  "google-search-console": [
+    {
+      id: "google-search-console-signin",
+      name: "Google Search Console (sign in)",
+      variantTitle: GOOGLE_SIGNIN_TITLE,
+      description: {
+        en: "{main} Signed in with your own Google account instead of a service account.",
+        nl: "{main} Ingelogd met je eigen Google-account in plaats van een serviceaccount.",
+      },
+      replaceVars: { SERVICE_ACCOUNT_KEY: GOOGLE_CLIENT_VARS },
+      setup: {
+        minutes: 10,
+        prerequisites: [
+          "Een Google-account dat de website in Search Console kan zien",
+          "Toegang tot Google Cloud Console (een nieuw project mag; gebruik je al een client voor Google Analytics, dan kun je die hergebruiken)",
+        ],
+        steps: [
+          {
+            id: "enable-api",
+            title: "Search Console API inschakelen",
+            instruction: "Open de link, kies bovenaan je project (of maak er een) en klik op Inschakelen.",
+            url: "https://console.cloud.google.com/apis/library/searchconsole.googleapis.com",
+          },
+          googleConsentStep,
+          googleClientStep,
+        ],
+        loginNote: GOOGLE_LOGIN_NOTE,
+      },
+      hosts: ["oauth2.googleapis.com", "searchconsole.googleapis.com", "accounts.google.com"],
+      auth: googleAuth(["https://www.googleapis.com/auth/webmasters.readonly"]),
+      replaceText: [
+        [
+          "Laat zien welke websites in Search Console staan en welke het serviceaccount kan zien.",
+          "Laat zien welke websites in Search Console staan en waar dit account bij kan.",
+        ],
+        [
+          "Shows which websites are in Search Console and which the service account can see.",
+          "Shows which websites are in Search Console and which this account can access.",
+        ],
+        [
+          "Websites (properties) in Search Console waar het serviceaccount toegang toe heeft",
+          "Websites (properties) in Search Console waar het gekoppelde Google-account bij kan",
+        ],
+        [
+          "welk rechtenniveau het serviceaccount erop heeft.",
+          "welk rechtenniveau het gekoppelde account erop heeft.",
+        ],
+        [
+          "which permission level the service account has on it.",
+          "which permission level the signed-in account has on it.",
+        ],
+        [
+          "met het rechtenniveau van het serviceaccount:",
+          "met het rechtenniveau van het gekoppelde account:",
+        ],
+      ],
+      readme: googleSigninReadme,
     },
   ],
 };

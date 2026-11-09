@@ -81,7 +81,9 @@ De Admin API gaat wel over mensen: de collega's die de property gebruiken. Het t
 
 ## Quota
 
-Een standaard property heeft 200.000 tokens per dag en 40.000 per uur, en hoogstens 10 gelijktijdige verzoeken. Een gewoon rapport kost 1 tot 10 tokens. Realtime en trechterrapporten hebben elk een eigen potje; `get_quota` toont de stand van alle drie. Tailr Core bewaart rapporten en trechters 5 minuten in de cache, `check_compatibility` een uur en `get_metadata` een dag; realtime en `get_quota` nooit. De Admin API heeft een eigen quotum, los van de rapporten; de inrichtingsfuncties en de alpha-lijsten staan een uur in de cache, het toegangsrapport 5 minuten.
+Een standaard property heeft 200.000 tokens per dag en 40.000 per uur (en 14.000 per uur per Google Cloud-project), en hoogstens 10 gelijktijdige verzoeken. Een gewoon rapport kost 1 tot 10 tokens. Realtime en trechterrapporten hebben elk een eigen, even groot potje; het toegangsrapport (`run_access_report`) telt bij Google mee met de gewone rapporten. `get_quota` toont de stand van alle drie. Tailr Core bewaart rapporten en trechters 5 minuten in de cache, `check_compatibility` een uur en `get_metadata` een dag; realtime en `get_quota` nooit. De Admin API (inrichting van de property) heeft een eigen quotum, los van de tokens: 1.200 verzoeken per minuut per project en 600 per minuut per gebruiker; de inrichtingsfuncties en de alpha-lijsten staan een uur in de cache, het toegangsrapport 5 minuten.
+
+Google laat lege lijsten weg: een `list_*`-functie geeft dan een leeg object `{}` terug. Elke `description` en `context.md` zeggen dat dat "er zijn er geen" betekent, zodat de AI het niet als fout leest.
 
 ## Een functie toevoegen
 

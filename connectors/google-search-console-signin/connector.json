@@ -52,7 +52,7 @@
   "$schema": "../../schemas/connector.json",
   "id": "google-search-console-signin",
   "name": "Google Search Console (sign in)",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "variantOf": "google-search-console",
   "variantTitle": {
     "en": "Sign in with your own Google account",
@@ -109,7 +109,7 @@
     "minutes": 10,
     "prerequisites": [
       "Een Google-account dat de website in Search Console kan zien",
-      "Toegang tot Google Cloud Console (een nieuw project mag)"
+      "Toegang tot Google Cloud Console (een nieuw project mag; gebruik je al een client voor Google Analytics, dan kun je die hergebruiken)"
     ],
     "steps": [
       {
@@ -121,14 +121,14 @@
       {
         "id": "consent",
         "title": "Toestemmingsscherm instellen",
-        "instruction": "Open de link en vul een app-naam (bijv. Tailr Core) en je e-mailadres in. Kies bij Doelgroep: Extern, en zet de publicatiestatus op In productie.",
+        "instruction": "Al gedaan voor een andere Google-koppeling in hetzelfde project? Dan kun je deze stap overslaan. Anders: open de link en vul een app-naam (bijv. Tailr Core) en je e-mailadres in. Kies bij Doelgroep: Extern, en zet de publicatiestatus op In productie.",
         "url": "https://console.cloud.google.com/auth/branding",
         "note": "Laat je het op Testen staan, dan verloopt de login na 7 dagen."
       },
       {
         "id": "client",
         "title": "OAuth-client aanmaken",
-        "instruction": "Open de link, klik op Client maken en kies Webapplicatie. Geef hem een naam (bijv. Tailr Core) en voeg het adres hieronder toe bij Geautoriseerde omleidings-URI's. Klik op Maken en laat het venster met de Client-id en het clientgeheim openstaan.",
+        "instruction": "Open de link, klik op Client maken en kies Webapplicatie. Voeg het adres hieronder toe bij Geautoriseerde omleidings-URI's en klik op Maken. Heb je al een client voor Tailr Core in dit project, dan kun je die gebruiken.",
         "url": "https://console.cloud.google.com/auth/clients",
         "copy": {
           "Geautoriseerde omleidings-URI": "{{redirectUri}}"
@@ -141,14 +141,14 @@
     "perMinute": 600,
     "concurrency": 5,
     "cacheTtlSeconds": 600,
-    "note": "Search Console API: Google noemt 1.200 verzoeken per minuut per site en 30 miljoen per dag per project. URL-inspectie (inspect_url) heeft een eigen, veel krappere limiet: 2.000 inspecties per dag en 600 per minuut per property; Tailr Core bewaart elke inspectie een uur, maar een inspectie van een nieuwe URL telt altijd. Zoekprestaties lopen 2 tot 3 dagen achter. Controleer de actuele limieten bij Google."
+    "note": "Search Console API: Google noemt 1.200 verzoeken per minuut per site en per gebruiker, en 40.000 per minuut en 30 miljoen per dag per project. URL-inspectie (inspect_url) heeft een eigen, veel krappere limiet: 2.000 inspecties per dag en 600 per minuut per property; Tailr Core bewaart elke inspectie een uur, maar een inspectie van een nieuwe URL telt altijd. Zoekprestaties lopen 2 tot 3 dagen achter. Controleer de actuele limieten bij Google."
   },
   "type": "rest",
   "baseUrl": "https://www.googleapis.com/webmasters/v3",
   "hosts": [
     "oauth2.googleapis.com",
-    "accounts.google.com",
-    "searchconsole.googleapis.com"
+    "searchconsole.googleapis.com",
+    "accounts.google.com"
   ],
   "auth": {
     "type": "oauth2",
@@ -174,7 +174,7 @@
         "nl": "Laat zien welke websites in Search Console staan en waar dit account bij kan.",
         "en": "Shows which websites are in Search Console and which this account can access."
       },
-      "description": "Websites (properties) in Search Console waar het gekoppelde account bij kan, met per website het rechtenniveau (siteOwner, siteFullUser, siteRestrictedUser, siteUnverifiedUser). Een domeinproperty heet sc-domain:voorbeeld.nl, een URL-prefixproperty https://www.voorbeeld.nl/.",
+      "description": "Websites (properties) in Search Console waar het gekoppelde Google-account bij kan, met per website het rechtenniveau (siteOwner, siteFullUser, siteRestrictedUser, siteUnverifiedUser). Een domeinproperty heet sc-domain:voorbeeld.nl, een URL-prefixproperty https://www.voorbeeld.nl/. Een leeg antwoord {} betekent: er zijn er geen. Het account is dan nergens als gebruiker toegevoegd.",
       "level": "read",
       "path": "/sites",
       "params": {},
@@ -293,7 +293,7 @@
         "nl": "Welke sitemaps bij Google bekend zijn, wanneer Google ze voor het laatst las en of er fouten of waarschuwingen zijn.",
         "en": "Which sitemaps Google knows about, when Google last read them and whether there are errors or warnings."
       },
-      "description": "Ingediende sitemaps van een website, met per sitemap: path (URL), type (sitemap, urlList, rssFeed, atomFeed, ...), isSitemapsIndex, isPending (nog niet verwerkt), lastSubmitted, lastDownloaded, errors, warnings en contents (per inhoudstype het aantal ingediende URL's in submitted; indexed is verouderd en zegt niets). Met sitemapIndex krijg je de sitemaps die in één sitemapindex staan. Gebruik get_sitemap voor één sitemap.",
+      "description": "Ingediende sitemaps van een website, met per sitemap: path (URL), type (sitemap, urlList, rssFeed, atomFeed, ...), isSitemapsIndex, isPending (nog niet verwerkt), lastSubmitted, lastDownloaded, errors, warnings en contents (per inhoudstype het aantal ingediende URL's in submitted; indexed is verouderd en zegt niets). Met sitemapIndex krijg je de sitemaps die in één sitemapindex staan. Een leeg antwoord {} betekent: er zijn er geen. Gebruik get_sitemap voor één sitemap.",
       "level": "read",
       "path": "/sites/{site}/sitemaps",
       "params": {
