@@ -34,7 +34,7 @@
   "$schema": "../schemas/connector.json",
   "id": "google-analytics-signin",
   "name": "Google Analytics 4 (sign in)",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "variantOf": "google-analytics",
   "variantTitle": {
     "en": "Sign in with your own Google account",
@@ -223,6 +223,5 @@
         }
       }
     }
-  ],
-  "maturity": "beta"
+  ]
 }

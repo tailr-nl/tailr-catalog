@@ -14,22 +14,22 @@
     {
       "id": "google-analytics",
       "file": "google-analytics.json",
-      "version": "0.4.0"
+      "version": "0.4.1"
     },
     {
       "id": "google-analytics-signin",
       "file": "google-analytics-signin.json",
-      "version": "0.4.0"
+      "version": "0.4.1"
     },
     {
       "id": "google-search-console",
       "file": "google-search-console.json",
-      "version": "0.4.0"
+      "version": "0.4.1"
     },
     {
       "id": "google-search-console-signin",
       "file": "google-search-console-signin.json",
-      "version": "0.4.0"
+      "version": "0.4.1"
     },
     {
       "id": "matomo",
