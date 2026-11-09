@@ -1,0 +1,217 @@
+{
+  "presentation": {
+    "intro": {
+      "en": "Compare search performance and find pages worth improving.",
+      "nl": "Vergelijk zoekprestaties en ontdek welke pagina’s je kunt verbeteren."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "Which search queries brought the most clicks last month? Show impressions, click-through rate and position, and suggest three improvements.",
+          "nl": "Welke zoekopdrachten leverden vorige maand de meeste klikken op? Toon vertoningen, doorklikpercentage en positie en geef drie verbeterpunten."
+        },
+        "requires": [
+          "list_sites",
+          "search_analytics"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Which pages have many impressions but few clicks in Google? Compare last month with the month before and explain where the opportunities are.",
+          "nl": "Welke pagina’s worden vaak vertoond in Google maar krijgen weinig klikken? Vergelijk vorige maand met de maand ervoor en leg uit waar kansen liggen."
+        },
+        "requires": [
+          "list_sites",
+          "search_analytics"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Compare search performance and find pages worth improving.",
+      "nl": "Vergelijk zoekprestaties en ontdek welke pagina’s je kunt verbeteren."
+    }
+  },
+  "$schema": "../schemas/connector.json",
+  "id": "google-search-console-signin",
+  "name": "Google Search Console (sign in)",
+  "version": "0.4.0",
+  "variantOf": "google-search-console",
+  "variantTitle": {
+    "en": "Sign in with your own Google account",
+    "nl": "Inloggen met je eigen Google-account"
+  },
+  "description": {
+    "en": "Search performance from Google Search Console (clicks, impressions, click-through rate and position by query or page), signed in with your own Google account instead of a service account.",
+    "nl": "Zoekprestaties uit Google Search Console (klikken, vertoningen, doorklikratio en positie per zoekopdracht of pagina), ingelogd met je eigen Google-account in plaats van een serviceaccount."
+  },
+  "homepage": "https://developers.google.com/webmaster-tools/v1/searchanalytics/query",
+  "category": "Marketing",
+  "vars": [
+    {
+      "name": "CLIENT_ID",
+      "label": {
+        "en": "Client ID",
+        "nl": "Client-id"
+      },
+      "description": {
+        "en": "From the OAuth app registration at the source.",
+        "nl": "Staat in het venster na het aanmaken van de OAuth-client in Google Cloud Console (eindigt op .apps.googleusercontent.com)."
+      },
+      "secret": false,
+      "pattern": "\\.apps\\.googleusercontent\\.com$",
+      "patternHint": "Een Client-id van Google eindigt op .apps.googleusercontent.com"
+    },
+    {
+      "name": "CLIENT_SECRET",
+      "label": {
+        "en": "Client secret",
+        "nl": "Clientgeheim"
+      },
+      "description": {
+        "en": "From the same app registration as the client ID.",
+        "nl": "Uit hetzelfde venster als de Client-id (begint meestal met GOCSPX-)."
+      }
+    },
+    {
+      "name": "SITE_URL",
+      "label": {
+        "en": "Website",
+        "nl": "Website"
+      },
+      "description": {
+        "en": "As shown in Search Console, e.g. https://www.example.com/ or sc-domain:example.com.",
+        "nl": "Zoals in Search Console, bijv. https://www.voorbeeld.nl/ of sc-domain:voorbeeld.nl"
+      },
+      "secret": false,
+      "required": false,
+      "chooseWith": "list_sites"
+    }
+  ],
+  "setup": {
+    "minutes": 10,
+    "prerequisites": [
+      "Een Google-account dat de website in Search Console kan zien",
+      "Toegang tot Google Cloud Console (een nieuw project mag)"
+    ],
+    "steps": [
+      {
+        "id": "enable-api",
+        "title": "Search Console API inschakelen",
+        "instruction": "Open de link, kies bovenaan je project (of maak er een) en klik op Inschakelen.",
+        "url": "https://console.cloud.google.com/apis/library/searchconsole.googleapis.com"
+      },
+      {
+        "id": "consent",
+        "title": "Toestemmingsscherm instellen",
+        "instruction": "Open de link en vul een app-naam (bijv. Tailr Core) en je e-mailadres in. Kies bij Doelgroep: Extern, en zet de publicatiestatus op In productie.",
+        "url": "https://console.cloud.google.com/auth/branding",
+        "note": "Laat je het op Testen staan, dan verloopt de login na 7 dagen."
+      },
+      {
+        "id": "client",
+        "title": "OAuth-client aanmaken",
+        "instruction": "Open de link, klik op Client maken en kies Webapplicatie. Geef hem een naam (bijv. Tailr Core) en voeg het adres hieronder toe bij Geautoriseerde omleidings-URI's. Klik op Maken en laat het venster met de Client-id en het clientgeheim openstaan.",
+        "url": "https://console.cloud.google.com/auth/clients",
+        "copy": {
+          "Geautoriseerde omleidings-URI": "{{redirectUri}}"
+        }
+      }
+    ],
+    "loginNote": "Google toont dan mogelijk 'Google heeft deze app niet geverifieerd'. Dat is normaal voor je eigen app: klik op Geavanceerd en daarna op Ga naar Tailr Core."
+  },
+  "limits": {
+    "perMinute": 600,
+    "concurrency": 5,
+    "cacheTtlSeconds": 600,
+    "note": "Search Console API: Google noemt o.a. 1.200 queries per minuut per site en 30 miljoen per dag per project; gegevens lopen 2-3 dagen achter. Controleer de actuele limieten bij Google."
+  },
+  "type": "rest",
+  "baseUrl": "https://www.googleapis.com/webmasters/v3",
+  "hosts": [
+    "oauth2.googleapis.com",
+    "accounts.google.com"
+  ],
+  "auth": {
+    "type": "oauth2",
+    "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+    "tokenUrl": "https://oauth2.googleapis.com/token",
+    "authorizeParams": {
+      "access_type": "offline",
+      "prompt": "consent",
+      "include_granted_scopes": "true"
+    },
+    "scopes": [
+      "https://www.googleapis.com/auth/webmasters.readonly"
+    ]
+  },
+  "tools": [
+    {
+      "name": "list_sites",
+      "title": {
+        "nl": "Websites",
+        "en": "Sites"
+      },
+      "summary": {
+        "nl": "Laat zien welke websites in Search Console staan en waar dit account bij kan.",
+        "en": "Shows which websites are in Search Console and which this account can access."
+      },
+      "description": "Websites (properties) in Search Console waar het gekoppelde account bij kan.",
+      "level": "read",
+      "path": "/sites",
+      "params": {},
+      "cacheTtlSeconds": 3600
+    },
+    {
+      "name": "search_analytics",
+      "title": {
+        "nl": "Zoekprestaties",
+        "en": "Search performance"
+      },
+      "summary": {
+        "nl": "Hoe vaak een website in Google verscheen en werd aangeklikt, per zoekterm, pagina, land, apparaat of dag.",
+        "en": "How often a website appeared in Google and was clicked, by search term, page, country, device or day."
+      },
+      "description": "Klikken, vertoningen, CTR en gemiddelde positie. Kies dimensions zoals query, page, country, device, date. Datums als JJJJ-MM-DD.",
+      "level": "read",
+      "method": "POST",
+      "path": "/sites/{site}/searchAnalytics/query",
+      "params": {
+        "site": {
+          "in": "path",
+          "description": "Website; standaard de ingestelde website",
+          "default": "{{SITE_URL}}"
+        },
+        "startDate": {
+          "in": "body",
+          "required": true,
+          "description": "JJJJ-MM-DD"
+        },
+        "endDate": {
+          "in": "body",
+          "required": true,
+          "description": "JJJJ-MM-DD"
+        },
+        "dimensions": {
+          "in": "body",
+          "type": "array",
+          "description": "Bijv. [\"query\"] of [\"page\",\"device\"]"
+        },
+        "dimensionFilterGroups": {
+          "in": "body",
+          "type": "array",
+          "description": "Filters"
+        },
+        "rowLimit": {
+          "in": "body",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (max 25.000)"
+        },
+        "type": {
+          "in": "body",
+          "description": "web, image, video, news"
+        }
+      }
+    }
+  ],
+  "maturity": "beta"
+}
