@@ -34,7 +34,7 @@
   "$schema": "../schemas/connector.json",
   "id": "google-analytics",
   "name": "Google Analytics 4",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": {
     "en": "Reports from Google Analytics 4: visitors, sessions, sources, pages and conversions.",
     "nl": "Rapporten uit Google Analytics 4: bezoekers, sessies, bronnen, pagina’s en conversies."
@@ -43,29 +43,20 @@
   "category": "Marketing",
   "vars": [
     {
-      "name": "CLIENT_ID",
+      "name": "SERVICE_ACCOUNT_KEY",
       "label": {
-        "en": "Client ID",
-        "nl": "Client-id"
+        "en": "Service account key",
+        "nl": "Sleutel van het serviceaccount"
       },
       "description": {
-        "en": "From the OAuth app registration at the source.",
-        "nl": "Staat in het venster na het aanmaken van de OAuth-client in Google Cloud Console (eindigt op .apps.googleusercontent.com)."
+        "en": "The JSON key file you downloaded when you created the key for the service account (step 2). Paste the whole file, including the braces.",
+        "nl": "Het JSON-sleutelbestand dat je downloadde bij het maken van de sleutel voor het serviceaccount (stap 2). Plak het hele bestand, inclusief de accolades."
       },
-      "secret": false,
-      "pattern": "\\.apps\\.googleusercontent\\.com$",
-      "patternHint": "Een Client-id van Google eindigt op .apps.googleusercontent.com"
-    },
-    {
-      "name": "CLIENT_SECRET",
-      "label": {
-        "en": "Client secret",
-        "nl": "Clientgeheim"
-      },
-      "description": {
-        "en": "From the same app registration as the client ID.",
-        "nl": "Uit hetzelfde venster als de Client-id (begint meestal met GOCSPX-)."
-      }
+      "secret": true,
+      "required": true,
+      "multiline": true,
+      "pattern": "\"type\"\\s*:\\s*\"service_account\"",
+      "patternHint": "Plak het complete JSON-sleutelbestand van een serviceaccount (het bevat \"type\": \"service_account\"). Een OAuth-clientbestand (client_secret_….json) is iets anders."
     },
     {
       "name": "PROPERTY_ID",
@@ -85,42 +76,33 @@
     }
   ],
   "setup": {
-    "minutes": 12,
+    "minutes": 8,
+    "testWith": "list_properties",
     "prerequisites": [
-      "Een Google-account met leestoegang tot de GA4-property",
-      "Toegang tot Google Cloud Console (een nieuw project mag; gebruik je al een client voor Search Console, dan kun je die hergebruiken)"
+      "Toegang tot Google Cloud Console (een nieuw project mag; gebruik je al een serviceaccount voor Search Console, dan kun je dat hergebruiken)",
+      "De rol Beheerder op de GA4-property, om het serviceaccount toegang te geven"
     ],
     "steps": [
       {
-        "id": "enable-data-api",
-        "title": "Google Analytics Data API inschakelen",
-        "instruction": "Open de link, kies bovenaan je project (of maak er een) en klik op Inschakelen.",
-        "url": "https://console.cloud.google.com/apis/library/analyticsdata.googleapis.com"
+        "id": "enable-apis",
+        "title": "Google Analytics API's inschakelen",
+        "instruction": "Open de link, kies je project (of maak er een) en klik op Inschakelen. Dit schakelt de Google Analytics Data API (rapporten) en de Admin API (properties opzoeken) in één keer in.",
+        "url": "https://console.cloud.google.com/flows/enableapi?apiid=analyticsdata.googleapis.com,analyticsadmin.googleapis.com"
       },
       {
-        "id": "enable-admin-api",
-        "title": "Google Analytics Admin API inschakelen",
-        "instruction": "Open de link en klik op Inschakelen, in hetzelfde project. Hiermee kan Tailr Core je properties opzoeken.",
-        "url": "https://console.cloud.google.com/apis/library/analyticsadmin.googleapis.com"
+        "id": "service-account",
+        "title": "Serviceaccount maken en JSON-sleutel downloaden",
+        "instruction": "Open de link in hetzelfde project (IAM en beheer → Serviceaccounts → Serviceaccount maken). Geef het serviceaccount een naam (bijv. Tailr Core) en klik op Gereed; rollen in het project zijn niet nodig. Open daarna het account, kies het tabblad Sleutels → Sleutel toevoegen → Nieuwe sleutel maken, kies JSON en klik op Maken. Het sleutelbestand wordt maar één keer gegeven: na het downloaden kun je het niet opnieuw ophalen. Bewaar het tot je het op de invulpagina plakt.",
+        "url": "https://console.cloud.google.com/iam-admin/serviceaccounts/create",
+        "note": "Het sleutelbestand bevat de privésleutel van het serviceaccount: behandel het als een wachtwoord en verwijder het na het plakken. Gebruik je al een serviceaccount voor Search Console in dit project, dan kun je hetzelfde account en dezelfde sleutel gebruiken."
       },
       {
-        "id": "consent",
-        "title": "Toestemmingsscherm instellen",
-        "instruction": "Al gedaan voor Search Console in hetzelfde project? Dan kun je deze stap overslaan. Anders: open de link en vul een app-naam (bijv. Tailr Core) en je e-mailadres in. Kies bij Doelgroep: Extern, en zet de publicatiestatus op In productie.",
-        "url": "https://console.cloud.google.com/auth/branding",
-        "note": "Laat je het op Testen staan, dan verloopt de login na 7 dagen."
-      },
-      {
-        "id": "client",
-        "title": "OAuth-client aanmaken",
-        "instruction": "Open de link, klik op Client maken en kies Webapplicatie. Voeg het adres hieronder toe bij Geautoriseerde omleidings-URI's en klik op Maken. Heb je al een client voor Tailr Core in dit project, dan kun je die gebruiken.",
-        "url": "https://console.cloud.google.com/auth/clients",
-        "copy": {
-          "Geautoriseerde omleidings-URI": "{{redirectUri}}"
-        }
+        "id": "grant-access",
+        "title": "Serviceaccount toegang geven in Google Analytics",
+        "instruction": "Open Google Analytics, klik linksonder op Beheerder en kies onder Property: Toegangsbeheer voor property. Klik op + → Gebruikers toevoegen, plak het e-mailadres van het serviceaccount (client_email in het sleutelbestand, eindigt op .iam.gserviceaccount.com), kies de rol Kijker en klik op Toevoegen. Lezen is genoeg: Tailr Core wijzigt niets in Google Analytics.",
+        "url": "https://analytics.google.com/"
       }
-    ],
-    "loginNote": "Google toont dan mogelijk 'Google heeft deze app niet geverifieerd'. Dat is normaal voor je eigen app: klik op Geavanceerd en daarna op Ga naar Tailr Core."
+    ]
   },
   "limits": {
     "concurrency": 5,
@@ -131,21 +113,18 @@
   "baseUrl": "https://analyticsdata.googleapis.com/v1beta",
   "hosts": [
     "analyticsadmin.googleapis.com",
-    "oauth2.googleapis.com",
-    "accounts.google.com"
+    "oauth2.googleapis.com"
   ],
   "auth": {
     "type": "oauth2",
-    "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+    "flow": "jwt_bearer",
     "tokenUrl": "https://oauth2.googleapis.com/token",
-    "authorizeParams": {
-      "access_type": "offline",
-      "prompt": "consent",
-      "include_granted_scopes": "true"
-    },
     "scopes": [
       "https://www.googleapis.com/auth/analytics.readonly"
-    ]
+    ],
+    "assertion": {
+      "fromJsonKey": "{{SERVICE_ACCOUNT_KEY}}"
+    }
   },
   "tools": [
     {
@@ -155,10 +134,10 @@
         "en": "Accounts and properties"
       },
       "summary": {
-        "nl": "Laat zien welke Google Analytics-accounts en properties er zijn, met hun id.",
-        "en": "Shows which Google Analytics accounts and properties exist, with their id."
+        "nl": "Laat zien welke Google Analytics-accounts en properties het serviceaccount kan zien, met hun id.",
+        "en": "Shows which Google Analytics accounts and properties the service account can see, with their id."
       },
-      "description": "Alle GA4-accounts en properties waar het gekoppelde Google-account bij kan, met property-id.",
+      "description": "Alle GA4-accounts en properties waar het serviceaccount toegang toe heeft, met property-id.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1beta/accountSummaries",
       "params": {},
