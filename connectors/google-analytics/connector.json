@@ -1,0 +1,807 @@
+{
+  "presentation": {
+    "intro": {
+      "en": "Turn website statistics into concrete insights about visitors and pages.",
+      "nl": "Maak van websitestatistieken concrete inzichten over bezoekers en pagina’s."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "How did visitor numbers and engagement change last month compared with the month before? Break the results down by traffic source.",
+          "nl": "Hoe veranderden bezoekersaantallen en betrokkenheid vorige maand ten opzichte van de maand ervoor? Splits dit uit naar verkeersbron."
+        },
+        "requires": [
+          "list_properties",
+          "run_report_flat"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Which landing pages attracted the most visitors last month, and which had the strongest engagement?",
+          "nl": "Welke landingspagina’s trokken vorige maand de meeste bezoekers en welke hadden de sterkste betrokkenheid?"
+        },
+        "requires": [
+          "list_properties",
+          "run_report_flat"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Who is on the website right now? Show the active visitors per page and per country.",
+          "nl": "Wie is er nu op de website? Laat de actieve bezoekers per pagina en per land zien."
+        },
+        "requires": [
+          "run_realtime_report"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Which custom dimensions does our property have? Then make a pivot table of page views by author and device type for last month.",
+          "nl": "Welke eigen dimensies heeft onze property? Maak daarna een draaitabel van paginaweergaven per auteur en apparaattype over vorige maand."
+        },
+        "requires": [
+          "find_dimensions_metrics",
+          "run_pivot_report"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Realtime visitors, pivot tables, several reports in one call, a search through all dimensions and metrics, and a flat report that is easy to analyse.",
+      "nl": "Realtime bezoekers, draaitabellen, meerdere rapporten in één aanroep, zoeken in alle dimensies en metrics, en een plat rapport dat makkelijk te analyseren is."
+    }
+  },
+  "$schema": "../../schemas/connector.json",
+  "id": "google-analytics",
+  "name": "Google Analytics 4",
+  "version": "0.5.0",
+  "description": {
+    "en": "Reports from Google Analytics 4: visitors, sessions, sources, pages, key events and revenue over any period, realtime visitors, pivot tables, and a search through all dimensions and metrics of the property.",
+    "nl": "Rapporten uit Google Analytics 4: bezoekers, sessies, bronnen, pagina’s, key events en omzet over elke periode, realtime bezoekers, draaitabellen, en zoeken in alle dimensies en metrics van de property."
+  },
+  "homepage": "https://developers.google.com/analytics/devguides/reporting/data/v1",
+  "category": "Marketing",
+  "vars": [
+    {
+      "name": "SERVICE_ACCOUNT_KEY",
+      "label": {
+        "en": "Service account key",
+        "nl": "Sleutel van het serviceaccount"
+      },
+      "description": {
+        "en": "The JSON key file you downloaded when you created the key for the service account (step 2). Paste the whole file, including the braces.",
+        "nl": "Het JSON-sleutelbestand dat je downloadde bij het maken van de sleutel voor het serviceaccount (stap 2). Plak het hele bestand, inclusief de accolades."
+      },
+      "secret": true,
+      "required": true,
+      "multiline": true,
+      "pattern": "\"type\"\\s*:\\s*\"service_account\"",
+      "patternHint": "Plak het complete JSON-sleutelbestand van een serviceaccount (het bevat \"type\": \"service_account\"). Een OAuth-clientbestand (client_secret_….json) is iets anders."
+    },
+    {
+      "name": "PROPERTY_ID",
+      "label": {
+        "en": "Property ID",
+        "nl": "Property-id"
+      },
+      "description": {
+        "en": "The numeric GA4 property ID, e.g. 123456789. Find it with Accounts and properties.",
+        "nl": "Het nummer van de GA4-property (bijv. 123456789). Te vinden met de functie 'Accounts en properties'."
+      },
+      "secret": false,
+      "required": false,
+      "pattern": "^[0-9]+$",
+      "patternHint": "Alleen het nummer van de property, zonder properties/",
+      "chooseWith": "list_properties"
+    }
+  ],
+  "setup": {
+    "minutes": 8,
+    "testWith": "list_properties",
+    "prerequisites": [
+      "Toegang tot Google Cloud Console (een nieuw project mag; gebruik je al een serviceaccount voor Search Console, dan kun je dat hergebruiken)",
+      "De rol Beheerder op de GA4-property, om het serviceaccount toegang te geven"
+    ],
+    "steps": [
+      {
+        "id": "enable-apis",
+        "title": "Google Analytics API's inschakelen",
+        "instruction": "Open de link, kies je project (of maak er een) en klik op Inschakelen. Dit schakelt de Google Analytics Data API (rapporten) en de Admin API (properties opzoeken) in één keer in.",
+        "url": "https://console.cloud.google.com/flows/enableapi?apiid=analyticsdata.googleapis.com,analyticsadmin.googleapis.com"
+      },
+      {
+        "id": "service-account",
+        "title": "Serviceaccount maken en JSON-sleutel downloaden",
+        "instruction": "Open de link in hetzelfde project (IAM en beheer → Serviceaccounts → Serviceaccount maken). Geef het serviceaccount een naam (bijv. Tailr Core) en klik op Gereed; rollen in het project zijn niet nodig. Open daarna het account, kies het tabblad Sleutels → Sleutel toevoegen → Nieuwe sleutel maken, kies JSON en klik op Maken. Het sleutelbestand wordt maar één keer gegeven: na het downloaden kun je het niet opnieuw ophalen. Bewaar het tot je het op de invulpagina plakt.",
+        "url": "https://console.cloud.google.com/iam-admin/serviceaccounts/create",
+        "note": "Het sleutelbestand bevat de privésleutel van het serviceaccount: behandel het als een wachtwoord en verwijder het na het plakken. Gebruik je al een serviceaccount voor Search Console in dit project, dan kun je hetzelfde account en dezelfde sleutel gebruiken."
+      },
+      {
+        "id": "grant-access",
+        "title": "Serviceaccount toegang geven in Google Analytics",
+        "instruction": "Open Google Analytics, klik linksonder op Beheerder en kies onder Property: Toegangsbeheer voor property. Klik op + → Gebruikers toevoegen, plak het e-mailadres van het serviceaccount (client_email in het sleutelbestand, eindigt op .iam.gserviceaccount.com), kies de rol Kijker en klik op Toevoegen. Lezen is genoeg: Tailr Core wijzigt niets in Google Analytics.",
+        "url": "https://analytics.google.com/"
+      }
+    ]
+  },
+  "limits": {
+    "concurrency": 5,
+    "cacheTtlSeconds": 300,
+    "note": "GA4 Data API (standaard property): 200.000 tokens per dag en 40.000 per uur per property, hoogstens 10 gelijktijdige verzoeken; een gewoon rapport kost 1 tot 10 tokens. Realtime heeft een eigen, los potje. Bron: developers.google.com/analytics/devguides/reporting/data/v1/quotas"
+  },
+  "type": "rest",
+  "baseUrl": "https://analyticsdata.googleapis.com/v1beta",
+  "hosts": [
+    "analyticsadmin.googleapis.com",
+    "oauth2.googleapis.com"
+  ],
+  "auth": {
+    "type": "oauth2",
+    "flow": "jwt_bearer",
+    "tokenUrl": "https://oauth2.googleapis.com/token",
+    "scopes": [
+      "https://www.googleapis.com/auth/analytics.readonly"
+    ],
+    "assertion": {
+      "fromJsonKey": "{{SERVICE_ACCOUNT_KEY}}"
+    }
+  },
+  "tools": [
+    {
+      "name": "list_properties",
+      "title": {
+        "nl": "Accounts en properties",
+        "en": "Accounts and properties"
+      },
+      "summary": {
+        "nl": "Laat zien welke Google Analytics-accounts en properties het serviceaccount kan zien, met hun id.",
+        "en": "Shows which Google Analytics accounts and properties the service account can see, with their id."
+      },
+      "description": "Alle GA4-accounts en properties waar het serviceaccount toegang toe heeft, met property-id.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/accountSummaries",
+      "params": {},
+      "cacheTtlSeconds": 3600
+    },
+    {
+      "name": "run_report",
+      "title": {
+        "nl": "Rapport opvragen (ruw)",
+        "en": "Run a report (raw)"
+      },
+      "summary": {
+        "nl": "Bezoekcijfers over een periode in de oorspronkelijke vorm van Google, met kopregels en rijen apart; voor dashboards en tools.",
+        "en": "Visitor figures over a period in Google's original shape, with headers and rows apart; for dashboards and tools."
+      },
+      "description": "Rapport met dimensies en metrics over een periode, in de ruwe vorm van de Data API (dimensionHeaders, metricHeaders, rows met dimensionValues en metricValues als tekst). Voor analyses in een gesprek is run_report_flat handiger: zelfde invoer, rijen als gewone objecten. Voorbeeld: dimensions [{\"name\":\"sessionDefaultChannelGroup\"}], metrics [{\"name\":\"sessions\"},{\"name\":\"keyEvents\"}], dateRanges [{\"startDate\":\"28daysAgo\",\"endDate\":\"yesterday\"}]. Twijfel je over een naam, zoek hem eerst op met find_dimensions_metrics.",
+      "level": "read",
+      "method": "POST",
+      "path": "/properties/{property}:runReport",
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "dateRanges": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "Eén of meer perioden, elk {startDate, endDate, name?}. Datums als JJJJ-MM-DD, of today, yesterday, NdaysAgo (bijv. 7daysAgo). Bij meer perioden krijgt elke rij een dateRange-dimensie.",
+          "schema": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": { "type": "string" },
+                "endDate": { "type": "string" },
+                "name": { "type": "string" }
+              },
+              "required": ["startDate", "endDate"]
+            }
+          }
+        },
+        "dimensions": {
+          "in": "body",
+          "type": "array",
+          "description": "Waarnaar je uitsplitst: [{name}], bijv. date, sessionDefaultChannelGroup, sessionSource, pagePath, landingPagePlusQueryString, country, deviceCategory, eventName. Hoogstens 9.",
+          "schema": {
+            "type": "array",
+            "maxItems": 9,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "dimensionExpression": { "type": "object" }
+              },
+              "required": ["name"]
+            }
+          }
+        },
+        "metrics": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "Wat je telt: [{name}], bijv. activeUsers, sessions, engagedSessions, screenPageViews, averageSessionDuration, keyEvents, totalRevenue. Hoogstens 10. Een eigen berekening kan met {name, expression}, bijv. expression \"eventCount/totalUsers\".",
+          "schema": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "expression": { "type": "string" },
+                "invisible": { "type": "boolean" }
+              },
+              "required": ["name"]
+            }
+          }
+        },
+        "dimensionFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Alleen rijen die aan een voorwaarde op een dimensie voldoen (FilterExpression). Voorbeeld: {\"filter\":{\"fieldName\":\"country\",\"stringFilter\":{\"matchType\":\"EXACT\",\"value\":\"Netherlands\"}}}. Combineren met andGroup / orGroup {expressions:[…]} of notExpression. matchType: EXACT, BEGINS_WITH, ENDS_WITH, CONTAINS, FULL_REGEXP, PARTIAL_REGEXP; inListFilter {values:[…]} voor meerdere waarden."
+        },
+        "metricFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Alleen rijen waarvan een metric aan een voorwaarde voldoet, zelfde vorm als dimensionFilter maar met numericFilter {operation, value:{int64Value|doubleValue}} (operation: EQUAL, LESS_THAN, LESS_THAN_OR_EQUAL, GREATER_THAN, GREATER_THAN_OR_EQUAL) of betweenFilter {fromValue, toValue}. Voorbeeld: sessies boven 100."
+        },
+        "orderBys": {
+          "in": "body",
+          "type": "array",
+          "description": "Sortering: [{metric:{metricName}, desc:true}] of [{dimension:{dimensionName, orderType}}] (orderType: ALPHANUMERIC, CASE_INSENSITIVE_ALPHANUMERIC, NUMERIC). Zonder sortering komt de volgorde van Google.",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "metric": { "type": "object", "properties": { "metricName": { "type": "string" } } },
+                "dimension": { "type": "object", "properties": { "dimensionName": { "type": "string" }, "orderType": { "type": "string" } } },
+                "desc": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        "limit": {
+          "in": "body",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 10.000, hoogstens 250.000). Houd het klein in een gesprek, bijv. 20 tot 100."
+        },
+        "offset": {
+          "in": "body",
+          "type": "integer",
+          "description": "Bladeren: sla zoveel rijen over (eerste rij is 0). Voor de tweede pagina: offset = limit van de eerste. rowCount in het antwoord is het totaal."
+        },
+        "metricAggregations": {
+          "in": "body",
+          "type": "array",
+          "description": "Totaalregels over alle rijen: TOTAL, MINIMUM, MAXIMUM en/of COUNT. Komen terug in totals, minimums, maximums.",
+          "schema": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["TOTAL", "MINIMUM", "MAXIMUM", "COUNT"] }
+          }
+        },
+        "keepEmptyRows": {
+          "in": "body",
+          "type": "boolean",
+          "description": "true: ook rijen waarvan alle metrics 0 zijn (bijv. dagen zonder bezoek in een reeks per datum). Standaard worden die weggelaten."
+        },
+        "comparisons": {
+          "in": "body",
+          "type": "array",
+          "description": "Segmenten naast elkaar: elk {name, dimensionFilter} (ad hoc) of {comparison:\"comparisons/123\"} (opgeslagen in GA). Elke vergelijking geeft eigen rijen met de dimensie comparison.",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "dimensionFilter": { "type": "object" },
+                "comparison": { "type": "string" }
+              }
+            }
+          }
+        },
+        "currencyCode": {
+          "in": "body",
+          "description": "Valuta voor omzetmetrics (ISO 4217, bijv. EUR). Standaard de valuta van de property."
+        },
+        "returnPropertyQuota": {
+          "in": "body",
+          "type": "boolean",
+          "description": "true: geef ook de quotastand van de property mee (propertyQuota: tokens per dag en per uur, verbruikt en resterend)."
+        }
+      }
+    },
+    {
+      "name": "run_realtime_report",
+      "title": {
+        "nl": "Realtime bezoekers",
+        "en": "Realtime visitors"
+      },
+      "summary": {
+        "nl": "Wie er op dit moment op de website is, bijvoorbeeld per pagina, land of apparaat, over de laatste 30 minuten.",
+        "en": "Who is on the website right now, for example per page, country or device, over the last 30 minutes."
+      },
+      "description": "Realtime rapport over de laatste 30 minuten (60 bij GA 360), nooit uit de cache. Realtime kent een eigen, kleinere set namen: dimensies zoals unifiedScreenName (paginatitel; pagePath bestaat hier niet), country, city, deviceCategory, platform, eventName, audienceName, minutesAgo; metrics zoals activeUsers, screenPageViews, eventCount, keyEvents. Geen dateRanges; splits desgewenst in minuteRanges. Antwoord in de ruwe vorm (dimensionHeaders, metricHeaders, rows met dimensionValues en metricValues). Voorbeeld: dimensions [{\"name\":\"unifiedScreenName\"}], metrics [{\"name\":\"activeUsers\"}].",
+      "level": "read",
+      "method": "POST",
+      "path": "/properties/{property}:runRealtimeReport",
+      "cacheTtlSeconds": 0,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "dimensions": {
+          "in": "body",
+          "type": "array",
+          "description": "[{name}] uit de realtime-set, bijv. unifiedScreenName, country, city, deviceCategory, eventName, minutesAgo",
+          "schema": {
+            "type": "array",
+            "maxItems": 9,
+            "items": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] }
+          }
+        },
+        "metrics": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "[{name}] uit de realtime-set, bijv. activeUsers, screenPageViews, eventCount, keyEvents",
+          "schema": {
+            "type": "array",
+            "maxItems": 10,
+            "items": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] }
+          }
+        },
+        "dimensionFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Voorwaarde op een dimensie (FilterExpression, zelfde vorm als bij run_report)"
+        },
+        "metricFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Voorwaarde op een metric (FilterExpression met numericFilter of betweenFilter)"
+        },
+        "metricAggregations": {
+          "in": "body",
+          "type": "array",
+          "description": "Totaalregels: TOTAL, MINIMUM, MAXIMUM en/of COUNT",
+          "schema": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["TOTAL", "MINIMUM", "MAXIMUM", "COUNT"] }
+          }
+        },
+        "orderBys": {
+          "in": "body",
+          "type": "array",
+          "description": "Sortering, bijv. [{metric:{metricName:\"activeUsers\"}, desc:true}]"
+        },
+        "limit": {
+          "in": "body",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 10.000). In een gesprek volstaat 10 tot 50."
+        },
+        "minuteRanges": {
+          "in": "body",
+          "type": "array",
+          "description": "Deelperioden in minuten geleden, elk {startMinutesAgo, endMinutesAgo, name?}, bijv. [{\"startMinutesAgo\":29,\"endMinutesAgo\":0}] of twee vensters om nu met zojuist te vergelijken. Standaard de laatste 30 minuten; startMinutesAgo hoogstens 29 (59 bij GA 360).",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startMinutesAgo": { "type": "integer" },
+                "endMinutesAgo": { "type": "integer" },
+                "name": { "type": "string" }
+              }
+            }
+          }
+        },
+        "returnPropertyQuota": {
+          "in": "body",
+          "type": "boolean",
+          "description": "true: geef ook de realtime-quotastand van de property mee"
+        }
+      }
+    },
+    {
+      "name": "run_pivot_report",
+      "title": {
+        "nl": "Draaitabel",
+        "en": "Pivot table"
+      },
+      "summary": {
+        "nl": "Een rapport als draaitabel: één dimensie in de rijen en een andere in de kolommen, bijvoorbeeld pagina’s tegen apparaattype.",
+        "en": "A report as a pivot table: one dimension in the rows and another in the columns, for example pages against device type."
+      },
+      "description": "Draaitabel over een periode. Noem alle dimensies in dimensions en verdeel ze daarna over pivots: elke pivot is een as met fieldNames (de dimensies op die as) en een verplichte limit (aantal unieke waarden); het product van alle limits mag hoogstens 250.000 zijn. Elke dimensie staat in precies één pivot. Voorbeeld pagina’s × apparaat: dimensions [{\"name\":\"pagePath\"},{\"name\":\"deviceCategory\"}], pivots [{\"fieldNames\":[\"pagePath\"],\"limit\":20,\"orderBys\":[{\"metric\":{\"metricName\":\"screenPageViews\"},\"desc\":true}]},{\"fieldNames\":[\"deviceCategory\"],\"limit\":5}]. Antwoord: pivotHeaders per as en rows met dimensionValues en metricValues; elke rij is één cel-combinatie. Voor een gewone tabel is run_report_flat eenvoudiger.",
+      "level": "read",
+      "method": "POST",
+      "path": "/properties/{property}:runPivotReport",
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "dateRanges": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "Eén of meer perioden {startDate, endDate, name?}; datums als JJJJ-MM-DD, today, yesterday of NdaysAgo",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": { "startDate": { "type": "string" }, "endDate": { "type": "string" }, "name": { "type": "string" } },
+              "required": ["startDate", "endDate"]
+            }
+          }
+        },
+        "dimensions": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "Alle dimensies van de tabel, [{name}]; elke dimensie moet ook in een pivot (of in een filter) voorkomen",
+          "schema": {
+            "type": "array",
+            "items": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] }
+          }
+        },
+        "metrics": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "Wat je telt, [{name}], bijv. screenPageViews, sessions, activeUsers",
+          "schema": {
+            "type": "array",
+            "items": { "type": "object", "properties": { "name": { "type": "string" }, "expression": { "type": "string" } }, "required": ["name"] }
+          }
+        },
+        "pivots": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "De assen van de draaitabel, elk {fieldNames:[dimensienamen], limit, offset?, orderBys?, metricAggregations?}. De eerste pivot bepaalt de rijvolgorde. Neem \"dateRange\" op in fieldNames om perioden als kolom te krijgen.",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldNames": { "type": "array", "items": { "type": "string" } },
+                "limit": { "type": "integer" },
+                "offset": { "type": "integer" },
+                "orderBys": { "type": "array" },
+                "metricAggregations": { "type": "array", "items": { "type": "string", "enum": ["TOTAL", "MINIMUM", "MAXIMUM", "COUNT"] } }
+              },
+              "required": ["fieldNames", "limit"]
+            }
+          }
+        },
+        "dimensionFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Voorwaarde op een dimensie (FilterExpression, zelfde vorm als bij run_report)"
+        },
+        "metricFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Voorwaarde op een metric (FilterExpression met numericFilter of betweenFilter)"
+        },
+        "comparisons": {
+          "in": "body",
+          "type": "array",
+          "description": "Segmenten naast elkaar, elk {name, dimensionFilter} of {comparison:\"comparisons/123\"}"
+        },
+        "currencyCode": {
+          "in": "body",
+          "description": "Valuta voor omzetmetrics (ISO 4217, bijv. EUR)"
+        },
+        "keepEmptyRows": {
+          "in": "body",
+          "type": "boolean",
+          "description": "true: ook cellen waarvan alle metrics 0 zijn"
+        },
+        "returnPropertyQuota": {
+          "in": "body",
+          "type": "boolean",
+          "description": "true: geef ook de quotastand van de property mee"
+        }
+      }
+    },
+    {
+      "name": "batch_run_reports",
+      "title": {
+        "nl": "Meerdere rapporten in één keer",
+        "en": "Several reports at once"
+      },
+      "summary": {
+        "nl": "Tot vijf rapporten over dezelfde property in één aanroep, bijvoorbeeld per kanaal, per pagina en per land tegelijk.",
+        "en": "Up to five reports on the same property in one call, for example per channel, per page and per country at once."
+      },
+      "description": "Voert tot 5 rapporten in één aanroep uit (scheelt rondjes en quota). requests is een lijst van rapportverzoeken met dezelfde velden als run_report (dateRanges, dimensions, metrics, dimensionFilter, metricFilter, orderBys, limit, offset, metricAggregations, keepEmptyRows, comparisons, currencyCode), zonder property. Antwoord: reports, in dezelfde volgorde, elk in de ruwe vorm van run_report (dimensionHeaders, metricHeaders, rows). Gebruik dit als je meerdere invalshoeken over dezelfde periode nodig hebt; voor één tabel is run_report_flat eenvoudiger.",
+      "level": "read",
+      "method": "POST",
+      "path": "/properties/{property}:batchRunReports",
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "requests": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "1 tot 5 rapportverzoeken, elk met minstens dateRanges en metrics, zoals bij run_report (zonder property)",
+          "schema": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "properties": {
+                "dateRanges": { "type": "array" },
+                "dimensions": { "type": "array" },
+                "metrics": { "type": "array" },
+                "dimensionFilter": { "type": "object" },
+                "metricFilter": { "type": "object" },
+                "orderBys": { "type": "array" },
+                "limit": { "type": "integer" },
+                "offset": { "type": "integer" },
+                "metricAggregations": { "type": "array" },
+                "keepEmptyRows": { "type": "boolean" },
+                "comparisons": { "type": "array" },
+                "currencyCode": { "type": "string" }
+              },
+              "required": ["dateRanges", "metrics"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "check_compatibility",
+      "title": {
+        "nl": "Combinatie controleren",
+        "en": "Check a combination"
+      },
+      "summary": {
+        "nl": "Controleert vooraf of dimensies en metrics samen in één rapport mogen, en welke andere namen daar nog bij kunnen.",
+        "en": "Checks in advance whether dimensions and metrics can go together in one report, and which other names can still be added."
+      },
+      "description": "Controleert of een combinatie van dimensions en metrics in één rapport mag, vóór je run_report aanroept. Geef dezelfde dimensions en metrics (en filters) als voor het rapport; het antwoord noemt per beschikbare dimensie en metric of hij COMPATIBLE of INCOMPATIBLE is met wat je al hebt. Zonder compatibilityFilter is het antwoord groot (alle namen); gebruik compatibilityFilter \"COMPATIBLE\" om alleen te zien wat je nog kunt toevoegen, of \"INCOMPATIBLE\" om te zien wat botst. Gebruik dit bij een foutmelding over een ongeldige combinatie, of bij het bouwen van een rapport met veel dimensies.",
+      "level": "read",
+      "method": "POST",
+      "path": "/properties/{property}:checkCompatibility",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "dimensions": {
+          "in": "body",
+          "type": "array",
+          "description": "[{name}] zoals in het rapport dat je wilt draaien",
+          "schema": {
+            "type": "array",
+            "items": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] }
+          }
+        },
+        "metrics": {
+          "in": "body",
+          "type": "array",
+          "description": "[{name}] zoals in het rapport dat je wilt draaien",
+          "schema": {
+            "type": "array",
+            "items": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] }
+          }
+        },
+        "dimensionFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Het dimensiefilter van het rapport, als dat er is"
+        },
+        "metricFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Het metricfilter van het rapport, als dat er is"
+        },
+        "compatibilityFilter": {
+          "in": "body",
+          "enum": ["COMPATIBLE", "INCOMPATIBLE"],
+          "description": "Alleen de passende (COMPATIBLE) of alleen de botsende (INCOMPATIBLE) namen teruggeven; zonder filter alles"
+        }
+      }
+    },
+    {
+      "name": "get_metadata",
+      "title": {
+        "nl": "Alle dimensies en metrics (ruw)",
+        "en": "All dimensions and metrics (raw)"
+      },
+      "summary": {
+        "nl": "De volledige lijst van dimensies en metrics van de property, inclusief eigen definities; alleen voor apps en dashboards.",
+        "en": "The complete list of dimensions and metrics of the property, including custom definitions; only for apps and dashboards."
+      },
+      "description": "Volledige metadata van de property: alle dimensies en metrics (apiName, uiName, category, description, customDefinition, bij metrics ook type en expression) en de opgeslagen vergelijkingen. Het antwoord is honderden items groot en alleen voor Apps (API), bijvoorbeeld een dashboard dat namen laat kiezen. De AI zoekt met find_dimensions_metrics.",
+      "level": "read",
+      "method": "GET",
+      "path": "/properties/{property}/metadata",
+      "audience": "api",
+      "cacheTtlSeconds": 86400,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property. 0 geeft alleen de standaardnamen, zonder eigen definities.",
+          "default": "{{PROPERTY_ID}}"
+        }
+      }
+    }
+  ],
+  "scripts": [
+    {
+      "name": "run_report_flat",
+      "title": {
+        "nl": "Rapport opvragen",
+        "en": "Run a report"
+      },
+      "summary": {
+        "nl": "Bezoekcijfers over een periode, zoals sessies, gebruikers en key events, uitgesplitst naar bijvoorbeeld kanaal of pagina; het antwoord is een gewone tabel.",
+        "en": "Visitor figures over a period, such as sessions, users and key events, split by for example channel or page; the answer is a plain table."
+      },
+      "description": "Hetzelfde rapport als run_report, maar het antwoord is plat: rows is een lijst van objecten met de dimensienaam en metricnaam als sleutel en metrics als getal, bijv. {\"date\":\"20261101\",\"sessionDefaultChannelGroup\":\"Organic Search\",\"sessions\":123}. Verder rowCount (het totaal, ook voorbij limit), totals/minimums/maximums als je metricAggregations vraagt, metadata (valuta, tijdzone, of er data in \"(other)\" verdween, of drempels gelden) en quota als returnPropertyQuota aanstaat. Gebruik deze functie voor analyses en antwoorden in een gesprek. Voorbeeld: dateRanges [{\"startDate\":\"28daysAgo\",\"endDate\":\"yesterday\"}], dimensions [{\"name\":\"sessionDefaultChannelGroup\"}], metrics [{\"name\":\"sessions\"},{\"name\":\"keyEvents\"}], orderBys [{\"metric\":{\"metricName\":\"sessions\"},\"desc\":true}], limit 20. Twijfel je over een naam, zoek hem eerst op met find_dimensions_metrics.",
+      "version": "0.5.0",
+      "level": "read",
+      "file": "tools/run_report_flat.ts",
+      "uses": [
+        "run_report"
+      ],
+      "params": {
+        "property": {
+          "type": "string",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property"
+        },
+        "dateRanges": {
+          "type": "array",
+          "required": true,
+          "description": "Eén of meer perioden {startDate, endDate, name?}; datums als JJJJ-MM-DD, today, yesterday of NdaysAgo (bijv. 7daysAgo). Bij meer perioden krijgt elke rij een veld dateRange.",
+          "schema": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "properties": { "startDate": { "type": "string" }, "endDate": { "type": "string" }, "name": { "type": "string" } },
+              "required": ["startDate", "endDate"]
+            }
+          }
+        },
+        "dimensions": {
+          "type": "array",
+          "description": "Waarnaar je uitsplitst: [{name}], bijv. date, sessionDefaultChannelGroup, sessionSource, pagePath, landingPagePlusQueryString, country, deviceCategory, eventName. Hoogstens 9.",
+          "schema": {
+            "type": "array",
+            "maxItems": 9,
+            "items": { "type": "object", "properties": { "name": { "type": "string" }, "dimensionExpression": { "type": "object" } }, "required": ["name"] }
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "required": true,
+          "description": "Wat je telt: [{name}], bijv. activeUsers, sessions, engagedSessions, screenPageViews, averageSessionDuration, keyEvents, totalRevenue. Hoogstens 10. Eigen berekening met {name, expression}.",
+          "schema": {
+            "type": "array",
+            "maxItems": 10,
+            "items": { "type": "object", "properties": { "name": { "type": "string" }, "expression": { "type": "string" }, "invisible": { "type": "boolean" } }, "required": ["name"] }
+          }
+        },
+        "dimensionFilter": {
+          "type": "object",
+          "description": "Voorwaarde op een dimensie (FilterExpression), bijv. {\"filter\":{\"fieldName\":\"country\",\"stringFilter\":{\"matchType\":\"EXACT\",\"value\":\"Netherlands\"}}}; combineren met andGroup/orGroup {expressions:[…]} of notExpression"
+        },
+        "metricFilter": {
+          "type": "object",
+          "description": "Voorwaarde op een metric (FilterExpression met numericFilter {operation, value:{int64Value|doubleValue}} of betweenFilter)"
+        },
+        "orderBys": {
+          "type": "array",
+          "description": "Sortering: [{metric:{metricName}, desc:true}] of [{dimension:{dimensionName, orderType}}]",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "metric": { "type": "object", "properties": { "metricName": { "type": "string" } } },
+                "dimension": { "type": "object", "properties": { "dimensionName": { "type": "string" }, "orderType": { "type": "string" } } },
+                "desc": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 10.000, hoogstens 250.000). Houd het klein in een gesprek, bijv. 20 tot 100."
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Bladeren: sla zoveel rijen over (eerste rij is 0); nextOffset in het antwoord geeft de waarde voor de volgende pagina"
+        },
+        "metricAggregations": {
+          "type": "array",
+          "description": "Totaalregels over alle rijen: TOTAL, MINIMUM, MAXIMUM en/of COUNT; komen terug als totals, minimums, maximums",
+          "schema": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["TOTAL", "MINIMUM", "MAXIMUM", "COUNT"] }
+          }
+        },
+        "keepEmptyRows": {
+          "type": "boolean",
+          "description": "true: ook rijen waarvan alle metrics 0 zijn"
+        },
+        "comparisons": {
+          "type": "array",
+          "description": "Segmenten naast elkaar, elk {name, dimensionFilter} of {comparison:\"comparisons/123\"}; elke rij krijgt dan een veld comparison"
+        },
+        "currencyCode": {
+          "type": "string",
+          "description": "Valuta voor omzetmetrics (ISO 4217, bijv. EUR); standaard die van de property"
+        },
+        "returnPropertyQuota": {
+          "type": "boolean",
+          "description": "true: geef ook de quotastand van de property mee (quota: tokens per dag en per uur, verbruikt en resterend)"
+        }
+      },
+      "limits": {
+        "maxCalls": 5,
+        "timeoutSeconds": 90
+      }
+    },
+    {
+      "name": "find_dimensions_metrics",
+      "title": {
+        "nl": "Dimensies en metrics zoeken",
+        "en": "Find dimensions and metrics"
+      },
+      "summary": {
+        "nl": "Zoekt op een woord in alle beschikbare dimensies en metrics van de property, inclusief eigen definities, en geeft de exacte namen voor een rapport.",
+        "en": "Searches all available dimensions and metrics of the property by a word, including custom definitions, and gives the exact names for a report."
+      },
+      "description": "Zoekt hoofdletterongevoelig in apiName, uiName en description van alle dimensies en metrics die de property kent, inclusief eigen (custom) definities. Gebruik dit als je niet zeker weet hoe iets heet (bijv. search \"landing\", \"auteur\", \"revenue\", \"engagement\") voordat je een rapport opvraagt. Meerdere woorden moeten allemaal voorkomen. Antwoord: hoogstens 50 treffers met kind (dimension of metric), apiName (de naam voor een rapport), uiName, category, description (ingekort), customDefinition en bij metrics type; plus het totaal aantal treffers. Alleen voor de gewone rapporten; realtime heeft een eigen, kleinere set namen.",
+      "version": "0.5.0",
+      "level": "read",
+      "file": "tools/find_dimensions_metrics.ts",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/properties/*/metadata"
+        }
+      ],
+      "params": {
+        "search": {
+          "type": "string",
+          "required": true,
+          "description": "Zoekwoord(en), bijv. \"landing page\", \"conversie\", \"revenue\" of een eigen dimensie zoals \"auteur\""
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["dimensions", "metrics", "both"],
+          "description": "Alleen dimensies, alleen metrics, of allebei (standaard)"
+        },
+        "property": {
+          "type": "string",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property"
+        }
+      },
+      "limits": {
+        "maxCalls": 3,
+        "timeoutSeconds": 60
+      }
+    }
+  ]
+}

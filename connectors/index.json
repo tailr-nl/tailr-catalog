@@ -13,13 +13,13 @@
     },
     {
       "id": "google-analytics",
-      "file": "google-analytics.json",
-      "version": "0.4.1"
+      "file": "google-analytics/connector.json",
+      "version": "0.5.0"
     },
     {
       "id": "google-analytics-signin",
-      "file": "google-analytics-signin.json",
-      "version": "0.4.1"
+      "file": "google-analytics-signin/connector.json",
+      "version": "0.5.0"
     },
     {
       "id": "google-search-console",
