@@ -43,25 +43,35 @@
           "find_dimensions_metrics",
           "run_pivot_report"
         ]
+      },
+      {
+        "prompt": {
+          "en": "Which events count as key events for us? Show how often each of them occurred last month, per channel.",
+          "nl": "Welke gebeurtenissen tellen bij ons als key event? Laat zien hoe vaak elk daarvan vorige maand voorkwam, per kanaal."
+        },
+        "requires": [
+          "list_key_events",
+          "run_report_flat"
+        ]
       }
     ],
     "whatsNew": {
-      "en": "Realtime visitors, pivot tables, several reports in one call, a search through all dimensions and metrics, and a flat report that is easy to analyse.",
-      "nl": "Realtime bezoekers, draaitabellen, meerdere rapporten in één aanroep, zoeken in alle dimensies en metrics, en een plat rapport dat makkelijk te analyseren is."
+      "en": "The setup of the property: key events, custom dimensions and metrics, data streams, data retention, Google Ads and Firebase links, and a data access report for dashboards.",
+      "nl": "De inrichting van de property: key events, eigen dimensies en metrics, gegevensstromen, bewaartermijn, Google Ads- en Firebase-koppelingen, en een toegangsrapport voor dashboards."
     }
   },
   "$schema": "../../schemas/connector.json",
   "id": "google-analytics-signin",
   "name": "Google Analytics 4 (sign in)",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "variantOf": "google-analytics",
   "variantTitle": {
     "en": "Sign in with your own Google account",
     "nl": "Inloggen met je eigen Google-account"
   },
   "description": {
-    "en": "Reports from Google Analytics 4: visitors, sessions, sources, pages, key events and revenue over any period, realtime visitors, pivot tables, and a search through all dimensions and metrics of the property. Signed in with your own Google account instead of a service account.",
-    "nl": "Rapporten uit Google Analytics 4: bezoekers, sessies, bronnen, pagina’s, key events en omzet over elke periode, realtime bezoekers, draaitabellen, en zoeken in alle dimensies en metrics van de property. Ingelogd met je eigen Google-account in plaats van een serviceaccount."
+    "en": "Reports from Google Analytics 4: visitors, sessions, sources, pages, key events and revenue over any period, realtime visitors, pivot tables, a search through all dimensions and metrics, and the setup of the property: key events, custom dimensions, data streams and data retention. Signed in with your own Google account instead of a service account.",
+    "nl": "Rapporten uit Google Analytics 4: bezoekers, sessies, bronnen, pagina’s, key events en omzet over elke periode, realtime bezoekers, draaitabellen, zoeken in alle dimensies en metrics, en de inrichting van de property: key events, eigen dimensies, gegevensstromen en bewaartermijn. Ingelogd met je eigen Google-account in plaats van een serviceaccount."
   },
   "homepage": "https://developers.google.com/analytics/devguides/reporting/data/v1",
   "category": "Marketing",
@@ -149,7 +159,7 @@
   "limits": {
     "concurrency": 5,
     "cacheTtlSeconds": 300,
-    "note": "GA4 Data API (standaard property): 200.000 tokens per dag en 40.000 per uur per property, hoogstens 10 gelijktijdige verzoeken; een gewoon rapport kost 1 tot 10 tokens. Realtime heeft een eigen, los potje. Bron: developers.google.com/analytics/devguides/reporting/data/v1/quotas"
+    "note": "GA4 Data API (standaard property): 200.000 tokens per dag en 40.000 per uur per property, hoogstens 10 gelijktijdige verzoeken; een gewoon rapport kost 1 tot 10 tokens. Realtime heeft een eigen, los potje. De Admin API (inrichting van de property en het toegangsrapport) heeft een eigen quotum, los van de rapporten. Bron: developers.google.com/analytics/devguides/reporting/data/v1/quotas"
   },
   "type": "rest",
   "baseUrl": "https://analyticsdata.googleapis.com/v1beta",
@@ -187,6 +197,409 @@
       "path": "https://analyticsadmin.googleapis.com/v1beta/accountSummaries",
       "params": {},
       "cacheTtlSeconds": 3600
+    },
+    {
+      "name": "get_property",
+      "title": {
+        "nl": "Property-gegevens",
+        "en": "Property details"
+      },
+      "summary": {
+        "nl": "Naam, tijdzone, valuta en branche van de property, en wanneer hij is gemaakt.",
+        "en": "Name, time zone, currency and industry of the property, and when it was created."
+      },
+      "description": "Gegevens van één GA4-property: displayName, timeZone (de daggrens van alle rapporten), currencyCode (de valuta van omzetmetrics), industryCategory (branche), propertyType (PROPERTY_TYPE_ORDINARY, PROPERTY_TYPE_SUBPROPERTY of PROPERTY_TYPE_ROLLUP), serviceLevel (GOOGLE_ANALYTICS_STANDARD of GOOGLE_ANALYTICS_360), account (accounts/<nummer>), createTime en updateTime. Gebruik dit om datums en bedragen in rapporten goed te duiden. Zonder property: de ingestelde property.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        }
+      }
+    },
+    {
+      "name": "get_data_retention",
+      "title": {
+        "nl": "Bewaartermijn",
+        "en": "Data retention"
+      },
+      "summary": {
+        "nl": "Hoe lang Google de gebeurtenis- en gebruikersgegevens van deze property bewaart.",
+        "en": "How long Google keeps the event and user data of this property."
+      },
+      "description": "Bewaarinstellingen van de property: eventDataRetention en userDataRetention (TWO_MONTHS of FOURTEEN_MONTHS; bij GA 360 ook TWENTY_SIX_MONTHS, THIRTY_EIGHT_MONTHS en FIFTY_MONTHS) en resetUserDataOnNewActivity (true: de termijn begint opnieuw bij elke nieuwe activiteit van een gebruiker). Verklaart waarom verkenningen en analyses per gebruiker over een oudere periode leeg zijn; de gewone rapporten met totalen (run_report_flat) blijven wel beschikbaar.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/dataRetentionSettings",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        }
+      }
+    },
+    {
+      "name": "list_data_streams",
+      "title": {
+        "nl": "Gegevensstromen",
+        "en": "Data streams"
+      },
+      "summary": {
+        "nl": "Welke websites en apps in deze property meten, met hun measurement-id (G-…).",
+        "en": "Which websites and apps send data to this property, with their measurement ID (G-…)."
+      },
+      "description": "Alle gegevensstromen van de property: per stroom name (properties/<property>/dataStreams/<nummer>), displayName, type (WEB_DATA_STREAM, ANDROID_APP_DATA_STREAM of IOS_APP_DATA_STREAM), createTime en updateTime; bij een webstroom webStreamData met measurementId (G-…) en defaultUri (de gemeten website), bij apps androidAppStreamData.packageName of iosAppStreamData.bundleId. Zo weet je welke websites en apps de cijfers leveren. Standaard 50 per pagina; nextPageToken in het antwoord geeft de volgende pagina.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/dataStreams",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "pageSize": {
+          "in": "query",
+          "type": "integer",
+          "description": "Aantal stromen per pagina (standaard 50, hoogstens 200)"
+        },
+        "pageToken": {
+          "in": "query",
+          "type": "string",
+          "description": "nextPageToken uit het vorige antwoord, voor de volgende pagina"
+        }
+      }
+    },
+    {
+      "name": "get_data_stream",
+      "title": {
+        "nl": "Eén gegevensstroom",
+        "en": "One data stream"
+      },
+      "summary": {
+        "nl": "De details van één website- of appstroom, op het nummer van de stroom.",
+        "en": "Details of one website or app stream, by stream number."
+      },
+      "description": "Eén gegevensstroom van de property, met dezelfde velden als list_data_streams (displayName, type, measurementId, defaultUri of packageName/bundleId). stream is alleen het nummer uit name: bij properties/123/dataStreams/456 is dat 456.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/dataStreams/{stream}",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "stream": {
+          "in": "path",
+          "required": true,
+          "description": "Nummer van de gegevensstroom (het laatste deel van name uit list_data_streams)"
+        }
+      }
+    },
+    {
+      "name": "list_key_events",
+      "title": {
+        "nl": "Key events",
+        "en": "Key events"
+      },
+      "summary": {
+        "nl": "Welke gebeurtenissen in deze property als key event (conversie) tellen, en hoe ze worden geteld.",
+        "en": "Which events count as key events (conversions) in this property, and how they are counted."
+      },
+      "description": "De key events van de property (de opvolger van conversies): per key event eventName (bijv. purchase, generate_lead), countingMethod (ONCE_PER_EVENT: elke keer telt; ONCE_PER_SESSION: hoogstens één per sessie), custom (true bij een zelf aangemaakte gebeurtenis), deletable, createTime en eventueel defaultValue {numericValue, currencyCode}. Vraag dit op voordat je de metric keyEvents duidt: die telt alle key events bij elkaar op. Eén key event apart rapporteer je met de metric keyEvents:<eventName>, of met eventName als dimensie en de metric eventCount. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/keyEvents",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "pageSize": {
+          "in": "query",
+          "type": "integer",
+          "description": "Aantal key events per pagina (standaard 50, hoogstens 200)"
+        },
+        "pageToken": {
+          "in": "query",
+          "type": "string",
+          "description": "nextPageToken uit het vorige antwoord, voor de volgende pagina"
+        }
+      }
+    },
+    {
+      "name": "list_custom_dimensions",
+      "title": {
+        "nl": "Eigen dimensies",
+        "en": "Custom dimensions"
+      },
+      "summary": {
+        "nl": "De zelf gedefinieerde dimensies van de property, met de naam die je in een rapport gebruikt.",
+        "en": "The property's own custom dimensions, with the name to use in a report."
+      },
+      "description": "Eigen (custom) dimensies van de property: per dimensie displayName, parameterName, scope (EVENT, USER of ITEM), description en disallowAdsPersonalization. In een rapport heet een EVENT-dimensie customEvent:<parameterName>, een USER-dimensie customUser:<parameterName> en een ITEM-dimensie customItem:<parameterName>. Vraag dit op als iemand naar iets eigens vraagt (auteur, categorie, klanttype, inlogstatus) en gok geen namen; find_dimensions_metrics zoekt op een woord in alle dimensies en metrics tegelijk. Een eigen dimensie kan iets persoonlijks bevatten, zoals een klant-id: vraag die niet per persoon op. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/customDimensions",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "pageSize": {
+          "in": "query",
+          "type": "integer",
+          "description": "Aantal dimensies per pagina (standaard 50, hoogstens 200)"
+        },
+        "pageToken": {
+          "in": "query",
+          "type": "string",
+          "description": "nextPageToken uit het vorige antwoord, voor de volgende pagina"
+        }
+      }
+    },
+    {
+      "name": "list_custom_metrics",
+      "title": {
+        "nl": "Eigen metrics",
+        "en": "Custom metrics"
+      },
+      "summary": {
+        "nl": "De zelf gedefinieerde metrics van de property, met eenheid en de naam voor een rapport.",
+        "en": "The property's own custom metrics, with unit and the name to use in a report."
+      },
+      "description": "Eigen (custom) metrics van de property: per metric displayName, parameterName, scope (EVENT), measurementUnit (STANDARD, CURRENCY, SECONDS, MILLISECONDS, MINUTES, HOURS, METERS, KILOMETERS, FEET of MILES), description en restrictedMetricType (COST_DATA of REVENUE_DATA als de metric kosten of omzet bevat). In een rapport heet zo'n metric customEvent:<parameterName>; een CURRENCY-metric volgt de valuta van de property (get_property). Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/customMetrics",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "pageSize": {
+          "in": "query",
+          "type": "integer",
+          "description": "Aantal metrics per pagina (standaard 50, hoogstens 200)"
+        },
+        "pageToken": {
+          "in": "query",
+          "type": "string",
+          "description": "nextPageToken uit het vorige antwoord, voor de volgende pagina"
+        }
+      }
+    },
+    {
+      "name": "list_google_ads_links",
+      "title": {
+        "nl": "Google Ads-koppelingen",
+        "en": "Google Ads links"
+      },
+      "summary": {
+        "nl": "Welke Google Ads-accounts aan deze property zijn gekoppeld, zodat je weet of advertentiecijfers gevuld zijn.",
+        "en": "Which Google Ads accounts are linked to this property, so you know whether advertising figures are populated."
+      },
+      "description": "Koppelingen tussen de property en Google Ads: per koppeling customerId (het klantnummer in Google Ads), canManageClients (true bij een managementaccount), adsPersonalizationEnabled, createTime en updateTime. Zonder koppeling blijven de googleAds*-metrics (kosten, klikken, vertoningen) in rapporten leeg. Het e-mailadres van wie de koppeling maakte wordt weggelaten. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/googleAdsLinks",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "pageSize": {
+          "in": "query",
+          "type": "integer",
+          "description": "Aantal koppelingen per pagina (standaard 50, hoogstens 200)"
+        },
+        "pageToken": {
+          "in": "query",
+          "type": "string",
+          "description": "nextPageToken uit het vorige antwoord, voor de volgende pagina"
+        }
+      },
+      "transform": {
+        "exclude": [
+          "googleAdsLinks.creatorEmailAddress"
+        ]
+      }
+    },
+    {
+      "name": "list_firebase_links",
+      "title": {
+        "nl": "Firebase-koppeling",
+        "en": "Firebase link"
+      },
+      "summary": {
+        "nl": "Of deze property aan een Firebase-project is gekoppeld, wat bij het meten van apps hoort.",
+        "en": "Whether this property is linked to a Firebase project, which belongs with measuring apps."
+      },
+      "description": "De Firebase-koppeling van de property (hoogstens één): project (het Firebase-project, projects/<nummer>) en createTime. Een lege lijst betekent: geen Firebase, dus geen appmetingen via Firebase.",
+      "level": "read",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/firebaseLinks",
+      "cacheTtlSeconds": 3600,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "pageSize": {
+          "in": "query",
+          "type": "integer",
+          "description": "Aantal koppelingen per pagina (standaard 50, hoogstens 200)"
+        },
+        "pageToken": {
+          "in": "query",
+          "type": "string",
+          "description": "nextPageToken uit het vorige antwoord, voor de volgende pagina"
+        }
+      }
+    },
+    {
+      "name": "run_access_report",
+      "title": {
+        "nl": "Toegangsrapport",
+        "en": "Data access report"
+      },
+      "summary": {
+        "nl": "Wie wanneer rapportgegevens van deze property heeft opgevraagd; alleen voor apps en dashboards, omdat het over collega's gaat.",
+        "en": "Who retrieved report data of this property and when; only for apps and dashboards, because it is about colleagues."
+      },
+      "description": "Toegangslog van de property: welke gebruiker wanneer en via welke weg rapportgegevens heeft opgevraagd. Dimensies (dimensionName) bijv. userEmail, accessedPropertyId, accessMechanism, accessorAppName, reportType, dataApiQuotaCategory, epochTimeMicros (elke opvraging apart) of mostRecentAccessEpochTimeMicros (de laatste keer per gebruiker); metric (metricName) accessCount. Antwoord in de ruwe vorm van Google: dimensionHeaders, metricHeaders, rows met dimensionValues en metricValues (als tekst), rowCount, en quota als returnEntityQuota aanstaat. Alleen voor Apps (API): het rapport bevat e-mailadressen van collega's en komt niet in een gesprek.",
+      "level": "read",
+      "method": "POST",
+      "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}:runAccessReport",
+      "audience": "api",
+      "cacheTtlSeconds": 300,
+      "params": {
+        "property": {
+          "in": "path",
+          "description": "Property-id (alleen het nummer); standaard de ingestelde property",
+          "default": "{{PROPERTY_ID}}"
+        },
+        "dateRanges": {
+          "in": "body",
+          "type": "array",
+          "required": true,
+          "description": "Eén of meer perioden {startDate, endDate}; datums als JJJJ-MM-DD, today, yesterday of NdaysAgo. Bij meer perioden krijgt elke rij een dateRange-index.",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": {
+                  "type": "string"
+                },
+                "endDate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "startDate",
+                "endDate"
+              ]
+            }
+          }
+        },
+        "dimensions": {
+          "in": "body",
+          "type": "array",
+          "description": "Waarnaar je uitsplitst: [{dimensionName}], bijv. userEmail, accessedPropertyId, accessMechanism, mostRecentAccessEpochTimeMicros. Hoogstens 9.",
+          "schema": {
+            "type": "array",
+            "maxItems": 9,
+            "items": {
+              "type": "object",
+              "properties": {
+                "dimensionName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "dimensionName"
+              ]
+            }
+          }
+        },
+        "metrics": {
+          "in": "body",
+          "type": "array",
+          "description": "Wat je telt: [{metricName}], bijv. accessCount. Hoogstens 10.",
+          "schema": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "metricName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "metricName"
+              ]
+            }
+          }
+        },
+        "dimensionFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Alleen rijen die aan een voorwaarde op een dimensie voldoen, bijv. {\"accessFilter\":{\"fieldName\":\"accessMechanism\",\"stringFilter\":{\"matchType\":\"EXACT\",\"value\":\"Data API\"}}}. Combineren met andGroup / orGroup {expressions:[…]} of notExpression; inListFilter {values:[…]} voor meerdere waarden."
+        },
+        "metricFilter": {
+          "in": "body",
+          "type": "object",
+          "description": "Alleen rijen waarvan een metric aan een voorwaarde voldoet, zelfde vorm als dimensionFilter met numericFilter {operation, value:{int64Value}} of betweenFilter {fromValue, toValue}."
+        },
+        "orderBys": {
+          "in": "body",
+          "type": "array",
+          "description": "Sortering: [{metric:{metricName}, desc:true}] of [{dimension:{dimensionName, orderType}}]",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "metric": {
+                  "type": "object"
+                },
+                "dimension": {
+                  "type": "object"
+                },
+                "desc": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "limit": {
+          "in": "body",
+          "type": "integer",
+          "description": "Maximaal aantal rijen (standaard 10.000, hoogstens 100.000)"
+        },
+        "offset": {
+          "in": "body",
+          "type": "integer",
+          "description": "Bladeren: sla zoveel rijen over (eerste rij is 0); rowCount in het antwoord is het totaal"
+        },
+        "returnEntityQuota": {
+          "in": "body",
+          "type": "boolean",
+          "description": "true: geef ook de quotastand van de property voor dit rapport mee (quota)"
+        }
+      }
     },
     {
       "name": "run_report",
