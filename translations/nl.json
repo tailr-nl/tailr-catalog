@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "Texts for signed requests to your own projects: the safety check when connecting, the Sign-in card and the signing key under Settings → Sign-in & security.",
-      "nl": "Teksten voor ondertekende verzoeken naar je eigen projecten: de veiligheidstest bij verbinden, de kaart Inloggen en de ondertekensleutel onder Instellingen → Inloggen en beveiliging."
+      "en": "The Language section on the admin overview no longer says Tailr Core is in English once a language has been added.",
+      "nl": "De sectie Taal op het beheeroverzicht zegt niet meer dat Tailr Core in het Engels is zodra er een taal is toegevoegd."
     }
   },
   "messages": {
@@ -41,6 +41,7 @@
     "{name} added": "{name} toegevoegd",
     "Language": "Taal",
     "Tailr Core is in English. Add another language, such as Dutch, here or later under Settings → Languages. Everyone then chooses their own language in the menu under their name.": "Tailr Core is in het Engels. Voeg hier of later bij Instellingen → Talen een andere taal toe, zoals Nederlands. Daarna kiest iedereen zijn eigen taal in het menu onder zijn naam.",
+    "Everyone chooses their own language in the menu under their name. Add more languages under Settings → Languages.": "Iedereen kiest zijn eigen taal in het menu onder zijn naam. Meer talen voeg je toe onder Instellingen → Talen.",
     "Version {version}": "Versie {version}",
     "Adding…": "Toevoegen…",
     "Add": "Toevoegen",
@@ -1522,7 +1523,6 @@
     "{added} connector(s) found": "{added} connector(s) gevonden",
     "E.g. Tailr connectors": "Bijv. Tailr-connectors",
     "Only JSON connectors are loaded from a repo. Connectors with custom code are rejected.": "Uit een repo komen alleen JSON-connectors. Adapters met eigen code worden geweigerd.",
-    "Delete custom connector": "Eigen connector verwijderen",
     "Connector not found": "Adapter niet gevonden",
     "This connector is not (or no longer) in the catalog": "Deze connector staat niet (meer) in de catalogus",
     "Built-in connectors cannot be published": "Ingebouwde connectors kunnen niet gepubliceerd worden",
