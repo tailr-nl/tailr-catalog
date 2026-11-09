@@ -15,7 +15,7 @@
   <div class="card">
     <div class="card-head"><h2>Standaard</h2></div>
     <p id="summary" class="muted">Laden…</p>
-    <p class="hint">De standaard voor nieuwe AI-tools en de rollen die elke AI-tool mogen gebruiken, stel je in op het tabblad Instellingen. De keuze per client maak je hieronder; die geldt meteen.</p>
+    <p class="hint">De standaard voor nieuwe AI-tools en de rollen waarvoor de controle niet geldt, stel je in op het tabblad Instellingen. De keuze per client maak je hieronder; die geldt meteen.</p>
   </div>
 
   <div id="list"></div>
@@ -50,7 +50,7 @@
     async function load() {
       data = await call(`${base}/clients`);
       const standard = { allow: "Nieuwe AI-tools mogen verbinden.", approve: "Nieuwe AI-tools hebben eerst goedkeuring nodig.", block: "Alleen AI-tools die je hieronder toestaat, mogen verbinden." }[data.defaultAi];
-      const roles = data.exemptRoles === 0 ? "Geen rollen met een uitzondering." : data.exemptRoles === 1 ? "1 rol mag elke AI-tool gebruiken." : `${data.exemptRoles} rollen mogen elke AI-tool gebruiken.`;
+      const roles = data.exemptRoles === 0 ? "Geen rollen met een uitzondering." : data.exemptRoles === 1 ? "Voor 1 rol geldt de controle niet." : `Voor ${data.exemptRoles} rollen geldt de controle niet.`;
       document.getElementById("summary").textContent = `${standard} ${roles}`;
       const el = document.getElementById("list");
       if (!data.clients.length) {

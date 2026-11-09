@@ -8,10 +8,10 @@ Bepaal per OAuth-client (Claude, ChatGPT, Claude Code, een eigen app) of hij met
   - **goedkeuring nodig:** een nieuwe client wordt geweigerd tot je hem toestaat. Hij staat dan in **Te bevestigen** van Tailr Core (beheerders krijgen een mail): *Bevestigen* staat hem toe, *Afwijzen* blokkeert hem. Je kunt ook op het tabblad *AI-tools toestaan* van de pluginpagina kiezen; dan wordt het item ingetrokken.
   - De medewerker ziet het al op het **toestemmingsscherm** ("Deze AI-tool wacht op goedkeuring van je beheerder"), nog vóór hij op *Toestaan* klikt (guard `oauth.consent`).
 - **Eigen apps** (onder *Toegang → Apprechten*) mogen altijd, tenzij je ze blokkeert.
-- **Rollen die altijd mogen:** bijvoorbeeld voor ontwikkelaars.
+- **Rollen waarvoor de controle niet geldt:** bijvoorbeeld ontwikkelaars; zij mogen elke AI-tool verbinden. Hun rechten in de rechtenmatrix (*Toegang → Rechten*) blijven gewoon gelden.
 - **Overzicht:** wie welke client gebruikt, met het aantal geweigerde pogingen. Wachtende clients staan bovenaan.
 
-**Waar:** de standaard voor nieuwe AI-tools en de rollen die altijd mogen, staan op de pluginpagina, tabblad *Instellingen* (`/plugins/ai-clients`, via *Plugins → Geïnstalleerd* → *Beheren*). De kern controleert de waarden, vraagt de sudo-bevestiging en zet elke wijziging in het auditlog (sinds 1.5.0, `api.settings.define`, plugin-API 1.8). De keuze per client (*Standaard*, *Toestaan*, *Blokkeren*) maak je op het tabblad *AI-tools toestaan* van dezelfde pagina; die geldt meteen. Bij het bijwerken van 1.4.x gaan de oude instellingen eenmalig mee.
+**Waar:** de standaard voor nieuwe AI-tools en de rollen waarvoor de controle niet geldt, staan op de pluginpagina, tabblad *Instellingen* (`/plugins/ai-clients`, via *Plugins → Geïnstalleerd* → *Beheren*). De kern controleert de waarden, vraagt de sudo-bevestiging en zet elke wijziging in het auditlog (sinds 1.5.0, `api.settings.define`, plugin-API 1.8). De keuze per client (*Standaard*, *Toestaan*, *Blokkeren*) maak je op het tabblad *AI-tools toestaan* van dezelfde pagina; die geldt meteen. Bij het bijwerken van 1.4.x gaan de oude instellingen eenmalig mee.
 
 **Alleen het zakelijke account** (geen gratis ChatGPT die op je data traint):
 1. Voeg de connector toe in je Claude- of ChatGPT-organisatie, verbind één keer met je werkaccount, en zet die client op *Toestaan*.
