@@ -33,6 +33,19 @@ A connector uses local function names in `requires`; a plugin or translation use
 
 See the matching JSON schema in `schemas/` and the core documentation `docs/presentation.md`. The installed core must support `presentation` to display it; older cores ignore the optional metadata.
 
+## Variants (`variantOf`): generate, do not edit
+
+Some connectors offer a second way to sign in to the same system, such as Google Analytics with your own Google account next to a service account. The variant must have exactly the same functions as the main connector. Do not edit it by hand: generate it with `scripts/make-variants.mjs`.
+
+- **Change the main connector only**, for example `connectors/google-analytics/`. Then run `node scripts/make-variants.mjs google-analytics` (or without an id for all connectors).
+- **What the script copies:** everything from the main connector, including `tools`, `scripts`, `presentation`, `limits` and the version, plus `context.md` and `tools/` for a folder connector.
+- **What it replaces,** from a small configuration block per connector at the top of the script: `id`, `name`, `variantOf`, `variantTitle`, `description` (the main description plus a sentence), the sign-in settings in `vars`, `setup`, `hosts`, `auth`, and a few sentences in the texts of functions (such as "het serviceaccount"). A sentence that is no longer in the main connector stops the script, so a changed text is never silently left behind.
+- **A folder connector gets a folder variant** (`connectors/<id>-signin/`), because a single JSON file cannot refer to `tools/*.ts`. The variant gets its own short `README.md` from the configuration.
+- **The script updates `connectors/index.json`** with the path and version of the variant.
+- **Check** that nothing is stale with `node scripts/make-variants.mjs --check`, and run `tailr check` on the main connector and on the variant.
+
+To add a variant for another connector, add an entry to `VARIANTS` in the script.
+
 ## Language and presentation
 
 Use English source text and provide Dutch in the same `{ "en": "…", "nl": "…" }` structure for connector descriptions and settings labels (`vars[].label` and `description`). Mark unfinished connectors with `maturity: "beta"`; keep test notes and fixed function counts out of their descriptions. This metadata needs a core that supports localized connector settings: release the matching core change before this catalog update.
