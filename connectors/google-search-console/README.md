@@ -4,7 +4,7 @@ Zoekprestaties, sitemaps en URL-inspectie uit Google Search Console. **Alleen le
 
 Gebaseerd op de openbare Search Console API van Google (v3 voor sites, sitemaps en zoekprestaties; v1 voor URL-inspectie); alle beschrijvingen zijn eigen tekst.
 
-Er is een variant [Google Search Console (sign in)](../google-search-console-signin/connector.json) met dezelfde functies, waarbij je inlogt met je eigen Google-account in plaats van een serviceaccount.
+Er is een variant [Google Search Console (sign in)](../google-search-console-signin/README.md) met dezelfde functies, waarbij je inlogt met je eigen Google-account in plaats van een serviceaccount. Die map wordt gegenereerd met `node scripts/make-variants.mjs google-search-console`; wijzig alleen deze hoofdconnector.
 
 ## Instellen
 
@@ -32,7 +32,8 @@ Alle functies hebben niveau `read`.
 
 ## Limieten
 
-- Zoekprestaties: Google noemt 1.200 verzoeken per minuut per site; de connector houdt 600 per minuut aan en bewaart antwoorden 10 minuten (sites en sitemaps een uur).
+- Zoekprestaties: Google noemt 1.200 verzoeken per minuut per site en per gebruiker (en 40.000 per minuut per Google Cloud-project); de connector houdt 600 per minuut aan en bewaart antwoorden 10 minuten (sites en sitemaps een uur).
+- Google laat lege lijsten weg: `list_sites` en `list_sitemaps` geven dan een leeg object `{}` terug. De `description` en `context.md` zeggen dat dat "er zijn er geen" betekent.
 - **URL-inspectie heeft een eigen quotum: 2.000 inspecties per dag en 600 per minuut per property.** Tailr Core bewaart een inspectie een uur, maar elke nieuwe URL telt. De uitleg voor de AI (`context.md`) zegt daarom: inspecteer alleen wat de gebruiker noemt, nooit een hele sitemap. Een losse limiet per functie kent het connectorformaat niet; wil je het harder begrenzen, zet de functie dan voor rollen die het niet nodig hebben uit.
 - Zoekprestaties lopen 2 tot 3 dagen achter. Met `dataState: all` komen de verse dagen mee, die nog kunnen veranderen.
 
@@ -47,4 +48,4 @@ Search Console bevat geen persoonsgegevens: zoektermen, pagina's, landen en appa
 
 ## Een functie toevoegen
 
-De Search Console API staat beschreven in Googles discovery-document (`https://searchconsole.googleapis.com/$discovery/rest?version=v1`). Neem daaruit alleen de feiten over (pad, methode, parameters, veldnamen, toegestane waarden) en schrijf `title`, `summary` en `description` zelf, zoals de andere functies. Schrijffuncties (sitemap indienen of verwijderen) vragen de ruimere scope `webmasters` en een hogere rol voor het serviceaccount; die horen in een aparte stap, niet tussen de leesfuncties. Verhoog `version` in `connector.json` en `connectors/index.json`, werk de variant bij en draai `tailr check` op beide: zonder waarschuwingen.
+De Search Console API staat beschreven in Googles discovery-document (`https://searchconsole.googleapis.com/$discovery/rest?version=v1`). Neem daaruit alleen de feiten over (pad, methode, parameters, veldnamen, toegestane waarden) en schrijf `title`, `summary` en `description` zelf, zoals de andere functies. Schrijffuncties (sitemap indienen of verwijderen) vragen de ruimere scope `webmasters` en een hogere rol voor het serviceaccount; die horen in een aparte stap, niet tussen de leesfuncties. Verhoog `version` in `connector.json` en `connectors/index.json`, maak de variant opnieuw met `node scripts/make-variants.mjs google-search-console` (zie `CONTRIBUTING.md`) en draai `tailr check` op beide: zonder waarschuwingen.

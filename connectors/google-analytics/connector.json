@@ -65,14 +65,14 @@
       }
     ],
     "whatsNew": {
-      "en": "Google's alpha APIs: funnel reports with drop-off per step, annotations that explain peaks and dips, audiences, channel groups, calculated metrics, attribution settings, enhanced measurement, event rules and the quota status.",
-      "nl": "De alpha-API’s van Google: trechterrapporten met afhakers per stap, annotaties die pieken en dalen verklaren, doelgroepen, kanaalgroepen, berekende metrics, attributie-instellingen, verbeterde meting, gebeurtenisregels en de quotastand."
+      "en": "More than reports: realtime visitors, pivot tables, several reports in one call and a search through all dimensions and metrics; the setup of the property from the Admin API, such as key events, custom dimensions and data streams; and Google's alpha APIs with funnel reports, annotations that explain peaks and dips, audiences, channel groups and the quota status.",
+      "nl": "Meer dan rapporten: realtime bezoekers, draaitabellen, meerdere rapporten in één aanroep en zoeken in alle dimensies en metrics; de inrichting van de property uit de Admin API, zoals key events, eigen dimensies en gegevensstromen; en de alpha-API’s van Google met trechterrapporten, annotaties die pieken en dalen verklaren, doelgroepen, kanaalgroepen en de quotastand."
     }
   },
   "$schema": "../../schemas/connector.json",
   "id": "google-analytics",
   "name": "Google Analytics 4",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": {
     "en": "Reports from Google Analytics 4: visitors, sessions, sources, pages, key events and revenue over any period, realtime visitors, pivot tables, a search through all dimensions and metrics, the setup of the property: key events, custom dimensions, data streams and data retention, and Google's alpha APIs: funnels, annotations, audiences, channel groups and quota.",
     "nl": "Rapporten uit Google Analytics 4: bezoekers, sessies, bronnen, pagina’s, key events en omzet over elke periode, realtime bezoekers, draaitabellen, zoeken in alle dimensies en metrics, de inrichting van de property: key events, eigen dimensies, gegevensstromen en bewaartermijn, en de alpha-API’s van Google: trechters, annotaties, doelgroepen, kanaalgroepen en quota."
@@ -145,7 +145,7 @@
   "limits": {
     "concurrency": 5,
     "cacheTtlSeconds": 300,
-    "note": "GA4 Data API (standaard property): 200.000 tokens per dag en 40.000 per uur per property, hoogstens 10 gelijktijdige verzoeken; een gewoon rapport kost 1 tot 10 tokens. Realtime en trechterrapporten (alpha) hebben elk een eigen, los potje; get_quota (alpha) toont de stand van alle drie. De Admin API (inrichting van de property en het toegangsrapport) heeft een eigen quotum, los van de rapporten. Bron: developers.google.com/analytics/devguides/reporting/data/v1/quotas"
+    "note": "GA4 Data API (standaard property): 200.000 tokens per dag en 40.000 per uur per property (14.000 per uur per project), hoogstens 10 gelijktijdige verzoeken; een gewoon rapport kost 1 tot 10 tokens. Realtime en trechterrapporten (alpha) hebben elk een eigen, even groot potje; het toegangsrapport telt mee met de gewone rapporten; get_quota (alpha) toont de stand van alle drie. De Admin API (inrichting van de property) heeft een eigen quotum: 1.200 verzoeken per minuut per project en 600 per minuut per gebruiker. Bron: developers.google.com/analytics/devguides/reporting/data/v1/quotas en developers.google.com/analytics/devguides/config/admin/v1/quotas"
   },
   "type": "rest",
   "baseUrl": "https://analyticsdata.googleapis.com/v1beta",
@@ -175,7 +175,7 @@
         "nl": "Laat zien welke Google Analytics-accounts en properties het serviceaccount kan zien, met hun id.",
         "en": "Shows which Google Analytics accounts and properties the service account can see, with their id."
       },
-      "description": "Alle GA4-accounts en properties waar het serviceaccount toegang toe heeft, met property-id.",
+      "description": "Alle GA4-accounts en properties waar het serviceaccount toegang toe heeft, met property-id. Een leeg antwoord {} betekent: er zijn er geen. Het account is dan nergens als gebruiker toegevoegd.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1beta/accountSummaries",
       "params": {},
@@ -235,7 +235,7 @@
         "nl": "Welke websites en apps in deze property meten, met hun measurement-id (G-…).",
         "en": "Which websites and apps send data to this property, with their measurement ID (G-…)."
       },
-      "description": "Alle gegevensstromen van de property: per stroom name (properties/<property>/dataStreams/<nummer>), displayName, type (WEB_DATA_STREAM, ANDROID_APP_DATA_STREAM of IOS_APP_DATA_STREAM), createTime en updateTime; bij een webstroom webStreamData met measurementId (G-…) en defaultUri (de gemeten website), bij apps androidAppStreamData.packageName of iosAppStreamData.bundleId. Zo weet je welke websites en apps de cijfers leveren. Standaard 50 per pagina; nextPageToken in het antwoord geeft de volgende pagina.",
+      "description": "Alle gegevensstromen van de property: per stroom name (properties/<property>/dataStreams/<nummer>), displayName, type (WEB_DATA_STREAM, ANDROID_APP_DATA_STREAM of IOS_APP_DATA_STREAM), createTime en updateTime; bij een webstroom webStreamData met measurementId (G-…) en defaultUri (de gemeten website), bij apps androidAppStreamData.packageName of iosAppStreamData.bundleId. Zo weet je welke websites en apps de cijfers leveren. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken in het antwoord geeft de volgende pagina.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/dataStreams",
       "cacheTtlSeconds": 3600,
@@ -294,7 +294,7 @@
         "nl": "Welke gebeurtenissen in deze property als key event (conversie) tellen, en hoe ze worden geteld.",
         "en": "Which events count as key events (conversions) in this property, and how they are counted."
       },
-      "description": "De key events van de property (de opvolger van conversies): per key event eventName (bijv. purchase, generate_lead), countingMethod (ONCE_PER_EVENT: elke keer telt; ONCE_PER_SESSION: hoogstens één per sessie), custom (true bij een zelf aangemaakte gebeurtenis), deletable, createTime en eventueel defaultValue {numericValue, currencyCode}. Vraag dit op voordat je de metric keyEvents duidt: die telt alle key events bij elkaar op. Eén key event apart rapporteer je met de metric keyEvents:<eventName>, of met eventName als dimensie en de metric eventCount. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "De key events van de property (de opvolger van conversies): per key event eventName (bijv. purchase, generate_lead), countingMethod (ONCE_PER_EVENT: elke keer telt; ONCE_PER_SESSION: hoogstens één per sessie), custom (true bij een zelf aangemaakte gebeurtenis), deletable, createTime en eventueel defaultValue {numericValue, currencyCode}. Vraag dit op voordat je de metric keyEvents duidt: die telt alle key events bij elkaar op. Eén key event apart rapporteer je met de metric keyEvents:<eventName>, of met eventName als dimensie en de metric eventCount. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/keyEvents",
       "cacheTtlSeconds": 3600,
@@ -326,7 +326,7 @@
         "nl": "De zelf gedefinieerde dimensies van de property, met de naam die je in een rapport gebruikt.",
         "en": "The property's own custom dimensions, with the name to use in a report."
       },
-      "description": "Eigen (custom) dimensies van de property: per dimensie displayName, parameterName, scope (EVENT, USER of ITEM), description en disallowAdsPersonalization. In een rapport heet een EVENT-dimensie customEvent:<parameterName>, een USER-dimensie customUser:<parameterName> en een ITEM-dimensie customItem:<parameterName>. Vraag dit op als iemand naar iets eigens vraagt (auteur, categorie, klanttype, inlogstatus) en gok geen namen; find_dimensions_metrics zoekt op een woord in alle dimensies en metrics tegelijk. Een eigen dimensie kan iets persoonlijks bevatten, zoals een klant-id: vraag die niet per persoon op. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Eigen (custom) dimensies van de property: per dimensie displayName, parameterName, scope (EVENT, USER of ITEM), description en disallowAdsPersonalization. In een rapport heet een EVENT-dimensie customEvent:<parameterName>, een USER-dimensie customUser:<parameterName> en een ITEM-dimensie customItem:<parameterName>. Vraag dit op als iemand naar iets eigens vraagt (auteur, categorie, klanttype, inlogstatus) en gok geen namen; find_dimensions_metrics zoekt op een woord in alle dimensies en metrics tegelijk. Een eigen dimensie kan iets persoonlijks bevatten, zoals een klant-id: vraag die niet per persoon op. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/customDimensions",
       "cacheTtlSeconds": 3600,
@@ -358,7 +358,7 @@
         "nl": "De zelf gedefinieerde metrics van de property, met eenheid en de naam voor een rapport.",
         "en": "The property's own custom metrics, with unit and the name to use in a report."
       },
-      "description": "Eigen (custom) metrics van de property: per metric displayName, parameterName, scope (EVENT), measurementUnit (STANDARD, CURRENCY, SECONDS, MILLISECONDS, MINUTES, HOURS, METERS, KILOMETERS, FEET of MILES), description en restrictedMetricType (COST_DATA of REVENUE_DATA als de metric kosten of omzet bevat). In een rapport heet zo'n metric customEvent:<parameterName>; een CURRENCY-metric volgt de valuta van de property (get_property). Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Eigen (custom) metrics van de property: per metric displayName, parameterName, scope (EVENT), measurementUnit (STANDARD, CURRENCY, SECONDS, MILLISECONDS, MINUTES, HOURS, METERS, KILOMETERS, FEET of MILES), description en restrictedMetricType (COST_DATA of REVENUE_DATA als de metric kosten of omzet bevat). In een rapport heet zo'n metric customEvent:<parameterName>; een CURRENCY-metric volgt de valuta van de property (get_property). Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/customMetrics",
       "cacheTtlSeconds": 3600,
@@ -390,7 +390,7 @@
         "nl": "Welke Google Ads-accounts aan deze property zijn gekoppeld, zodat je weet of advertentiecijfers gevuld zijn.",
         "en": "Which Google Ads accounts are linked to this property, so you know whether advertising figures are populated."
       },
-      "description": "Koppelingen tussen de property en Google Ads: per koppeling customerId (het klantnummer in Google Ads), canManageClients (true bij een managementaccount), adsPersonalizationEnabled, createTime en updateTime. Zonder koppeling blijven de googleAds*-metrics (kosten, klikken, vertoningen) in rapporten leeg. Het e-mailadres van wie de koppeling maakte wordt weggelaten. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Koppelingen tussen de property en Google Ads: per koppeling customerId (het klantnummer in Google Ads), canManageClients (true bij een managementaccount), adsPersonalizationEnabled, createTime en updateTime. Zonder koppeling blijven de googleAds*-metrics (kosten, klikken, vertoningen) in rapporten leeg. Het e-mailadres van wie de koppeling maakte wordt weggelaten. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/googleAdsLinks",
       "cacheTtlSeconds": 3600,
@@ -425,7 +425,7 @@
         "nl": "Of deze property aan een Firebase-project is gekoppeld, wat bij het meten van apps hoort.",
         "en": "Whether this property is linked to a Firebase project, which belongs with measuring apps."
       },
-      "description": "De Firebase-koppeling van de property (hoogstens één): project (het Firebase-project, projects/<nummer>) en createTime. Een lege lijst betekent: geen Firebase, dus geen appmetingen via Firebase.",
+      "description": "De Firebase-koppeling van de property (hoogstens één): project (het Firebase-project, projects/<nummer>) en createTime. Een leeg antwoord {} betekent: er is geen Firebase-koppeling, dus geen appmetingen via Firebase.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}/firebaseLinks",
       "cacheTtlSeconds": 3600,
@@ -1217,7 +1217,7 @@
         "nl": "Welke doelgroepen in deze property zijn gedefinieerd en op welke voorwaarden, zonder de leden (alpha-API van Google).",
         "en": "Which audiences are defined in this property and on what conditions, without the members (Google alpha API)."
       },
-      "description": "Alpha-API van Google: kan veranderen. De doelgroepen (audiences) van de property: alleen de definities, niet wie erin zit. Per doelgroep name (properties/<property>/audiences/<nummer>), displayName, description, membershipDurationDays (hoe lang iemand lid blijft, hoogstens 540), filterClauses (de voorwaarden: clauseType INCLUDE of EXCLUDE met een simpleFilter of een sequenceFilter voor een volgorde van gebeurtenissen), exclusionDurationMode (EXCLUDE_TEMPORARILY of EXCLUDE_PERMANENTLY), adsPersonalizationEnabled, eventTrigger {eventName, logCondition} als het lidmaatschap een gebeurtenis logt, en createTime. Google maakt zelf \"All Users\" en \"Purchasers\" aan. In een rapport gebruik je de displayName als waarde van de dimensie audienceName (run_report_flat en run_realtime_report), bijvoorbeeld met metric activeUsers per doelgroep. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Alpha-API van Google: kan veranderen. De doelgroepen (audiences) van de property: alleen de definities, niet wie erin zit. Per doelgroep name (properties/<property>/audiences/<nummer>), displayName, description, membershipDurationDays (hoe lang iemand lid blijft, hoogstens 540), filterClauses (de voorwaarden: clauseType INCLUDE of EXCLUDE met een simpleFilter of een sequenceFilter voor een volgorde van gebeurtenissen), exclusionDurationMode (EXCLUDE_TEMPORARILY of EXCLUDE_PERMANENTLY), adsPersonalizationEnabled, eventTrigger {eventName, logCondition} als het lidmaatschap een gebeurtenis logt, en createTime. Google maakt zelf \"All Users\" en \"Purchasers\" aan. In een rapport gebruik je de displayName als waarde van de dimensie audienceName (run_report_flat en run_realtime_report), bijvoorbeeld met metric activeUsers per doelgroep. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1alpha/properties/{property}/audiences",
       "cacheTtlSeconds": 3600,
@@ -1249,7 +1249,7 @@
         "nl": "De kanaalgroepen van de property: de standaardgroep van Google en eigen indelingen van verkeersbronnen in kanalen (alpha-API van Google).",
         "en": "The property's channel groups: Google's default group and the organisation's own groupings of traffic sources into channels (Google alpha API)."
       },
-      "description": "Alpha-API van Google: kan veranderen. Kanaalgroepen van de property: per groep name (properties/<property>/channelGroups/<nummer>), displayName, description, systemDefined (true bij de Default Channel Group van Google), primary (true bij de groep die de standaardrapporten in GA gebruiken) en groupingRule: de kanalen in volgorde, elk {displayName, expression} waarbij expression een filter op bron, medium of campagne is (de eerste regel die past wint). In rapporten: sessionDefaultChannelGroup is Googles standaardindeling, sessionPrimaryChannelGroup de groep met primary true, en een eigen groep heet sessionCustomChannelGroup:<nummer> of firstUserCustomChannelGroup:<nummer> met het nummer uit name. Gebruik dit als cijfers per kanaal afwijken van wat iemand in GA ziet: de organisatie kan een eigen indeling gebruiken. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Alpha-API van Google: kan veranderen. Kanaalgroepen van de property: per groep name (properties/<property>/channelGroups/<nummer>), displayName, description, systemDefined (true bij de Default Channel Group van Google), primary (true bij de groep die de standaardrapporten in GA gebruiken) en groupingRule: de kanalen in volgorde, elk {displayName, expression} waarbij expression een filter op bron, medium of campagne is (de eerste regel die past wint). In rapporten: sessionDefaultChannelGroup is Googles standaardindeling, sessionPrimaryChannelGroup de groep met primary true, en een eigen groep heet sessionCustomChannelGroup:<nummer> of firstUserCustomChannelGroup:<nummer> met het nummer uit name. Gebruik dit als cijfers per kanaal afwijken van wat iemand in GA ziet: de organisatie kan een eigen indeling gebruiken. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1alpha/properties/{property}/channelGroups",
       "cacheTtlSeconds": 3600,
@@ -1281,7 +1281,7 @@
         "nl": "De zelf gedefinieerde berekende metrics van de property, met formule en de naam voor een rapport (alpha-API van Google).",
         "en": "The property's own calculated metrics, with formula and the name to use in a report (Google alpha API)."
       },
-      "description": "Alpha-API van Google: kan veranderen. Berekende metrics die de organisatie zelf heeft gedefinieerd als formule over bestaande metrics: per metric name, calculatedMetricId (de API-naam), displayName, description, formula (bijv. {totalRevenue}/{sessions}), metricUnit (STANDARD, CURRENCY, SECONDS, MILLISECONDS, MINUTES, HOURS, METERS, KILOMETERS, FEET of MILES), restrictedMetricType (COST_DATA of REVENUE_DATA als de metric kosten of omzet bevat) en invalidMetricReference (true: de formule verwijst naar een metric die niet meer bestaat; de waarde is dan onbetrouwbaar). In een rapport heet zo'n metric calcMetric:<calculatedMetricId>; find_dimensions_metrics vindt dezelfde namen op een zoekwoord. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Alpha-API van Google: kan veranderen. Berekende metrics die de organisatie zelf heeft gedefinieerd als formule over bestaande metrics: per metric name, calculatedMetricId (de API-naam), displayName, description, formula (bijv. {totalRevenue}/{sessions}), metricUnit (STANDARD, CURRENCY, SECONDS, MILLISECONDS, MINUTES, HOURS, METERS, KILOMETERS, FEET of MILES), restrictedMetricType (COST_DATA of REVENUE_DATA als de metric kosten of omzet bevat) en invalidMetricReference (true: de formule verwijst naar een metric die niet meer bestaat; de waarde is dan onbetrouwbaar). In een rapport heet zo'n metric calcMetric:<calculatedMetricId>; find_dimensions_metrics vindt dezelfde namen op een zoekwoord. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1alpha/properties/{property}/calculatedMetrics",
       "cacheTtlSeconds": 3600,
@@ -1313,7 +1313,7 @@
         "nl": "Notities op de tijdlijn van de property, zoals een campagnestart of een nieuwe website, die pieken en dalen in rapporten verklaren (alpha-API van Google).",
         "en": "Notes on the property's timeline, such as a campaign launch or a new website, that explain peaks and dips in reports (Google alpha API)."
       },
-      "description": "Alpha-API van Google: kan veranderen. Annotaties die collega's of Google op de tijdlijn van de property hebben gezet: per annotatie name, title, description, color (PURPLE, BROWN, BLUE, GREEN, RED, CYAN of ORANGE), systemGenerated (true: door Google gemaakt, bijvoorbeeld bij een wijziging in de meting) en de datum: annotationDate {year, month, day} voor één dag of annotationDateRange {startDate, endDate} voor een periode. Vraag dit op als een rapport een opvallende piek of dal laat zien, en noem de annotatie die in die periode valt als mogelijke verklaring. Beperk met filter, bijv. is_annotation_in_range(\"2026-10-01\", \"2026-10-31\") = true voor alles wat in oktober valt of title:\"campagne\" voor een woord in de titel; combineren met AND en OR. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Alpha-API van Google: kan veranderen. Annotaties die collega's of Google op de tijdlijn van de property hebben gezet: per annotatie name, title, description, color (PURPLE, BROWN, BLUE, GREEN, RED, CYAN of ORANGE), systemGenerated (true: door Google gemaakt, bijvoorbeeld bij een wijziging in de meting) en de datum: annotationDate {year, month, day} voor één dag of annotationDateRange {startDate, endDate} voor een periode. Vraag dit op als een rapport een opvallende piek of dal laat zien, en noem de annotatie die in die periode valt als mogelijke verklaring. Beperk met filter, bijv. is_annotation_in_range(\"2026-10-01\", \"2026-10-31\") = true voor alles wat in oktober valt of title:\"campagne\" voor een woord in de titel; combineren met AND en OR. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1alpha/properties/{property}/reportingDataAnnotations",
       "cacheTtlSeconds": 3600,
@@ -1350,7 +1350,7 @@
         "nl": "Of de ruwe gegevens van deze property naar BigQuery worden geëxporteerd, naar welk project en hoe vaak (alpha-API van Google).",
         "en": "Whether this property's raw data is exported to BigQuery, to which project and how often (Google alpha API)."
       },
-      "description": "Alpha-API van Google: kan veranderen. Koppelingen van de property met BigQuery: per koppeling name, project (het Google Cloud-project, projects/<nummer>), datasetLocation (bijv. EU of US), dailyExportEnabled (dagelijkse export), streamingExportEnabled (vrijwel direct), freshDailyExportEnabled, exportStreams (welke gegevensstromen meegaan, properties/<property>/dataStreams/<nummer>), excludedEvents (gebeurtenissen die niet meegaan), includeAdvertisingId en createTime. Een lege lijst betekent: geen export, dus de ruwe gebeurtenisgegevens zijn alleen via deze rapporten te bevragen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Alpha-API van Google: kan veranderen. Koppelingen van de property met BigQuery: per koppeling name, project (het Google Cloud-project, projects/<nummer>), datasetLocation (bijv. EU of US), dailyExportEnabled (dagelijkse export), streamingExportEnabled (vrijwel direct), freshDailyExportEnabled, exportStreams (welke gegevensstromen meegaan, properties/<property>/dataStreams/<nummer>), excludedEvents (gebeurtenissen die niet meegaan), includeAdvertisingId en createTime. Een leeg antwoord {} betekent: er is geen export, dus de ruwe gebeurtenisgegevens zijn alleen via deze rapporten te bevragen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1alpha/properties/{property}/bigQueryLinks",
       "cacheTtlSeconds": 3600,
@@ -1431,7 +1431,7 @@
         "nl": "Regels in een gegevensstroom die uit een bestaande gebeurtenis een nieuwe maken, bijvoorbeeld een key event voor één pagina (alpha-API van Google).",
         "en": "Rules in a data stream that create a new event from an existing one, for example a key event for one page (Google alpha API)."
       },
-      "description": "Alpha-API van Google: kan veranderen. Regels van één gegevensstroom die een nieuwe gebeurtenis aanmaken zodra een bestaande aan voorwaarden voldoet: per regel name, destinationEvent (de naam van de nieuwe gebeurtenis), eventConditions (voorwaarden op de brongebeurtenis, elk {field, comparisonType, value, negated}; field event_name is de naam van de brongebeurtenis, andere velden zijn parameters zoals page_location; comparisonType bijv. EQUALS, CONTAINS, STARTS_WITH, REGULAR_EXPRESSION, met _CASE_INSENSITIVE-varianten), sourceCopyParameters (true: de parameters van de bron gaan mee) en parameterMutations (parameters die de nieuwe gebeurtenis krijgt, {parameter, parameterValue}). Verklaart waar een gebeurtenis vandaan komt die niet in de code van de website staat, bijvoorbeeld een key event dat op één pagina afgaat. Het nummer van de stroom staat in list_data_streams. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Alpha-API van Google: kan veranderen. Regels van één gegevensstroom die een nieuwe gebeurtenis aanmaken zodra een bestaande aan voorwaarden voldoet: per regel name, destinationEvent (de naam van de nieuwe gebeurtenis), eventConditions (voorwaarden op de brongebeurtenis, elk {field, comparisonType, value, negated}; field event_name is de naam van de brongebeurtenis, andere velden zijn parameters zoals page_location; comparisonType bijv. EQUALS, CONTAINS, STARTS_WITH, REGULAR_EXPRESSION, met _CASE_INSENSITIVE-varianten), sourceCopyParameters (true: de parameters van de bron gaan mee) en parameterMutations (parameters die de nieuwe gebeurtenis krijgt, {parameter, parameterValue}). Verklaart waar een gebeurtenis vandaan komt die niet in de code van de website staat, bijvoorbeeld een key event dat op één pagina afgaat. Het nummer van de stroom staat in list_data_streams. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1alpha/properties/{property}/dataStreams/{stream}/eventCreateRules",
       "cacheTtlSeconds": 3600,
@@ -1468,7 +1468,7 @@
         "nl": "Regels in een gegevensstroom die binnenkomende gebeurtenissen hernoemen of parameters veranderen voordat ze in rapporten komen (alpha-API van Google).",
         "en": "Rules in a data stream that rename incoming events or change their parameters before they reach reports (Google alpha API)."
       },
-      "description": "Alpha-API van Google: kan veranderen. Regels van één gegevensstroom die een binnenkomende gebeurtenis aanpassen: per regel name, displayName, processingOrder (de volgorde waarin regels worden toegepast; een lagere waarde gaat voor), eventConditions (voorwaarden op de gebeurtenis, elk {field, comparisonType, value, negated}; field event_name is de naam) en parameterMutations (wat verandert, {parameter, parameterValue}; parameter event_name hernoemt de gebeurtenis). Verklaart waarom een gebeurtenis in rapporten anders heet dan in de code van de website, of waarom een parameter een andere waarde heeft. Het nummer van de stroom staat in list_data_streams. Standaard 50 per pagina; nextPageToken geeft de volgende.",
+      "description": "Alpha-API van Google: kan veranderen. Regels van één gegevensstroom die een binnenkomende gebeurtenis aanpassen: per regel name, displayName, processingOrder (de volgorde waarin regels worden toegepast; een lagere waarde gaat voor), eventConditions (voorwaarden op de gebeurtenis, elk {field, comparisonType, value, negated}; field event_name is de naam) en parameterMutations (wat verandert, {parameter, parameterValue}; parameter event_name hernoemt de gebeurtenis). Verklaart waarom een gebeurtenis in rapporten anders heet dan in de code van de website, of waarom een parameter een andere waarde heeft. Het nummer van de stroom staat in list_data_streams. Een leeg antwoord {} betekent: er zijn er geen. Standaard 50 per pagina; nextPageToken geeft de volgende.",
       "level": "read",
       "path": "https://analyticsadmin.googleapis.com/v1alpha/properties/{property}/dataStreams/{stream}/eventEditRules",
       "cacheTtlSeconds": 3600,

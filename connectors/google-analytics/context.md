@@ -22,8 +22,9 @@ Lezen van het antwoord:
 - Totalen: vraag metricAggregations ["TOTAL"]; tel gebruikers niet zelf op over rijen (één gebruiker kan op meerdere dagen of pagina's voorkomen).
 - metadata.dataLossFromOtherRow = true: een deel zit in een rij "(other)". metadata.subjectToThresholding = true: Google laat kleine aantallen weg om bezoekers niet herkenbaar te maken. Noem dat bij je antwoord.
 - "(not set)" is een gewone waarde: Google kende de bron, pagina of campagne niet.
+- Google laat lege lijsten weg: een lijstfunctie (list_…) geeft dan een leeg object {} terug. Dat betekent: er zijn er geen; het is geen fout.
 
-Quota: een standaard property heeft 200.000 tokens per dag en 40.000 per uur; een gewoon rapport kost meestal 1 tot 10 tokens, grote rapporten (lange periode, veel dimensies) meer. Realtime heeft een eigen potje. Met returnPropertyQuota: true zie je de stand. Krijg je een quotafout, wacht dan en vraag kleiner (kortere periode, minder dimensies, lagere limit).
+Quota: een standaard property heeft 200.000 tokens per dag en 40.000 per uur; een gewoon rapport kost meestal 1 tot 10 tokens, grote rapporten (lange periode, veel dimensies) meer. Realtime en trechters hebben elk een eigen potje; het toegangsrapport telt mee met de gewone rapporten, en de inrichtingsfuncties (Admin API) hebben een eigen limiet per minuut. Met returnPropertyQuota: true zie je de stand. Krijg je een quotafout, wacht dan en vraag kleiner (kortere periode, minder dimensies, lagere limit).
 
 Inrichting van de property (Admin API):
 - Vraag list_key_events op voordat je de metric keyEvents duidt: die telt alle key events bij elkaar, en welke gebeurtenissen dat zijn (en of ze per gebeurtenis of per sessie tellen) verschilt per property. Eén key event apart: metric keyEvents:<eventName>.
