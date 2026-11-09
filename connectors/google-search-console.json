@@ -34,7 +34,7 @@
   "$schema": "../schemas/connector.json",
   "id": "google-search-console",
   "name": "Google Search Console",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": {
     "en": "Search performance from Google Search Console: clicks, impressions, click-through rate and position by query or page.",
     "nl": "Zoekprestaties uit Google Search Console: klikken, vertoningen, doorklikratio en positie per zoekopdracht of pagina."
@@ -192,6 +192,5 @@
         }
       }
     }
-  ],
-  "maturity": "beta"
+  ]
 }

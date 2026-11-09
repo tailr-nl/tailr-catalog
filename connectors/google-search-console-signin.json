@@ -34,7 +34,7 @@
   "$schema": "../schemas/connector.json",
   "id": "google-search-console-signin",
   "name": "Google Search Console (sign in)",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "variantOf": "google-search-console",
   "variantTitle": {
     "en": "Sign in with your own Google account",
@@ -212,6 +212,5 @@
         }
       }
     }
-  ],
-  "maturity": "beta"
+  ]
 }

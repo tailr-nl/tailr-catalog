@@ -34,7 +34,7 @@
   "$schema": "../schemas/connector.json",
   "id": "google-analytics",
   "name": "Google Analytics 4",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": {
     "en": "Reports from Google Analytics 4: visitors, sessions, sources, pages and conversions.",
     "nl": "Rapporten uit Google Analytics 4: bezoekers, sessies, bronnen, pagina’s en conversies."
@@ -197,6 +197,5 @@
         }
       }
     }
-  ],
-  "maturity": "beta"
+  ]
 }
