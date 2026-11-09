@@ -39,7 +39,7 @@ Alle functies hebben niveau `read`.
 ## Wat de code mag (manifest)
 
 - **Hosts:** `www.googleapis.com` (sites, sitemaps, zoekprestaties), `searchconsole.googleapis.com` (URL-inspectie) en `oauth2.googleapis.com` (token).
-- **Code-functie `search_analytics_all`:** alleen `POST /sites/*/searchAnalytics/query`, hoogstens 12 aanroepen per run (10 pagina's van 25.000 rijen is het harde plafond van 250.000), 120 seconden. De code ziet de sleutel niet: Tailr Core voegt de login toe.
+- **Code-functie `search_analytics_all`:** geen eigen verzoeken naar Google; hij roept alleen de functie `search_analytics` aan (`uses`), zodat hij een leesfunctie blijft en de cache en limieten van `search_analytics` gelden. Hoogstens 12 aanroepen per run (10 pagina's van 25.000 rijen is het harde plafond van 250.000), 120 seconden. De code ziet de sleutel niet: Tailr Core voegt de login toe.
 
 ## Persoonsgegevens
 

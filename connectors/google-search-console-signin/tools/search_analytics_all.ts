@@ -5,6 +5,10 @@
  * vraagt pagina's van 25.000 op met een oplopende startRow tot Google minder dan
  * een volle pagina teruggeeft (einde) of het plafond maxRows is bereikt.
  * complete = false als het plafond eerder kwam dan het einde.
+ *
+ * Gaat via ctx.call("search_analytics") en niet via ctx.request: een POST in
+ * "requests" zou de functie voor Tailr Core een schrijffunctie maken. Zo blijft
+ * hij een leesfunctie en gelden de cache en limieten van search_analytics.
  */
 
 const PAGE = 25_000;
@@ -68,7 +72,6 @@ export default async function searchAnalyticsAll(args: Args, ctx: any) {
     maxRows = Math.min(n, HARD_MAX);
   }
 
-  const path = `/sites/${encodeURIComponent(site)}/searchAnalytics/query`;
   const rows: Row[] = [];
   let pages = 0;
   let complete = false;
@@ -78,16 +81,17 @@ export default async function searchAnalyticsAll(args: Args, ctx: any) {
 
   while (rows.length < maxRows) {
     const rowLimit = Math.min(PAGE, maxRows - rows.length);
-    const body: Record<string, unknown> = { startDate, endDate, rowLimit, startRow };
-    if (dimensions) body.dimensions = dimensions;
-    if (args.dimensionFilterGroups) body.dimensionFilterGroups = args.dimensionFilterGroups;
-    if (type) body.type = type;
-    if (dataState) body.dataState = dataState;
-    if (aggregationType) body.aggregationType = aggregationType;
+    const call: Record<string, unknown> = { site, startDate, endDate, rowLimit, startRow };
+    if (dimensions) call.dimensions = dimensions;
+    if (args.dimensionFilterGroups) call.dimensionFilterGroups = args.dimensionFilterGroups;
+    if (type) call.type = type;
+    if (dataState) call.dataState = dataState;
+    if (aggregationType) call.aggregationType = aggregationType;
 
-    const res = await ctx.request({ method: "POST", path, body });
+    const res = await ctx.call("search_analytics", call);
     pages++;
-    const data = res.data ?? {};
+    // ctx.call geeft de data van de functie; wees tolerant voor een omhulsel { data }.
+    const data = res && typeof res === "object" && !("rows" in res) && res.data && typeof res.data === "object" ? res.data : res ?? {};
     const page: unknown = data.rows;
     if (page !== undefined && !Array.isArray(page)) ctx.fail("source_error", "Search Console returned an unexpected answer (rows is not a list)");
     const list = (page ?? []) as Row[];

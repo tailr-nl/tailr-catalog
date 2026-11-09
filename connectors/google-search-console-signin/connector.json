@@ -385,13 +385,10 @@
       "version": "0.1.0",
       "level": "read",
       "file": "tools/search_analytics_all.ts",
-      "uses": [],
-      "requests": [
-        {
-          "method": "POST",
-          "path": "/sites/*/searchAnalytics/query"
-        }
+      "uses": [
+        "search_analytics"
       ],
+      "requests": [],
       "params": {
         "site": {
           "in": "body",
