@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "Texts for connecting with a service account (no sign-in step), the alternative route on the connector page, settings the AI pre-filled from the conversation, and the function tabs per channel on the access page.",
-      "nl": "Teksten voor koppelen met een serviceaccount (zonder inlogstap), de alternatieve route op de connectorpagina, instellingen die de AI uit het gesprek al invulde, en de functietabbladen per kanaal op de toegangspagina."
+      "en": "The hint under Talks only to for a connector that fetches its own token (service account): no sign-in step.",
+      "nl": "De hint onder Praat alleen met voor een connector die zelf zijn token ophaalt (serviceaccount): geen inlogstap."
     }
   },
   "messages": {
@@ -2082,6 +2082,7 @@
     "Paste the complete file here": "Plak hier het volledige bestand",
     "Extended error details in responses": "Uitgebreide foutdetails in antwoorden",
     "During development, include details from the source system in API and AI tool error responses. By default, callers receive an error code and a cleaned-up message.": "Neem tijdens de ontwikkeling details van het bronsysteem op in de foutmeldingen voor de API en AI-tools. Standaard krijgt de aanroeper een foutcode en een opgeschoonde melding.",
-    "Paste the key of the service account and save. Tailr Core signs in with that key itself; there is no sign-in step.": "Plak de sleutel van het serviceaccount en sla op. Tailr Core logt daarmee zelf in; er is geen inlogstap."
+    "Paste the key of the service account and save. Tailr Core signs in with that key itself; there is no sign-in step.": "Plak de sleutel van het serviceaccount en sla op. Tailr Core logt daarmee zelf in; er is geen inlogstap.",
+    "Fetches its access token from {hosts}; there is no sign-in step.": "Haalt zijn toegangstoken op bij {hosts}; er is geen inlogstap."
   }
 }
