@@ -2080,6 +2080,15 @@
     "The link expired before Connect was clicked, so nothing was saved.": "De link is verlopen voordat op Koppelen is geklikt, dus er is niets opgeslagen.",
     "The link expired before Connect was clicked, so nothing was saved. Ask your AI tool to propose the connector again.": "De link is verlopen voordat op Koppelen is geklikt, dus er is niets opgeslagen. Vraag je AI-tool de connector opnieuw voor te stellen.",
     "default": "standaard",
-    "Filled in when connecting.": "Vul je in bij het koppelen."
+    "Filled in when connecting.": "Vul je in bij het koppelen.",
+    "View configured permissions": "Bekijk ingestelde rechten",
+    "Show functions by channel": "Toon functies per kanaal",
+    "All functions": "Alle functies",
+    "Via API": "Via API",
+    "Via MCP": "Via MCP",
+    "Role permissions are shared across channels. Default levels apply to all functions.": "Rolrechten gelden voor beide kanalen. Standaardniveaus gelden voor alle functies.",
+    "No functions are available via this channel.": "Via dit kanaal zijn geen functies beschikbaar.",
+    "Extended error details in responses": "Uitgebreide foutdetails in antwoorden",
+    "During development, include details from the source system in API and AI tool error responses. By default, callers receive an error code and a cleaned-up message.": "Stuur tijdens ontwikkeling foutdetails van het bronsysteem mee in antwoorden aan apps en AI-tools. Standaard krijgt de aanroeper een foutcode en een opgeschoonde melding."
   }
 }
