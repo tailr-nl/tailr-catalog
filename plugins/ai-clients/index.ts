@@ -3,7 +3,8 @@
  *
  * Elke AI-tool of app die met OAuth verbindt (Claude, ChatGPT, Claude Code, een eigen app met
  * "Inloggen met Tailr Core") is een OAuth-client. Per client kies je toestaan of blokkeren, met
- * een standaard voor nieuwe clients en rollen die altijd mogen.
+ * een standaard voor nieuwe clients en rollen waarvoor deze controle niet geldt. Wat die rollen
+ * daarna mogen, bepaalt de rechtenmatrix van de kern (Toegang → Rechten), niet deze plugin.
  *
  * Privé-accounts afvangen (bijv. een gratis ChatGPT die op je data traint): zet de standaard op
  * "goedkeuring nodig" en sta de client van de connector van je Claude- of ChatGPT-organisatie toe.
@@ -29,7 +30,7 @@ interface Config {
   defaultAi: DefaultAi;
   /** Keuze per client-id */
   clients: Record<string, State>;
-  /** Rollen die elke client mogen gebruiken */
+  /** Rollen waarvoor de controle op AI-tools niet geldt; hun rechten in de rechtenmatrix blijven gelden */
   exemptRoles: string[];
 }
 const DEFAULTS: Config = { defaultAi: "allow", clients: {}, exemptRoles: [] };
@@ -128,8 +129,8 @@ export function register(api: PluginApi) {
       {
         name: "exemptRoles",
         type: "roles",
-        label: { en: "Roles that may use any AI tool", nl: "Rollen die elke AI-tool mogen gebruiken" },
-        description: { en: "For example developers. No selection: no exceptions.", nl: "Bijvoorbeeld ontwikkelaars. Niets aangevinkt: geen uitzonderingen." },
+        label: { en: "Roles the AI tool policy does not apply to", nl: "Rollen waarvoor de controle op AI-tools niet geldt" },
+        description: { en: "For example developers: they may connect any AI tool. Their permissions under Access → Permissions still apply. No selection: no exceptions.", nl: "Bijvoorbeeld ontwikkelaars: zij mogen elke AI-tool verbinden. Hun rechten onder Toegang → Rechten blijven gelden. Niets aangevinkt: geen uitzonderingen." },
         group: { en: "Default", nl: "Standaard" },
       },
     ],
