@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "Texts for connecting a custom connector in one step from To confirm (Review and connect), the next step after confirming a proposal, and the Connect bar on the connector page.",
-      "nl": "Teksten voor het in één stap koppelen van een eigen connector vanuit Te bevestigen (Beoordelen en koppelen), de vervolgstap na het bevestigen van een voorstel, en de koppelbalk op de connectorpagina."
+      "en": "Under Talks only to, a host that comes from a setting now shows the setting's label or its default value instead of a placeholder.",
+      "nl": "Onder Praat alleen met toont een host uit een instelling nu het label van die instelling of de standaardwaarde in plaats van een placeholder."
     }
   },
   "messages": {
@@ -2078,6 +2078,8 @@
     "Nothing is saved until you click Connect on the next page.": "Er wordt niets opgeslagen tot je op de volgende pagina op Koppelen klikt.",
     "Create a new link": "Nieuwe link maken",
     "The link expired before Connect was clicked, so nothing was saved.": "De link is verlopen voordat op Koppelen is geklikt, dus er is niets opgeslagen.",
-    "The link expired before Connect was clicked, so nothing was saved. Ask your AI tool to propose the connector again.": "De link is verlopen voordat op Koppelen is geklikt, dus er is niets opgeslagen. Vraag je AI-tool de connector opnieuw voor te stellen."
+    "The link expired before Connect was clicked, so nothing was saved. Ask your AI tool to propose the connector again.": "De link is verlopen voordat op Koppelen is geklikt, dus er is niets opgeslagen. Vraag je AI-tool de connector opnieuw voor te stellen.",
+    "default": "standaard",
+    "Filled in when connecting.": "Vul je in bij het koppelen."
   }
 }
