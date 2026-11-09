@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "The last texts that still said catalogue now point to Connections → Available and Settings → Languages.",
-      "nl": "De laatste teksten die nog catalogus zeiden verwijzen nu naar Koppelingen → Beschikbaar en Instellingen → Talen."
+      "en": "Texts for signed requests to your own projects: the safety check when connecting, the Sign-in card and the signing key under Settings → Sign-in & security.",
+      "nl": "Teksten voor ondertekende verzoeken naar je eigen projecten: de veiligheidstest bij verbinden, de kaart Inloggen en de ondertekensleutel onder Instellingen → Inloggen en beveiliging."
     }
   },
   "messages": {
@@ -2001,6 +2001,40 @@
     "Warning": "Waarschuwing",
     "Denied": "Geweigerd",
     "All levels": "Alle niveaus",
-    "Refresh": "Vernieuwen"
+    "Refresh": "Vernieuwen",
+    "Check again and connect": "Opnieuw controleren en verbinden",
+    "Unsafe sign-in": "Onveilige login",
+    "{name} accepted a wrong token and was switched off": "{name} accepteerde een fout token en is uitgezet",
+    "The daily safety check sent a wrong token and the project accepted it. Fix the check in the project (use the official verifier), run the safety check below, and switch the connection on again.": "De dagelijkse veiligheidstest stuurde een fout token en het project accepteerde het. Herstel de controle in het project (gebruik de officiële controle), voer hieronder de veiligheidstest uit en zet de koppeling weer aan.",
+    "Accepts a valid signed request": "Accepteert een geldig ondertekend verzoek",
+    "Rejects a request without a token": "Weigert een verzoek zonder token",
+    "Rejects an expired token": "Weigert een verlopen token",
+    "Rejects a token for another source": "Weigert een token voor een andere bron",
+    "Rejects a token for another path": "Weigert een token voor een ander pad",
+    "Rejects a token signed with another key": "Weigert een token met een andere sleutel",
+    "Rejects an unsigned token": "Weigert een niet-ondertekend token",
+    "Rejects a token signed with the public key": "Weigert een token ondertekend met de publieke sleutel",
+    "Passed": "Geslaagd",
+    "Signed by Tailr Core: no key needed": "Ondertekend door Tailr Core: geen sleutel nodig",
+    "Tailr Core signs every request to {name}, and the project checks the signature with the public key of Tailr Core. When you connect, Tailr Core first checks that {name} accepts a valid request and rejects wrong ones.": "Tailr Core ondertekent elk verzoek aan {name}, en het project controleert de handtekening met de publieke sleutel van Tailr Core. Bij verbinden controleert Tailr Core eerst of {name} een geldig verzoek accepteert en foute verzoeken weigert.",
+    "Key fingerprint": "Vingerafdruk van de sleutel",
+    "The safety check passed": "De veiligheidstest is geslaagd",
+    "Sign-in": "Inloggen",
+    "Signed by Tailr Core: there is no key. The project trusts this Tailr Core and checks every request with its public key.": "Ondertekend door Tailr Core: er is geen sleutel. Het project vertrouwt deze Tailr Core en controleert elk verzoek met de publieke sleutel ervan.",
+    "Address of Tailr Core (TAILR_ISSUER)": "Adres van Tailr Core (TAILR_ISSUER)",
+    "Connection id (TAILR_CONNECTION, optional)": "Id van de koppeling (TAILR_CONNECTION, optioneel)",
+    "Public keys": "Publieke sleutels",
+    "Safety check passed on {time}": "Veiligheidstest geslaagd op {time}",
+    "Safety check failed on {time}": "Veiligheidstest mislukt op {time}",
+    "Run the safety check": "Veiligheidstest uitvoeren",
+    "Replace the signing key?": "De ondertekensleutel vervangen?",
+    "Sources that fetch the public keys pick up the new key by themselves; the old key stays published for 24 hours. A source with a pinned key stops working until you pin the new one.": "Bronnen die de publieke sleutels ophalen, nemen de nieuwe sleutel vanzelf over; de oude blijft 24 uur gepubliceerd. Een bron met een vastgezette sleutel werkt pas weer als je de nieuwe vastzet.",
+    "Replace": "Vervangen",
+    "Signing key replaced": "Ondertekensleutel vervangen",
+    "Signed requests to your own projects": "Ondertekende verzoeken naar je eigen projecten",
+    "For connectors with auth \"tailr\": Tailr Core signs every request, so your own projects need no API key.": "Voor connectors met auth \"tailr\": Tailr Core ondertekent elk verzoek, dus je eigen projecten hebben geen API-sleutel nodig.",
+    "since {date}": "sinds {date}",
+    "Previous key {fingerprint} stays published until {time}.": "De vorige sleutel {fingerprint} blijft gepubliceerd tot {time}.",
+    "Replace key": "Sleutel vervangen"
   }
 }
