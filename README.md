@@ -21,7 +21,7 @@ schemas/        JSON schemas for connector.json, plugin.json, translation files 
 | [Exact Online](connectors/exact-online) | General ledger, entries, matching status, bank lines (OAuth2, code functions) |
 | [GitHub](connectors/github.json) | Repositories, files, issues and pull requests |
 | [Google Analytics 4](connectors/google-analytics.json) | Reports from the Data API (service account; [signing in with your own Google account](connectors/google-analytics-signin.json) as a variant) |
-| [Google Search Console](connectors/google-search-console.json) | Search performance per site (service account; [signing in with your own Google account](connectors/google-search-console-signin.json) as a variant) |
+| [Google Search Console](connectors/google-search-console/) | Search performance (also Discover and Google News), sitemaps and URL inspection, read only (service account; [signing in with your own Google account](connectors/google-search-console-signin/) as a variant) |
 | [Matomo](connectors/matomo.json) | Website statistics, read only |
 | [Mollie](connectors/mollie) | Payments, refunds, customers, mandates, subscriptions, settlements and more: the full API v2 (126 functions, code functions for settlements) |
 | [WooCommerce](connectors/woocommerce.json) | Orders, products and customers (REST API v3) |

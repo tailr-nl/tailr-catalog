@@ -1,0 +1,447 @@
+{
+  "presentation": {
+    "intro": {
+      "en": "Compare search performance, check your sitemaps and find out why a page is not in Google.",
+      "nl": "Vergelijk zoekprestaties, controleer je sitemaps en ontdek waarom een pagina niet in Google staat."
+    },
+    "examples": [
+      {
+        "prompt": {
+          "en": "Which search queries brought the most clicks last month? Show impressions, click-through rate and position, and suggest three improvements.",
+          "nl": "Welke zoekopdrachten leverden vorige maand de meeste klikken op? Toon vertoningen, doorklikpercentage en positie en geef drie verbeterpunten."
+        },
+        "requires": [
+          "list_sites",
+          "search_analytics"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Which pages have many impressions but few clicks in Google? Compare last month with the month before and explain where the opportunities are.",
+          "nl": "Welke pagina’s worden vaak vertoond in Google maar krijgen weinig klikken? Vergelijk vorige maand met de maand ervoor en leg uit waar kansen liggen."
+        },
+        "requires": [
+          "list_sites",
+          "search_analytics"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Are our sitemaps in order? Show for each sitemap when Google last read it, how many URLs it contains and whether there are errors or warnings.",
+          "nl": "Staan onze sitemaps er goed bij? Laat per sitemap zien wanneer Google hem voor het laatst las, hoeveel URL’s erin staan en of er fouten of waarschuwingen zijn."
+        },
+        "requires": [
+          "list_sitemaps"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Why is the page https://www.example.com/news/article not showing up in Google? Check whether it is indexed, which canonical Google chose and when it was last crawled.",
+          "nl": "Waarom staat de pagina https://www.voorbeeld.nl/nieuws/artikel niet in Google? Controleer of hij geïndexeerd is, welke canonical Google koos en wanneer hij voor het laatst is gecrawld."
+        },
+        "requires": [
+          "inspect_url"
+        ]
+      }
+    ],
+    "whatsNew": {
+      "en": "Sitemap status, URL inspection (is this page indexed, and why not?), Discover and Google News performance, fresh data from the last few days, and search performance beyond 25,000 rows.",
+      "nl": "Sitemapstatus, URL-inspectie (staat deze pagina in Google, en zo niet waarom niet?), prestaties in Discover en Google Nieuws, verse cijfers van de laatste dagen, en zoekprestaties voorbij 25.000 rijen."
+    }
+  },
+  "$schema": "../../schemas/connector.json",
+  "id": "google-search-console",
+  "name": "Google Search Console",
+  "version": "0.5.0",
+  "description": {
+    "en": "Google Search Console, read only: search performance (clicks, impressions, click-through rate and position by query, page, country, device or date, also for Discover and Google News), sitemap status and URL inspection.",
+    "nl": "Google Search Console, alleen lezen: zoekprestaties (klikken, vertoningen, doorklikratio en positie per zoekopdracht, pagina, land, apparaat of dag, ook voor Discover en Google Nieuws), sitemapstatus en URL-inspectie."
+  },
+  "homepage": "https://developers.google.com/webmaster-tools/v1/api_reference_index",
+  "category": "Marketing",
+  "vars": [
+    {
+      "name": "SERVICE_ACCOUNT_KEY",
+      "label": {
+        "en": "Service account key",
+        "nl": "Sleutel van het serviceaccount"
+      },
+      "description": {
+        "en": "The JSON key file you downloaded when you created the key for the service account (step 2). Paste the whole file, including the braces.",
+        "nl": "Het JSON-sleutelbestand dat je downloadde bij het maken van de sleutel voor het serviceaccount (stap 2). Plak het hele bestand, inclusief de accolades."
+      },
+      "secret": true,
+      "required": true,
+      "multiline": true,
+      "pattern": "\"type\"\\s*:\\s*\"service_account\"",
+      "patternHint": "Plak het complete JSON-sleutelbestand van een serviceaccount (het bevat \"type\": \"service_account\"). Een OAuth-clientbestand (client_secret_….json) is iets anders."
+    },
+    {
+      "name": "SITE_URL",
+      "label": {
+        "en": "Website",
+        "nl": "Website"
+      },
+      "description": {
+        "en": "As shown in Search Console, e.g. https://www.example.com/ or sc-domain:example.com.",
+        "nl": "Zoals in Search Console, bijv. https://www.voorbeeld.nl/ of sc-domain:voorbeeld.nl"
+      },
+      "secret": false,
+      "required": false,
+      "chooseWith": "list_sites"
+    }
+  ],
+  "setup": {
+    "minutes": 8,
+    "testWith": "list_sites",
+    "prerequisites": [
+      "Toegang tot Google Cloud Console (een nieuw project mag; gebruik je al een serviceaccount voor Google Analytics, dan kun je dat hergebruiken)",
+      "Eigenaar van de property in Search Console (alleen eigenaren kunnen gebruikers toevoegen)"
+    ],
+    "steps": [
+      {
+        "id": "enable-apis",
+        "title": "Search Console API inschakelen",
+        "instruction": "Open de link, kies je project (of maak er een) en klik op Inschakelen.",
+        "url": "https://console.cloud.google.com/flows/enableapi?apiid=searchconsole.googleapis.com"
+      },
+      {
+        "id": "service-account",
+        "title": "Serviceaccount maken en JSON-sleutel downloaden",
+        "instruction": "Open de link in hetzelfde project (IAM en beheer → Serviceaccounts → Serviceaccount maken). Geef het serviceaccount een naam (bijv. Tailr Core) en klik op Gereed; rollen in het project zijn niet nodig. Open daarna het account, kies het tabblad Sleutels → Sleutel toevoegen → Nieuwe sleutel maken, kies JSON en klik op Maken. Het sleutelbestand wordt maar één keer gegeven: na het downloaden kun je het niet opnieuw ophalen. Bewaar het tot je het op de invulpagina plakt.",
+        "url": "https://console.cloud.google.com/iam-admin/serviceaccounts/create",
+        "note": "Het sleutelbestand bevat de privésleutel van het serviceaccount: behandel het als een wachtwoord en verwijder het na het plakken. Gebruik je al een serviceaccount voor Google Analytics in dit project, dan kun je hetzelfde account en dezelfde sleutel gebruiken."
+      },
+      {
+        "id": "grant-access",
+        "title": "Serviceaccount toegang geven in Search Console",
+        "instruction": "Open Search Console, kies de property en ga naar Instellingen → Gebruikers en rechten. Klik op Gebruiker toevoegen, plak het e-mailadres van het serviceaccount (client_email in het sleutelbestand, eindigt op .iam.gserviceaccount.com), kies bij Rechten: Beperkt en klik op Toevoegen. Lezen is genoeg: Tailr Core wijzigt niets in Search Console.",
+        "url": "https://search.google.com/search-console"
+      }
+    ]
+  },
+  "limits": {
+    "perMinute": 600,
+    "concurrency": 5,
+    "cacheTtlSeconds": 600,
+    "note": "Search Console API: Google noemt 1.200 verzoeken per minuut per site en 30 miljoen per dag per project. URL-inspectie (inspect_url) heeft een eigen, veel krappere limiet: 2.000 inspecties per dag en 600 per minuut per property; Tailr Core bewaart elke inspectie een uur, maar een inspectie van een nieuwe URL telt altijd. Zoekprestaties lopen 2 tot 3 dagen achter. Controleer de actuele limieten bij Google."
+  },
+  "type": "rest",
+  "baseUrl": "https://www.googleapis.com/webmasters/v3",
+  "hosts": [
+    "oauth2.googleapis.com",
+    "searchconsole.googleapis.com"
+  ],
+  "auth": {
+    "type": "oauth2",
+    "flow": "jwt_bearer",
+    "tokenUrl": "https://oauth2.googleapis.com/token",
+    "scopes": [
+      "https://www.googleapis.com/auth/webmasters.readonly"
+    ],
+    "assertion": {
+      "fromJsonKey": "{{SERVICE_ACCOUNT_KEY}}"
+    }
+  },
+  "tools": [
+    {
+      "name": "list_sites",
+      "title": {
+        "nl": "Websites",
+        "en": "Sites"
+      },
+      "summary": {
+        "nl": "Laat zien welke websites in Search Console staan en welke het serviceaccount kan zien.",
+        "en": "Shows which websites are in Search Console and which the service account can see."
+      },
+      "description": "Websites (properties) in Search Console waar het serviceaccount toegang toe heeft, met per website het rechtenniveau (siteOwner, siteFullUser, siteRestrictedUser, siteUnverifiedUser). Een domeinproperty heet sc-domain:voorbeeld.nl, een URL-prefixproperty https://www.voorbeeld.nl/.",
+      "level": "read",
+      "path": "/sites",
+      "params": {},
+      "cacheTtlSeconds": 3600
+    },
+    {
+      "name": "get_site",
+      "title": {
+        "nl": "Website opvragen",
+        "en": "Get site"
+      },
+      "summary": {
+        "nl": "Controleert of een website in Search Console bereikbaar is en welk rechtenniveau het serviceaccount erop heeft.",
+        "en": "Checks whether a website is reachable in Search Console and which permission level the service account has on it."
+      },
+      "description": "Eén website (property) met het rechtenniveau van het serviceaccount: siteOwner, siteFullUser, siteRestrictedUser of siteUnverifiedUser. Gebruik dit om te controleren of een property bestaat en toegankelijk is; voor de lijst van alle websites: list_sites.",
+      "level": "read",
+      "path": "/sites/{site}",
+      "params": {
+        "site": {
+          "in": "path",
+          "description": "Website zoals in Search Console (sc-domain:voorbeeld.nl of https://www.voorbeeld.nl/); standaard de ingestelde website",
+          "default": "{{SITE_URL}}"
+        }
+      },
+      "cacheTtlSeconds": 3600
+    },
+    {
+      "name": "search_analytics",
+      "title": {
+        "nl": "Zoekprestaties",
+        "en": "Search performance"
+      },
+      "summary": {
+        "nl": "Hoe vaak een website in Google verscheen en werd aangeklikt, per zoekterm, pagina, land, apparaat of dag; ook voor Discover en Google Nieuws.",
+        "en": "How often a website appeared in Google and was clicked, by search term, page, country, device or day; also for Discover and Google News."
+      },
+      "description": "Klikken, vertoningen, CTR en gemiddelde positie over een periode, gegroepeerd per dimensie. Dimensies: query (zoekterm), page (URL), country (ISO 3166-1 alpha-3, bijv. nld), device (DESKTOP, MOBILE, TABLET), date (JJJJ-MM-DD) en searchAppearance (weergave, bijv. rich results; niet te combineren met andere dimensies). Rijen komen terug als keys (de dimensiewaarden, in de volgorde van dimensions) plus clicks, impressions, ctr, position. Zonder dimensions krijg je één totaalrij. Datums in JJJJ-MM-DD, Pacific-tijd. Maximaal 25.000 rijen per aanroep; blader met startRow, of gebruik search_analytics_all voor alles in één keer. Standaard alleen definitieve dagen (tot 2 à 3 dagen geleden); dataState all geeft ook de verse, nog onvolledige dagen. type discover en googleNews hebben geen dimensie query. CTR en position zijn gemiddelden: tel ze niet op over rijen.",
+      "level": "read",
+      "method": "POST",
+      "path": "/sites/{site}/searchAnalytics/query",
+      "params": {
+        "site": {
+          "in": "path",
+          "description": "Website zoals in Search Console; standaard de ingestelde website",
+          "default": "{{SITE_URL}}"
+        },
+        "startDate": {
+          "in": "body",
+          "required": true,
+          "description": "Eerste dag, JJJJ-MM-DD (inclusief)"
+        },
+        "endDate": {
+          "in": "body",
+          "required": true,
+          "description": "Laatste dag, JJJJ-MM-DD (inclusief)"
+        },
+        "dimensions": {
+          "in": "body",
+          "type": "array",
+          "description": "Groeperen op, in deze volgorde. Bijv. [\"query\"], [\"page\",\"device\"] of [\"date\"]. Keuze uit query, page, country, device, date, searchAppearance."
+        },
+        "dimensionFilterGroups": {
+          "in": "body",
+          "type": "array",
+          "description": "Filters, bijv. [{\"filters\":[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\":\"/blog/\"}]}]. Operators: equals, notEquals, contains, notContains, includingRegex, excludingRegex. Filters in één groep worden met EN gecombineerd."
+        },
+        "type": {
+          "in": "body",
+          "enum": [
+            "web",
+            "image",
+            "video",
+            "news",
+            "discover",
+            "googleNews"
+          ],
+          "description": "Soort resultaat: web (standaard), image, video, news (tabblad Nieuws in Google Zoeken), discover of googleNews (de app en site van Google Nieuws). Discover en googleNews kennen geen dimensie query."
+        },
+        "dataState": {
+          "in": "body",
+          "enum": [
+            "final",
+            "all"
+          ],
+          "description": "final (standaard): alleen dagen waarvan de cijfers vaststaan. all: ook de laatste 2 à 3 dagen, die nog kunnen veranderen; gegroepeerd op date staat in metadata.firstIncompleteDate vanaf welke dag de cijfers voorlopig zijn."
+        },
+        "aggregationType": {
+          "in": "body",
+          "enum": [
+            "auto",
+            "byPage",
+            "byProperty"
+          ],
+          "description": "Hoe Google telt: auto (standaard) kiest zelf; byProperty telt een zoekopdracht met meerdere pagina's van je site als één vertoning; byPage telt per pagina. Groepeer of filter je op page, dan kan byProperty niet."
+        },
+        "rowLimit": {
+          "in": "body",
+          "type": "integer",
+          "description": "Maximaal aantal rijen, 1 tot 25.000 (standaard 1.000)"
+        },
+        "startRow": {
+          "in": "body",
+          "type": "integer",
+          "description": "Bladeren: index van de eerste rij (begint bij 0). Vraag de volgende pagina op met startRow = vorige startRow + rowLimit; komen er minder dan rowLimit rijen terug, dan is dit de laatste pagina."
+        }
+      }
+    },
+    {
+      "name": "list_sitemaps",
+      "title": {
+        "nl": "Sitemaps",
+        "en": "Sitemaps"
+      },
+      "summary": {
+        "nl": "Welke sitemaps bij Google bekend zijn, wanneer Google ze voor het laatst las en of er fouten of waarschuwingen zijn.",
+        "en": "Which sitemaps Google knows about, when Google last read them and whether there are errors or warnings."
+      },
+      "description": "Ingediende sitemaps van een website, met per sitemap: path (URL), type (sitemap, urlList, rssFeed, atomFeed, ...), isSitemapsIndex, isPending (nog niet verwerkt), lastSubmitted, lastDownloaded, errors, warnings en contents (per inhoudstype het aantal ingediende URL's in submitted; indexed is verouderd en zegt niets). Met sitemapIndex krijg je de sitemaps die in één sitemapindex staan. Gebruik get_sitemap voor één sitemap.",
+      "level": "read",
+      "path": "/sites/{site}/sitemaps",
+      "params": {
+        "site": {
+          "in": "path",
+          "description": "Website zoals in Search Console; standaard de ingestelde website",
+          "default": "{{SITE_URL}}"
+        },
+        "sitemapIndex": {
+          "in": "query",
+          "description": "Volledige URL van een sitemapindex: dan komen alleen de sitemaps uit die index terug"
+        }
+      },
+      "cacheTtlSeconds": 3600
+    },
+    {
+      "name": "get_sitemap",
+      "title": {
+        "nl": "Sitemap opvragen",
+        "en": "Get sitemap"
+      },
+      "summary": {
+        "nl": "De status van één sitemap: wanneer Google hem las, hoeveel URL's erin staan en of er fouten zijn.",
+        "en": "The status of one sitemap: when Google read it, how many URLs it contains and whether there are errors."
+      },
+      "description": "Eén sitemap met dezelfde velden als list_sitemaps: type, isPending, lastSubmitted, lastDownloaded, errors, warnings en contents met het aantal ingediende URL's per inhoudstype. feedpath is de volledige URL van de sitemap zoals die in list_sitemaps staat (bijv. https://www.voorbeeld.nl/sitemap.xml); Tailr Core codeert hem zelf voor het adres.",
+      "level": "read",
+      "path": "/sites/{site}/sitemaps/{feedpath}",
+      "params": {
+        "site": {
+          "in": "path",
+          "description": "Website zoals in Search Console; standaard de ingestelde website",
+          "default": "{{SITE_URL}}"
+        },
+        "feedpath": {
+          "in": "path",
+          "required": true,
+          "description": "Volledige URL van de sitemap, bijv. https://www.voorbeeld.nl/sitemap.xml"
+        }
+      },
+      "cacheTtlSeconds": 3600
+    },
+    {
+      "name": "inspect_url",
+      "title": {
+        "nl": "URL inspecteren",
+        "en": "Inspect URL"
+      },
+      "summary": {
+        "nl": "Staat een pagina in Google, en zo niet, waarom niet? Met de canonical die Google koos, de laatste crawl en problemen met rich results of mobiel.",
+        "en": "Is a page in Google, and if not, why not? With the canonical Google chose, the last crawl and issues with rich results or mobile usability."
+      },
+      "description": "Inspecteert één URL zoals Google hem in de index heeft (geen live test). Antwoord: inspectionResult met indexStatusResult (verdict PASS/PARTIAL/FAIL/NEUTRAL, coverageState in woorden, indexingState, robotsTxtState, pageFetchState, lastCrawlTime, crawledAs, userCanonical versus googleCanonical, sitemap en referringUrls waarin Google de URL vond), mobileUsabilityResult, richResultsResult (alleen als er rich results zijn, met issues en severity) en ampResult (alleen bij AMP), plus inspectionResultLink naar het rapport in Search Console. De URL moet onder de property vallen (bij sc-domain: elk subdomein en protocol; bij een URL-prefix precies dat voorvoegsel). Schaars: Google staat 2.000 inspecties per dag en 600 per minuut per property toe. Inspecteer alleen URL's die de gebruiker noemt of die uit een eerdere vraag volgen; nooit een hele sitemap.",
+      "level": "read",
+      "method": "POST",
+      "path": "https://searchconsole.googleapis.com/v1/urlInspection/index:inspect",
+      "params": {
+        "inspectionUrl": {
+          "in": "body",
+          "required": true,
+          "description": "Volledige URL van de pagina, bijv. https://www.voorbeeld.nl/nieuws/artikel"
+        },
+        "siteUrl": {
+          "in": "body",
+          "description": "Property waar de URL onder valt, zoals in Search Console; standaard de ingestelde website",
+          "default": "{{SITE_URL}}"
+        },
+        "languageCode": {
+          "in": "body",
+          "description": "Taal van de meldingen (BCP-47), standaard nl",
+          "default": "nl"
+        }
+      },
+      "cacheTtlSeconds": 3600
+    }
+  ],
+  "scripts": [
+    {
+      "name": "search_analytics_all",
+      "title": {
+        "nl": "Alle zoekprestaties",
+        "en": "All search performance rows"
+      },
+      "summary": {
+        "nl": "Haalt alle rijen van de zoekprestaties op, ook voorbij de 25.000 per aanroep, tot een plafond.",
+        "en": "Fetches every search performance row, also beyond the 25,000 per call, up to a ceiling."
+      },
+      "description": "Zelfde invoer als search_analytics, maar bladert zelf door alle pagina's van 25.000 rijen tot er geen meer zijn of maxRows (standaard 100.000) is bereikt. Antwoord: rows (keys, clicks, impressions, ctr, position), rowCount, pages (aantal opgehaalde pagina's), complete (false als het plafond eerder kwam dan het einde) en metadata van Google als dataState all is. Gebruik dit alleen als search_analytics met 25.000 rijen niet genoeg is, bijv. alle zoektermen of pagina's van een jaar op een grote site; voor top-lijsten volstaat search_analytics. Een groot antwoord kan door Tailr Core worden ingekort: kies dan een kleinere periode of een filter.",
+      "version": "0.1.0",
+      "level": "read",
+      "file": "tools/search_analytics_all.ts",
+      "uses": [],
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/sites/*/searchAnalytics/query"
+        }
+      ],
+      "params": {
+        "site": {
+          "in": "body",
+          "type": "string",
+          "description": "Website zoals in Search Console; standaard de ingestelde website"
+        },
+        "startDate": {
+          "in": "body",
+          "type": "string",
+          "required": true,
+          "description": "Eerste dag, JJJJ-MM-DD (inclusief)"
+        },
+        "endDate": {
+          "in": "body",
+          "type": "string",
+          "required": true,
+          "description": "Laatste dag, JJJJ-MM-DD (inclusief)"
+        },
+        "dimensions": {
+          "in": "body",
+          "type": "array",
+          "description": "Groeperen op: query, page, country, device, date, searchAppearance (in deze volgorde in keys)"
+        },
+        "dimensionFilterGroups": {
+          "in": "body",
+          "type": "array",
+          "description": "Filters, zoals bij search_analytics"
+        },
+        "type": {
+          "in": "body",
+          "type": "string",
+          "enum": [
+            "web",
+            "image",
+            "video",
+            "news",
+            "discover",
+            "googleNews"
+          ],
+          "description": "Soort resultaat, standaard web. Discover en googleNews kennen geen dimensie query."
+        },
+        "dataState": {
+          "in": "body",
+          "type": "string",
+          "enum": [
+            "final",
+            "all"
+          ],
+          "description": "final (standaard) of all (ook de verse, nog onvolledige dagen)"
+        },
+        "aggregationType": {
+          "in": "body",
+          "type": "string",
+          "enum": [
+            "auto",
+            "byPage",
+            "byProperty"
+          ],
+          "description": "auto (standaard), byPage of byProperty"
+        },
+        "maxRows": {
+          "in": "body",
+          "type": "integer",
+          "description": "Plafond voor het totaal aantal rijen, standaard 100.000 (maximaal 250.000)"
+        }
+      },
+      "limits": {
+        "maxCalls": 12,
+        "timeoutSeconds": 120
+      }
+    }
+  ]
+}
