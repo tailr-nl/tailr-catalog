@@ -1,4 +1,4 @@
-Google Analytics 4 (Data API v1beta):
+Google Analytics 4 (Data API v1beta, Admin API v1beta en alpha-functies):
 
 Welke functie:
 - Gebruik run_report_flat voor analyses en antwoorden in een gesprek: rijen als gewone objecten, metrics als getal. run_report is dezelfde vraag in de ruwe vorm van Google (kopregels en rijen apart), voor dashboards en tools.
@@ -32,6 +32,15 @@ Inrichting van de property (Admin API):
 - get_data_retention verklaart waarom analyses per gebruiker over een oudere periode leeg zijn (Google bewaart gebruikersgegevens 2 of 14 maanden); totalen in gewone rapporten blijven wel beschikbaar.
 - list_data_streams zegt welke websites en apps in deze property meten (measurement-id G-…); gebruik dit als iemand twijfelt of een site of app wel in deze property zit.
 - Het toegangsrapport (run_access_report) gaat over collega's die rapporten bekeken en is alleen voor apps en dashboards. Noem geen e-mailadressen van GA-gebruikers in een antwoord, tenzij de gebruiker er uitdrukkelijk om vraagt.
+
+Alpha-functies (Google kan deze API's nog veranderen):
+- Trechter: run_funnel_report telt hoeveel gebruikers elke stap van een reeks halen en waar ze afhaken. Stappen zijn gebeurtenissen met filters (funnelEventFilter op eventName, bijv. view_item → add_to_cart → purchase); funnelVisualizationType TRENDED_FUNNEL geeft de trechter per dag. Weet je de namen van de gebeurtenissen niet, vraag ze eerst op met run_report_flat (dimensie eventName, metric eventCount).
+- Annotaties (list_annotations) zijn notities van collega's of Google op de tijdlijn: een campagnestart, een nieuwe website, een wijziging in de meting. Zie je in een rapport een opvallende piek of dal, vraag dan de annotaties van die periode op (filter is_annotation_in_range) en noem een passende annotatie als mogelijke verklaring.
+- Doelgroepen (list_audiences) geven de definities, niet de leden. De displayName is de waarde van de dimensie audienceName in run_report_flat en run_realtime_report.
+- Kanaalgroepen (list_channel_groups) en berekende metrics (list_calculated_metrics) zijn eigen definities van de organisatie: een eigen indeling van verkeersbronnen (in rapporten sessionCustomChannelGroup:<nummer>, de primaire groep als sessionPrimaryChannelGroup) en eigen formules (calcMetric:<calculatedMetricId>). Wijken cijfers per kanaal af van wat iemand in GA ziet, kijk dan hiernaar.
+- Attributie (get_attribution_settings), verbeterde meting (get_enhanced_measurement) en gebeurtenisregels (list_event_create_rules, list_event_edit_rules) verklaren waarom key events anders over kanalen verdeeld zijn dan in Google Ads, en waar gebeurtenissen vandaan komen die niet in de code van de website staan.
+- Bij een quotafout: get_quota toont per potje (rapporten, realtime, trechters) wat er per uur en per dag nog over is.
+- Krijg je bij een van deze functies een onverwachte fout, zeg dan dat het een alpha-functie van Google is die kan zijn veranderd, en gebruik waar mogelijk een gewone functie (bijv. run_report_flat met eventName in plaats van de trechter).
 
 Persoonsgegevens: GA-rapporten bevatten geen gegevens van individuele personen, alleen tellingen over groepen bezoekers. Uitzondering: een eigen (custom) dimensie kan iets persoonlijks bevatten, zoals een klant- of gebruikers-id. Vraag die niet per persoon op en noem zulke waarden niet in een antwoord.
 
