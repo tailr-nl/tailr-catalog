@@ -75,7 +75,7 @@ export default async function findDimensionsMetrics(args: { search: string; kind
   try {
     res = await ctx.request({ method: "GET", path: `/properties/${property}/metadata` });
   } catch (e: any) {
-    if (e?.status === 403) ctx.fail("access_denied", `Google Analytics refused access to property ${property}: ${e.message ?? "forbidden"}`);
+    if (e?.status === 403) ctx.fail("source_auth_failed", `Google Analytics refused access to property ${property}: ${e.message ?? "forbidden"}. The account of this connection needs at least the Viewer role on the property.`);
     if (e?.status === 404) ctx.fail("not_found", `Property ${property} was not found. Use list_properties to see the available properties.`);
     throw e;
   }

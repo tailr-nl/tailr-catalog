@@ -101,7 +101,7 @@ export default async function runReportFlat(args: Row, ctx: any) {
     data = res && typeof res === "object" && "data" in res && !("rows" in res) && !("dimensionHeaders" in res) && !("metricHeaders" in res) ? (res as any).data : res;
   } catch (e: any) {
     if (e?.status === 400) ctx.fail("invalid_input", `Google Analytics rejected the report: ${e.message ?? "bad request"}. Check the dimension and metric names with find_dimensions_metrics, or the combination with check_compatibility.`);
-    if (e?.status === 403) ctx.fail("access_denied", `Google Analytics refused access to property ${property}: ${e.message ?? "forbidden"}`);
+    if (e?.status === 403) ctx.fail("source_auth_failed", `Google Analytics refused access to property ${property}: ${e.message ?? "forbidden"}. The account of this connection needs at least the Viewer role on the property.`);
     if (e?.status === 404) ctx.fail("not_found", `Property ${property} was not found. Use list_properties to see the available properties.`);
     throw e;
   }
