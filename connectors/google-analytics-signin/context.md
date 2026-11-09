@@ -25,6 +25,14 @@ Lezen van het antwoord:
 
 Quota: een standaard property heeft 200.000 tokens per dag en 40.000 per uur; een gewoon rapport kost meestal 1 tot 10 tokens, grote rapporten (lange periode, veel dimensies) meer. Realtime heeft een eigen potje. Met returnPropertyQuota: true zie je de stand. Krijg je een quotafout, wacht dan en vraag kleiner (kortere periode, minder dimensies, lagere limit).
 
+Inrichting van de property (Admin API):
+- Vraag list_key_events op voordat je de metric keyEvents duidt: die telt alle key events bij elkaar, en welke gebeurtenissen dat zijn (en of ze per gebeurtenis of per sessie tellen) verschilt per property. Eén key event apart: metric keyEvents:<eventName>.
+- Eigen dimensies en metrics: list_custom_dimensions en list_custom_metrics geven de parameterName; in een rapport heet die customEvent:<parameterName> (scope EVENT), customUser:<parameterName> (USER) of customItem:<parameterName> (ITEM). find_dimensions_metrics vindt dezelfde namen op een zoekwoord.
+- get_property geeft de tijdzone en valuta van de property: noem de valuta bij bedragen en reken datums niet om naar een andere tijdzone.
+- get_data_retention verklaart waarom analyses per gebruiker over een oudere periode leeg zijn (Google bewaart gebruikersgegevens 2 of 14 maanden); totalen in gewone rapporten blijven wel beschikbaar.
+- list_data_streams zegt welke websites en apps in deze property meten (measurement-id G-…); gebruik dit als iemand twijfelt of een site of app wel in deze property zit.
+- Het toegangsrapport (run_access_report) gaat over collega's die rapporten bekeken en is alleen voor apps en dashboards. Noem geen e-mailadressen van GA-gebruikers in een antwoord, tenzij de gebruiker er uitdrukkelijk om vraagt.
+
 Persoonsgegevens: GA-rapporten bevatten geen gegevens van individuele personen, alleen tellingen over groepen bezoekers. Uitzondering: een eigen (custom) dimensie kan iets persoonlijks bevatten, zoals een klant- of gebruikers-id. Vraag die niet per persoon op en noem zulke waarden niet in een antwoord.
 
 Tailr Core wijzigt niets in Google Analytics: alle functies lezen alleen.
