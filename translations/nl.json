@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "The Language section on the admin overview no longer says Tailr Core is in English once a language has been added.",
-      "nl": "De sectie Taal op het beheeroverzicht zegt niet meer dat Tailr Core in het Engels is zodra er een taal is toegevoegd."
+      "en": "Texts for the connector proposal in To confirm (what the connector is, may do and what changes) and for the Unfinished setups card with its Continue button.",
+      "nl": "Teksten voor het connectorvoorstel in Te bevestigen (wat de connector is, mag en wat er verandert) en voor de kaart Nog af te ronden met de knop Verder."
     }
   },
   "messages": {
@@ -1571,7 +1571,6 @@
     "All {n} setup steps": "Alle {n} stappen",
     "Unfinished setups": "Nog af te ronden",
     "Step {step} of {total}: {title}": "Stap {step} van {total}: {title}",
-    "Copy the prompt and continue in your AI tool. Your progress is saved for seven days.": "Kopieer de opdracht en ga verder in je AI-tool. Je voortgang wordt zeven dagen bewaard.",
     "Copy resume prompt": "Kopieer hervatopdracht",
     "In Tailr Core, resume my setup for {name}.": "Hervat in Tailr Core mijn stappenplan voor {name}.",
     "Use tailr__admin_connection_setup_status with guideId={guideId}. Continue from the current step with tailr__admin_connection_setup_next; do not start a new plan. Never ask for secrets in the chat.": "Gebruik tailr__admin_connection_setup_status met guideId={guideId}. Ga verder bij de huidige stap met tailr__admin_connection_setup_next; begin geen nieuw plan. Vraag nooit om geheimen in de chat.",
@@ -2035,6 +2034,31 @@
     "For connectors with auth \"tailr\": Tailr Core signs every request, so your own projects need no API key.": "Voor connectors met auth \"tailr\": Tailr Core ondertekent elk verzoek, dus je eigen projecten hebben geen API-sleutel nodig.",
     "since {date}": "sinds {date}",
     "Previous key {fingerprint} stays published until {time}.": "De vorige sleutel {fingerprint} blijft gepubliceerd tot {time}.",
-    "Replace key": "Sleutel vervangen"
+    "Replace key": "Sleutel vervangen",
+    "New connector": "Nieuwe connector",
+    "Update from v{version}": "Update van v{version}",
+    "Replaces v{version} (same version)": "Vervangt v{version} (zelfde versie)",
+    "Older than the installed v{version}": "Ouder dan de geïnstalleerde v{version}",
+    "This connector cannot be saved as it is: {error}": "Deze connector kan zo niet worden opgeslagen: {error}",
+    "New functions": "Nieuwe functies",
+    "Removed functions": "Verwijderde functies",
+    "Level changed": "Niveau gewijzigd",
+    "New hosts": "Nieuwe hosts",
+    "Hosts no longer used": "Hosts die niet meer worden gebruikt",
+    "Code changed": "Code gewijzigd",
+    "Explanation for the AI changed": "Uitleg voor de AI gewijzigd",
+    "What this connector may do stays the same in this version.": "Wat deze connector mag, blijft in deze versie gelijk.",
+    "The functions come from the MCP server once it is connected. Their levels follow the server's annotations unless the connector overrides them.": "De functies komen van de MCP-server zodra die is verbonden. Hun niveau volgt de annotaties van de server, tenzij de connector ze overschrijft.",
+    "Documentation": "Documentatie",
+    "README included": "README aanwezig",
+    "No README": "Geen README",
+    "Explanation for the AI included": "Uitleg voor de AI aanwezig",
+    "No explanation for the AI": "Geen uitleg voor de AI",
+    "Fill in the credentials and connect, here in Tailr Core.": "Vul hier in Tailr Core de inloggegevens in en koppel.",
+    "Sign in to the source on the connection page.": "Log in bij de bron op de pagina van de koppeling.",
+    "Continue in your AI tool; it shows the next step.": "Ga verder in je AI-tool; die toont de volgende stap.",
+    "Your progress is saved for seven days.": "Je voortgang blijft zeven dagen bewaard.",
+    "Repository": "Repository",
+    "Recipient": "Ontvanger"
   }
 }
