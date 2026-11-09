@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "Texts for the connector proposal in To confirm (what the connector is, may do and what changes) and for the Unfinished setups card with its Continue button.",
-      "nl": "Teksten voor het connectorvoorstel in Te bevestigen (wat de connector is, mag en wat er verandert) en voor de kaart Nog af te ronden met de knop Verder."
+      "en": "Texts for connecting a custom connector in one step from To confirm (Review and connect), the next step after confirming a proposal, and the Connect bar on the connector page.",
+      "nl": "Teksten voor het in één stap koppelen van een eigen connector vanuit Te bevestigen (Beoordelen en koppelen), de vervolgstap na het bevestigen van een voorstel, en de koppelbalk op de connectorpagina."
     }
   },
   "messages": {
@@ -803,7 +803,6 @@
     "Credentials": "Inloggegevens",
     "Uses these connections": "Gebruikt deze koppelingen",
     "Stored encrypted, never visible to the AI": "Versleuteld opgeslagen, nooit zichtbaar voor de AI",
-    "This connection needs no credentials.": "Deze koppeling heeft geen inloggegevens nodig.",
     "Name in Tailr": "Naam in Tailr",
     "What the connection is called in Tailr. Useful when you connect two web shops or ledgers.": "Zo heet de koppeling in Tailr. Handig als je twee webshops of administraties koppelt.",
     "Prefix of the tools for the AI, e.g. {example}. Lowercase letters, digits and -.": "Voorvoegsel van de functies voor de AI, bijv. {example}. Kleine letters, cijfers en -.",
@@ -1565,7 +1564,6 @@
     "The general rule for every connection. A connector can have its own values from the API documentation (e.g. Exact: 60 per minute), and you can adjust those per connection under Connections.": "De algemene regel voor elke koppeling. Een connector kan eigen waarden uit de API-documentatie hebben (bijv. Exact: 60 per minuut). Je past die per koppeling aan onder Koppelingen.",
     "Before you connect": "Voordat je koppelt",
     "About {minutes} minutes": "Ongeveer {minutes} minuten",
-    "Loading setup plan…": "Stappenplan laden…",
     "You will need": "Dit heb je nodig",
     "Open source system": "Open het bronsysteem",
     "All {n} setup steps": "Alle {n} stappen",
@@ -2059,6 +2057,27 @@
     "Continue in your AI tool; it shows the next step.": "Ga verder in je AI-tool; die toont de volgende stap.",
     "Your progress is saved for seven days.": "Je voortgang blijft zeven dagen bewaard.",
     "Repository": "Repository",
-    "Recipient": "Ontvanger"
+    "Recipient": "Ontvanger",
+    "Saved and connected. Give a role access so people can use it.": "Opgeslagen en gekoppeld. Geef een rol toegang, dan kunnen mensen hem gebruiken.",
+    "Your AI assistant prepared this connector. Nothing is saved until you click Connect: that saves the connector and creates the connection in one step.": "Je AI-assistent heeft deze connector voorbereid. Er wordt niets opgeslagen tot je op Koppelen klikt: dat slaat de connector op en maakt de koppeling in één stap.",
+    "Ready to connect (not saved yet)": "Klaar om te koppelen (nog niet opgeslagen)",
+    "Also creates the connection {name} (short name {slug}).": "Maakt ook de koppeling {name} (korte naam {slug}).",
+    "Also creates the connection {name}.": "Maakt ook de koppeling {name}.",
+    "You go straight to a page where you fill in any credentials and click Connect. Nothing is saved before that.": "Je gaat direct naar een pagina waar je eventuele inloggegevens invult en op Koppelen klikt. Daarvoor wordt niets opgeslagen.",
+    "Review and connect": "Beoordelen en koppelen",
+    "Couldn't create a new link": "Nieuwe link maken is niet gelukt",
+    "1 setting required": "1 instelling vereist",
+    "{n} settings required": "{n} instellingen vereist",
+    "Review what this connector may do first": "Bekijk eerst wat deze connector mag",
+    "Ready to connect": "Klaar om te koppelen",
+    "Nothing to fill in": "Niets in te vullen",
+    "This connector needs no credentials.": "Deze connector heeft geen inloggegevens nodig.",
+    "Saved. Connect it now so a role can get access.": "Opgeslagen. Koppel hem nu, dan kan een rol toegang krijgen.",
+    "View user": "Gebruiker bekijken",
+    "Manage app": "App beheren",
+    "Nothing is saved until you click Connect on the next page.": "Er wordt niets opgeslagen tot je op de volgende pagina op Koppelen klikt.",
+    "Create a new link": "Nieuwe link maken",
+    "The link expired before Connect was clicked, so nothing was saved.": "De link is verlopen voordat op Koppelen is geklikt, dus er is niets opgeslagen.",
+    "The link expired before Connect was clicked, so nothing was saved. Ask your AI tool to propose the connector again.": "De link is verlopen voordat op Koppelen is geklikt, dus er is niets opgeslagen. Vraag je AI-tool de connector opnieuw voor te stellen."
   }
 }
