@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "The hint under Talks only to for a connector that fetches its own token (service account): no sign-in step.",
-      "nl": "De hint onder Praat alleen met voor een connector die zelf zijn token ophaalt (serviceaccount): geen inlogstap."
+      "en": "The welcome page and the invitation email for a new user (#356).",
+      "nl": "De welkomstpagina en de uitnodigingsmail voor een nieuwe gebruiker (#356)."
     }
   },
   "messages": {
@@ -784,6 +784,11 @@
     "Blocked (can no longer sign in, keys stop working)": "Geblokkeerd (kan niet meer inloggen, sleutels werken niet meer)",
     "The link has also been sent by email.": "De link is ook per mail verstuurd.",
     "Pass this link on. It is valid for 3 days and works once.": "Stuur deze link door. Hij is 3 dagen geldig en werkt één keer.",
+    "Hi {name}, welcome!": "Hoi {name}, leuk dat je erbij komt!",
+    "Welcome!": "Welkom!",
+    "This invitation has expired or has already been used. Ask your administrator for a new one.": "Deze uitnodiging is verlopen of al gebruikt. Vraag je beheerder om een nieuwe.",
+    "Choose your password below. After that you're signed in right away and can connect your AI tool to Tailr Core.": "Kies hieronder je wachtwoord. Daarna ben je meteen ingelogd en kun je je AI-tool aan Tailr Core koppelen.",
+    "Set password and sign in": "Wachtwoord instellen en inloggen",
     "No link was created.": "Er is geen link aangemaakt.",
     "1 function": "1 functie",
     "Already connected as {names}": "Al gekoppeld als {names}",
@@ -1243,6 +1248,8 @@
     "Enter the client secret": "Vul het clientgeheim in",
     "Turn on sign-in with Tailr Core in the admin console (Apps and dashboards)": "Zet inloggen met Tailr Core aan in de beheeromgeving (Apps en dashboards)",
     "Set your password for Tailr Core": "Stel je wachtwoord in voor Tailr Core",
+    "{by} has added you to Tailr Core": "{by} heeft je toegevoegd aan Tailr Core",
+    "Hi {name},\n\n{by} has added you to Tailr Core. Choose your password via this link; after that you're signed in right away:\n\n{url}\n\nThe link is valid for 3 days and works once.": "Hoi {name},\n\n{by} heeft je toegevoegd aan Tailr Core. Kies je wachtwoord via deze link; daarna ben je meteen ingelogd:\n\n{url}\n\nDe link is 3 dagen geldig en werkt één keer.",
     "Hello {name},\n\nUse this link to set a (new) password for Tailr Core:\n\n{url}\n\nThe link is valid for 3 days.": "Hallo {name},\n\nVia deze link stel je een (nieuw) wachtwoord in voor Tailr Core:\n\n{url}\n\nDe link is 3 dagen geldig.",
     "Test email from Tailr Core": "Testmail van Tailr Core",
     "This test email shows that Tailr Core can send email. Invitations and password links are now sent by email automatically.": "Deze testmail laat zien dat Tailr Core mail kan versturen. Uitnodigingen en wachtwoordlinks gaan nu automatisch per mail.",
