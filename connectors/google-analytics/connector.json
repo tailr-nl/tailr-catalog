@@ -72,7 +72,7 @@
   "$schema": "../../schemas/connector.json",
   "id": "google-analytics",
   "name": "Google Analytics 4",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": {
     "en": "Reports from Google Analytics 4: visitors, sessions, sources, pages, key events and revenue over any period, realtime visitors, pivot tables, a search through all dimensions and metrics, the setup of the property: key events, custom dimensions, data streams and data retention, and Google's alpha APIs: funnels, annotations, audiences, channel groups and quota.",
     "nl": "Rapporten uit Google Analytics 4: bezoekers, sessies, bronnen, pagina’s, key events en omzet over elke periode, realtime bezoekers, draaitabellen, zoeken in alle dimensies en metrics, de inrichting van de property: key events, eigen dimensies, gegevensstromen en bewaartermijn, en de alpha-API’s van Google: trechters, annotaties, doelgroepen, kanaalgroepen en quota."
@@ -460,6 +460,7 @@
       "description": "Toegangslog van de property: welke gebruiker wanneer en via welke weg rapportgegevens heeft opgevraagd. Dimensies (dimensionName) bijv. userEmail, accessedPropertyId, accessMechanism, accessorAppName, reportType, dataApiQuotaCategory, epochTimeMicros (elke opvraging apart) of mostRecentAccessEpochTimeMicros (de laatste keer per gebruiker); metric (metricName) accessCount. Antwoord in de ruwe vorm van Google: dimensionHeaders, metricHeaders, rows met dimensionValues en metricValues (als tekst), rowCount, en quota als returnEntityQuota aanstaat. Alleen voor Apps (API): het rapport bevat e-mailadressen van collega's en komt niet in een gesprek.",
       "level": "read",
       "method": "POST",
+      "readsWithPost": true,
       "path": "https://analyticsadmin.googleapis.com/v1beta/properties/{property}:runAccessReport",
       "audience": "api",
       "cacheTtlSeconds": 300,
@@ -574,6 +575,7 @@
       "description": "Rapport met dimensies en metrics over een periode, in de ruwe vorm van de Data API (dimensionHeaders, metricHeaders, rows met dimensionValues en metricValues als tekst). Voor analyses in een gesprek is run_report_flat handiger: zelfde invoer, rijen als gewone objecten. Voorbeeld: dimensions [{\"name\":\"sessionDefaultChannelGroup\"}], metrics [{\"name\":\"sessions\"},{\"name\":\"keyEvents\"}], dateRanges [{\"startDate\":\"28daysAgo\",\"endDate\":\"yesterday\"}]. Twijfel je over een naam, zoek hem eerst op met find_dimensions_metrics.",
       "level": "read",
       "method": "POST",
+      "readsWithPost": true,
       "path": "/properties/{property}:runReport",
       "params": {
         "property": {
@@ -726,6 +728,7 @@
       "description": "Realtime rapport over de laatste 30 minuten (60 bij GA 360), nooit uit de cache. Realtime kent een eigen, kleinere set namen: dimensies zoals unifiedScreenName (paginatitel; pagePath bestaat hier niet), country, city, deviceCategory, platform, eventName, audienceName, minutesAgo; metrics zoals activeUsers, screenPageViews, eventCount, keyEvents. Geen dateRanges; splits desgewenst in minuteRanges. Antwoord in de ruwe vorm (dimensionHeaders, metricHeaders, rows met dimensionValues en metricValues). Voorbeeld: dimensions [{\"name\":\"unifiedScreenName\"}], metrics [{\"name\":\"activeUsers\"}].",
       "level": "read",
       "method": "POST",
+      "readsWithPost": true,
       "path": "/properties/{property}:runRealtimeReport",
       "cacheTtlSeconds": 0,
       "params": {
@@ -820,6 +823,7 @@
       "description": "Draaitabel over een periode. Noem alle dimensies in dimensions en verdeel ze daarna over pivots: elke pivot is een as met fieldNames (de dimensies op die as) en een verplichte limit (aantal unieke waarden); het product van alle limits mag hoogstens 250.000 zijn. Elke dimensie staat in precies één pivot. Voorbeeld pagina’s × apparaat: dimensions [{\"name\":\"pagePath\"},{\"name\":\"deviceCategory\"}], pivots [{\"fieldNames\":[\"pagePath\"],\"limit\":20,\"orderBys\":[{\"metric\":{\"metricName\":\"screenPageViews\"},\"desc\":true}]},{\"fieldNames\":[\"deviceCategory\"],\"limit\":5}]. Antwoord: pivotHeaders per as en rows met dimensionValues en metricValues; elke rij is één cel-combinatie. Voor een gewone tabel is run_report_flat eenvoudiger.",
       "level": "read",
       "method": "POST",
+      "readsWithPost": true,
       "path": "/properties/{property}:runPivotReport",
       "params": {
         "property": {
@@ -925,6 +929,7 @@
       "description": "Voert tot 5 rapporten in één aanroep uit (scheelt rondjes en quota). requests is een lijst van rapportverzoeken met dezelfde velden als run_report (dateRanges, dimensions, metrics, dimensionFilter, metricFilter, orderBys, limit, offset, metricAggregations, keepEmptyRows, comparisons, currencyCode), zonder property. Antwoord: reports, in dezelfde volgorde, elk in de ruwe vorm van run_report (dimensionHeaders, metricHeaders, rows). Gebruik dit als je meerdere invalshoeken over dezelfde periode nodig hebt; voor één tabel is run_report_flat eenvoudiger.",
       "level": "read",
       "method": "POST",
+      "readsWithPost": true,
       "path": "/properties/{property}:batchRunReports",
       "params": {
         "property": {
@@ -976,6 +981,7 @@
       "description": "Controleert of een combinatie van dimensions en metrics in één rapport mag, vóór je run_report aanroept. Geef dezelfde dimensions en metrics (en filters) als voor het rapport; het antwoord noemt per beschikbare dimensie en metric of hij COMPATIBLE of INCOMPATIBLE is met wat je al hebt. Zonder compatibilityFilter is het antwoord groot (alle namen); gebruik compatibilityFilter \"COMPATIBLE\" om alleen te zien wat je nog kunt toevoegen, of \"INCOMPATIBLE\" om te zien wat botst. Gebruik dit bij een foutmelding over een ongeldige combinatie, of bij het bouwen van een rapport met veel dimensies.",
       "level": "read",
       "method": "POST",
+      "readsWithPost": true,
       "path": "/properties/{property}:checkCompatibility",
       "cacheTtlSeconds": 3600,
       "params": {
@@ -1056,6 +1062,7 @@
       "description": "Alpha-API van Google: kan veranderen. Trechterrapport over een periode: per stap het aantal actieve gebruikers dat die stap haalde, het percentage dat doorging en het aantal afhakers. Een stap is een voorwaarde op gebeurtenissen, meestal een funnelEventFilter op eventName; de stappen moeten in volgorde gebeuren (gesloten trechter: iedereen begint bij stap 1; isOpenFunnel true laat instappen bij elke stap toe). Compleet voorbeeld van twee stappen: dateRanges [{\"startDate\":\"28daysAgo\",\"endDate\":\"yesterday\"}], funnel {\"steps\":[{\"name\":\"Productpagina\",\"filterExpression\":{\"funnelEventFilter\":{\"eventName\":\"view_item\"}}},{\"name\":\"Winkelwagen\",\"filterExpression\":{\"funnelEventFilter\":{\"eventName\":\"add_to_cart\"}}}]}. Een stap kan ook een funnelFieldFilter op een dimensie zijn, bijv. {\"funnelFieldFilter\":{\"fieldName\":\"pagePath\",\"stringFilter\":{\"matchType\":\"BEGINS_WITH\",\"value\":\"/checkout\"}}}, of een combinatie met andGroup/orGroup/notExpression. Per stap optioneel isDirectlyFollowedBy (true: direct na de vorige stap, zonder andere gebeurtenissen ertussen) en withinDurationFromPriorStep (bijv. \"1800s\": binnen 30 minuten na de vorige stap). Antwoord: funnelTable (dimensie funnelStepName als \"1. Productpagina\", \"2. Winkelwagen\"; metrics activeUsers, funnelStepCompletionRate, funnelStepAbandonments, funnelStepAbandonmentRate; met funnelBreakdown een extra dimensie per stap, bijv. deviceCategory) en funnelVisualization (per stap activeUsers; met funnelVisualizationType TRENDED_FUNNEL ook per date; met funnelNextAction de volgende gebeurtenis of pagina na elke stap). Beide in de ruwe vorm van Google: dimensionHeaders, metricHeaders en rows met dimensionValues en metricValues als tekst. Trechters gebruiken een eigen quotapotje (funnelPropertyQuota in get_quota). Welke gebeurtenissen er zijn: run_report_flat met dimensie eventName en metric eventCount.",
       "level": "read",
       "method": "POST",
+      "readsWithPost": true,
       "path": "https://analyticsdata.googleapis.com/v1alpha/properties/{property}:runFunnelReport",
       "cacheTtlSeconds": 300,
       "params": {
