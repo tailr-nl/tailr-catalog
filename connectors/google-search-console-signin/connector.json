@@ -52,7 +52,7 @@
   "$schema": "../../schemas/connector.json",
   "id": "google-search-console-signin",
   "name": "Google Search Console (sign in)",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "variantOf": "google-search-console",
   "variantTitle": {
     "en": "Sign in with your own Google account",
@@ -215,6 +215,7 @@
       "description": "Klikken, vertoningen, CTR en gemiddelde positie over een periode, gegroepeerd per dimensie. Dimensies: query (zoekterm), page (URL), country (ISO 3166-1 alpha-3, bijv. nld), device (DESKTOP, MOBILE, TABLET), date (JJJJ-MM-DD) en searchAppearance (weergave, bijv. rich results; niet te combineren met andere dimensies). Rijen komen terug als keys (de dimensiewaarden, in de volgorde van dimensions) plus clicks, impressions, ctr, position. Zonder dimensions krijg je één totaalrij. Datums in JJJJ-MM-DD, Pacific-tijd. Maximaal 25.000 rijen per aanroep; blader met startRow, of gebruik search_analytics_all voor alles in één keer. Standaard alleen definitieve dagen (tot 2 à 3 dagen geleden); dataState all geeft ook de verse, nog onvolledige dagen. type discover en googleNews hebben geen dimensie query. CTR en position zijn gemiddelden: tel ze niet op over rijen.",
       "level": "read",
       "method": "POST",
+      "readsWithPost": true,
       "path": "/sites/{site}/searchAnalytics/query",
       "params": {
         "site": {
@@ -349,6 +350,7 @@
       "description": "Inspecteert één URL zoals Google hem in de index heeft (geen live test). Antwoord: inspectionResult met indexStatusResult (verdict PASS/PARTIAL/FAIL/NEUTRAL, coverageState in woorden, indexingState, robotsTxtState, pageFetchState, lastCrawlTime, crawledAs, userCanonical versus googleCanonical, sitemap en referringUrls waarin Google de URL vond), mobileUsabilityResult, richResultsResult (alleen als er rich results zijn, met issues en severity) en ampResult (alleen bij AMP), plus inspectionResultLink naar het rapport in Search Console. De URL moet onder de property vallen (bij sc-domain: elk subdomein en protocol; bij een URL-prefix precies dat voorvoegsel). Schaars: Google staat 2.000 inspecties per dag en 600 per minuut per property toe. Inspecteer alleen URL's die de gebruiker noemt of die uit een eerdere vraag volgen; nooit een hele sitemap.",
       "level": "read",
       "method": "POST",
+      "readsWithPost": true,
       "path": "https://searchconsole.googleapis.com/v1/urlInspection/index:inspect",
       "params": {
         "inspectionUrl": {
