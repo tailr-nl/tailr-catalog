@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "The texts for the security changes of November 2026.",
-      "nl": "De teksten voor de beveiligingswijzigingen van november 2026."
+      "en": "The texts for the log filters on one line.",
+      "nl": "De teksten voor de logfilters op één regel."
     }
   },
   "messages": {
@@ -358,7 +358,7 @@
     "User permission": "Recht van een gebruiker",
     "Cache": "Cache",
     "Setup guide": "Stappenplan",
-        "Connector": "Connector",
+    "Connector": "Connector",
     "App": "App",
     "App permission": "Recht van een app",
     "App key": "App-sleutel",
@@ -438,6 +438,14 @@
     "Via AI, confirmed": "Via AI, bevestigd",
     "From": "Vanaf",
     "Up to and including": "Tot en met",
+    "Period": "Periode",
+    "All time": "Alle datums",
+    "Today": "Vandaag",
+    "Last 7 days": "Laatste 7 dagen",
+    "Last 30 days": "Laatste 30 dagen",
+    "Custom range…": "Eigen periode…",
+    "From {date}": "Vanaf {date}",
+    "Up to {date}": "Tot en met {date}",
     "Clear filters": "Filters wissen",
     "{n} change": "{n} wijziging",
     "{n} changes": "{n} wijzigingen",
