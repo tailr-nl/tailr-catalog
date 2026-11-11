@@ -2184,6 +2184,8 @@
     "The updater is not installed on this server, so you update Tailr Core on the server itself. With the updater you update here, also automatically. Install it on the server with:": "De updater is niet geïnstalleerd op deze server, dus je werkt Tailr Core bij op de server zelf. Met de updater werk je hier bij, ook automatisch. Installeer hem op de server met:",
     "Or update by hand: set TAILR_VERSION in .env to the new version, then run:": "Of werk handmatig bij: zet TAILR_VERSION in .env op de nieuwe versie en voer daarna uit:",
     "Tailr Core is restarting with the new version. This page reloads by itself.": "Tailr Core start opnieuw op met de nieuwe versie. Deze pagina wordt vanzelf opnieuw geladen.",
+    "Tailr Core is restarting": "Tailr Core start opnieuw op",
+    "This usually takes about a minute, for example during an update. This page continues by itself once Tailr Core is back.": "Dat duurt meestal ongeveer een minuut, bijvoorbeeld tijdens een update. Deze pagina gaat vanzelf verder zodra Tailr Core terug is.",
     "Updating to {version}… {step}": "Bijwerken naar {version}… {step}",
     "Waiting for the updater (within a minute).": "Wachten op de updater (binnen een minuut).",
     "Updated from {from} to {to} on {at}.": "Bijgewerkt van {from} naar {to} op {at}.",
