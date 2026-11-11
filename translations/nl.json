@@ -2337,6 +2337,7 @@
     "Fetching…": "Ophalen…",
     "Fetch now": "Nu ophalen",
     "not fetched yet": "nog niet opgehaald",
-    "{name} fetched": "{name} opgehaald"
+    "{name} fetched": "{name} opgehaald",
+    "Tailr Core does not connect to this database: its connection uses the option {option}, which is not allowed. Options that read a file or socket on the server (such as sslcert, sslkey, sslrootcert or socketPath), change the login method, or are unknown are refused. Remove or change it in the connection settings; for your own CA certificate, give the certificate itself as text (connection.ca), never a path.": "Tailr Core verbindt niet met deze database: de verbinding gebruikt de optie {option}, en die is niet toegestaan. Opties die een bestand of socket op de server lezen (zoals sslcert, sslkey, sslrootcert of socketPath), de manier van inloggen veranderen of onbekend zijn, worden geweigerd. Haal de optie weg of pas hem aan in de instellingen van de koppeling; voor een eigen CA-certificaat geef je het certificaat zelf als tekst op (connection.ca), nooit een pad."
   }
 }
