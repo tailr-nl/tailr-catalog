@@ -14,22 +14,22 @@
     {
       "id": "google-analytics",
       "file": "google-analytics/connector.json",
-      "version": "0.7.2"
+      "version": "0.7.3"
     },
     {
       "id": "google-analytics-signin",
       "file": "google-analytics-signin/connector.json",
-      "version": "0.7.2"
+      "version": "0.7.3"
     },
     {
       "id": "google-search-console",
       "file": "google-search-console/connector.json",
-      "version": "0.5.2"
+      "version": "0.5.3"
     },
     {
       "id": "google-search-console-signin",
       "file": "google-search-console-signin/connector.json",
-      "version": "0.5.2"
+      "version": "0.5.3"
     },
     {
       "id": "matomo",

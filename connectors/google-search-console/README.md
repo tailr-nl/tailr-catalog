@@ -10,9 +10,11 @@ Er is een variant [Google Search Console (sign in)](../google-search-console-sig
 
 1. Schakel in Google Cloud Console de **Search Console API** in (een nieuw project mag; een project dat je al voor Google Analytics gebruikt ook).
 2. Maak in hetzelfde project een **serviceaccount** en download een **JSON-sleutel**. Rollen in het project zijn niet nodig.
-3. Geef het serviceaccount in Search Console toegang tot de property: *Instellingen → Gebruikers en rechten → Gebruiker toevoegen*, met het e-mailadres uit het sleutelbestand (`client_email`) en rechten **Beperkt**. Lezen is genoeg.
-4. Voeg in Tailr Core de koppeling **Google Search Console** toe, plak het sleutelbestand op de invulpagina en kies de website uit de lijst (*Websites*). De website is de standaard voor alle functies; per aanroep kan de AI een andere property kiezen.
-5. Tailr Core test de verbinding met *Websites* (`list_sites`).
+3. Voeg in Tailr Core de koppeling **Google Search Console** toe en plak of sleep het sleutelbestand op de invulpagina.
+4. Geef het serviceaccount in Search Console toegang tot de property: *Instellingen → Gebruikers en rechten → Gebruiker toevoegen*, met rechten **Beperkt**. Lezen is genoeg. Het stappenplan geeft je het e-mailadres van het serviceaccount om te kopiëren; het staat ook in het sleutelbestand (`client_email`).
+5. Kies de website uit de lijst (*Websites*, `list_sites`); daarmee test Tailr Core ook de verbinding. De website is de standaard voor alle functies; per aanroep kan de AI een andere property kiezen.
+
+Stap 1 en 2 kunnen ook in één keer: met één commando in **Cloud Shell** (in Google Cloud Console) schakel je de API in, maak je het serviceaccount *Tailr Core* (of gebruik je het als het er al is, bijvoorbeeld van Google Analytics) en download je de sleutel. Het stappenplan biedt die snelle route aan bij de eerste stap.
 
 Het stappenplan in Tailr Core loopt deze stappen met je door, met de juiste links.
 
