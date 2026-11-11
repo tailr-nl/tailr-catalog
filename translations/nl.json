@@ -9,8 +9,8 @@
       "nl": "Tailr Core is beschikbaar in het Nederlands. Kies je taal in het accountmenu."
     },
     "whatsNew": {
-      "en": "The texts for the log filters on one line.",
-      "nl": "De teksten voor de logfilters op één regel."
+      "en": "Texts for updates that need new settings first, and for messages about the source of a connection.",
+      "nl": "Teksten voor updates die eerst nieuwe instellingen vragen, en voor meldingen over de bron van een koppeling."
     }
   },
   "messages": {
@@ -1533,7 +1533,6 @@
     "E.g. Tailr connectors": "Bijv. Tailr-connectors",
     "Only JSON connectors are loaded from a repo. Connectors with custom code are rejected.": "Uit een repo komen alleen JSON-connectors. Adapters met eigen code worden geweigerd.",
     "Connector not found": "Adapter niet gevonden",
-    "This connector is not (or no longer) in the catalog": "Deze connector staat niet (meer) in de catalogus",
     "Built-in connectors cannot be published": "Ingebouwde connectors kunnen niet gepubliceerd worden",
     "Unknown connector": "Onbekende connector",
     "Custom connector": "Eigen connector",
@@ -2349,6 +2348,31 @@
     "not fetched yet": "nog niet opgehaald",
     "{name} fetched": "{name} opgehaald",
     "Tailr Core does not connect to this database: its connection uses the option {option}, which is not allowed. Options that read a file or socket on the server (such as sslcert, sslkey, sslrootcert or socketPath), change the login method, or are unknown are refused. Remove or change it in the connection settings; for your own CA certificate, give the certificate itself as text (connection.ca), never a path.": "Tailr Core verbindt niet met deze database: de verbinding gebruikt de optie {option}, en die is niet toegestaan. Opties die een bestand of socket op de server lezen (zoals sslcert, sslkey, sslrootcert of socketPath), de manier van inloggen veranderen of onbekend zijn, worden geweigerd. Haal de optie weg of pas hem aan in de instellingen van de koppeling; voor een eigen CA-certificaat geef je het certificaat zelf als tekst op (connection.ca), nooit een pad.",
-    "Tailr Core does not connect to this database: the TLS setting {option} is not accepted. A CA certificate, client certificate and key must be the PEM text itself (starting with -----BEGIN), never a path to a file; the certificate and key go together, the key must not be encrypted, and TLS must be on with verification of the server.": "Tailr Core verbindt niet met deze database: de TLS-instelling {option} wordt niet geaccepteerd. Een CA-certificaat, clientcertificaat en sleutel moeten de PEM-tekst zelf zijn (beginnend met -----BEGIN), nooit een pad naar een bestand; certificaat en sleutel horen bij elkaar, de sleutel mag niet versleuteld zijn, en TLS moet aan staan met controle van de server."
+    "Tailr Core does not connect to this database: the TLS setting {option} is not accepted. A CA certificate, client certificate and key must be the PEM text itself (starting with -----BEGIN), never a path to a file; the certificate and key go together, the key must not be encrypted, and TLS must be on with verification of the server.": "Tailr Core verbindt niet met deze database: de TLS-instelling {option} wordt niet geaccepteerd. Een CA-certificaat, clientcertificaat en sleutel moeten de PEM-tekst zelf zijn (beginnend met -----BEGIN), nooit een pad naar een bestand; certificaat en sleutel horen bij elkaar, de sleutel mag niet versleuteld zijn, en TLS moet aan staan met controle van de server.",
+    "Updated to version {version}. Now sign in to {name} and grant access.": "Bijgewerkt naar versie {version}. Log nu in bij {name} en geef toegang.",
+    "Update {name}": "{name} bijwerken",
+    "Version {from} → {to}. Fill in the new settings here; the version only changes after they work.": "Versie {from} → {to}. Vul hier de nieuwe instellingen in; de versie wisselt pas als ze werken.",
+    "Opening…": "Openen…",
+    "a service account key": "een sleutel van een serviceaccount",
+    "a client ID and secret": "een client-ID en geheim",
+    "signing in with your own account": "inloggen met je eigen account",
+    "a user name and password": "een gebruikersnaam en wachtwoord",
+    "requests signed by Tailr Core": "verzoeken die Tailr Core ondertekent",
+    "no sign-in": "geen inlog",
+    "an API key or token": "een API-sleutel of token",
+    "This version signs in differently: it needs {to} instead of {from}.": "Deze versie logt anders in: ze heeft {to} nodig in plaats van {from}.",
+    "This version needs new settings.": "Deze versie heeft nieuwe instellingen nodig.",
+    "Fill in first: {names}.": "Eerst invullen: {names}.",
+    "No longer used, and cleared when you update: {names}.": "Niet meer gebruikt, en gewist bij het bijwerken: {names}.",
+    "The connection keeps working with version {version} until the new settings work.": "De koppeling blijft met versie {version} werken tot de nieuwe instellingen werken.",
+    "Update opens a page for the new settings. The connection keeps working with version {version} until they work.": "Bijwerken opent een pagina voor de nieuwe instellingen. De koppeling blijft met versie {version} werken tot ze werken.",
+    "Keep signing in the current way:": "Blijf op de huidige manier inloggen:",
+    "switch to {name}": "stap over op {name}",
+    "That is a new connection with the same functions; you can remove the old one afterwards.": "Dat is een nieuwe koppeling met dezelfde functies; de oude kun je daarna verwijderen.",
+    "{name} is updated": "{name} is bijgewerkt",
+    "The new settings work. The connection now uses version {version}.": "De nieuwe instellingen werken. De koppeling gebruikt nu versie {version}.",
+    "This connection is not bound to a connector source, so it gets no updates. Add the connector again from the source you trust.": "Deze koppeling hoort niet bij een connectorbron en krijgt dus geen updates. Voeg de connector opnieuw toe uit de bron die je vertrouwt.",
+    "The source of this connection no longer offers this connector (or is turned off). Updates only come from the source the connection was added from.": "De bron van deze koppeling biedt deze connector niet meer aan (of staat uit). Updates komen alleen uit de bron waaruit de koppeling is toegevoegd.",
+    "Some updates need new settings first. Update opens a page to fill them in; the version only changes after they work.": "Sommige updates hebben eerst nieuwe instellingen nodig. Bijwerken opent een pagina om ze in te vullen; de versie wisselt pas als ze werken."
   }
 }
