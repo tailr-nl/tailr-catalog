@@ -10,8 +10,11 @@ De connector logt in met een **serviceaccount** (een technisch account met een J
 
 1. Schakel in Google Cloud Console de Google Analytics Data API en Admin API in.
 2. Maak een serviceaccount en download een JSON-sleutel.
-3. Geef het serviceaccount in Google Analytics de rol **Kijker** op de property (*Beheerder → Toegangsbeheer voor property*).
-4. Plak de sleutel op de invulpagina in Tailr Core en kies daarna de property uit de lijst.
+3. Plak of sleep de sleutel op de invulpagina in Tailr Core.
+4. Geef het serviceaccount in Google Analytics de rol **Kijker** op de property (*Beheerder → Toegangsbeheer voor property*). Het stappenplan geeft je het e-mailadres van het serviceaccount om te kopiëren; het staat ook in het sleutelbestand (`client_email`).
+5. Kies de property uit de lijst.
+
+Stap 1 en 2 kunnen ook in één keer: met één commando in **Cloud Shell** (in Google Cloud Console) schakel je beide API's in, maak je het serviceaccount *Tailr Core* (of gebruik je het als het er al is, bijvoorbeeld van Search Console) en download je de sleutel. Het stappenplan biedt die snelle route aan bij de eerste stap.
 
 Ben je geen beheerder van de property, of wil je liever met je eigen Google-account inloggen? Gebruik dan de variant [Inloggen met je eigen Google-account](../google-analytics-signin/). Die heeft dezelfde functies, met een OAuth-client in plaats van een serviceaccount.
 

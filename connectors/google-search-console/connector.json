@@ -52,7 +52,7 @@
   "$schema": "../../schemas/connector.json",
   "id": "google-search-console",
   "name": "Google Search Console",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": {
     "en": "Google Search Console, read only: search performance (clicks, impressions, click-through rate and position by query, page, country, device or date, also for Discover and Google News), sitemap status and URL inspection.",
     "nl": "Google Search Console, alleen lezen: zoekprestaties (klikken, vertoningen, doorklikratio en positie per zoekopdracht, pagina, land, apparaat of dag, ook voor Discover en Google Nieuws), sitemapstatus en URL-inspectie."
@@ -67,8 +67,8 @@
         "nl": "Sleutel van het serviceaccount"
       },
       "description": {
-        "en": "The JSON key file you downloaded when you created the key for the service account (step 2). Paste the whole file, including the braces.",
-        "nl": "Het JSON-sleutelbestand dat je downloadde bij het maken van de sleutel voor het serviceaccount (stap 2). Plak het hele bestand, inclusief de accolades."
+        "en": "The JSON key file you downloaded for the service account (step 2, or with the Cloud Shell command). Paste the whole file, including the braces, or drop the file on the field.",
+        "nl": "Het JSON-sleutelbestand dat je voor het serviceaccount downloadde (stap 2, of met het commando in Cloud Shell). Plak het hele bestand, inclusief de accolades, of sleep het bestand op het veld."
       },
       "secret": true,
       "required": true,
@@ -103,7 +103,19 @@
         "id": "enable-apis",
         "title": "Search Console API inschakelen",
         "instruction": "Open de link, kies je project (of maak er een) en klik op Inschakelen.",
-        "url": "https://console.cloud.google.com/flows/enableapi?apiid=searchconsole.googleapis.com"
+        "url": "https://console.cloud.google.com/flows/enableapi?apiid=searchconsole.googleapis.com",
+        "shortcut": {
+          "title": "Sneller: alles in één keer in Cloud Shell",
+          "instruction": "Open de link, kies bovenaan je project (of maak er een) en klik rechtsboven op Cloud Shell activeren (het pictogram >_). Plak het commando in Cloud Shell en druk op Enter. Het schakelt de Search Console API in, maakt het serviceaccount Tailr Core (of gebruikt het als het er al is), maakt een JSON-sleutel en downloadt het sleutelbestand tailr-core-key.json naar je computer. Bevestig de download als je browser erom vraagt. Hiermee is ook de stap voor het serviceaccount klaar.",
+          "url": "https://console.cloud.google.com/?cloudshell=true",
+          "copy": {
+            "Commando voor Cloud Shell": "P=$(gcloud config get-value project) && gcloud services enable searchconsole.googleapis.com && (gcloud iam service-accounts describe tailr-core@$P.iam.gserviceaccount.com >/dev/null 2>&1 || gcloud iam service-accounts create tailr-core --display-name=\"Tailr Core\") && gcloud iam service-accounts keys create tailr-core-key.json --iam-account=tailr-core@$P.iam.gserviceaccount.com && cloudshell download tailr-core-key.json"
+          },
+          "note": "Verwijder het sleutelbestand daarna ook in Cloud Shell met rm tailr-core-key.json. Meldt Google dat sleutels maken niet mag (iam.disableServiceAccountKeyCreation), dan blokkeert een organisatiebeleid het; dat geldt ook voor de stap met de hand.",
+          "skips": [
+            "service-account"
+          ]
+        }
       },
       {
         "id": "service-account",
@@ -115,8 +127,12 @@
       {
         "id": "grant-access",
         "title": "Serviceaccount toegang geven in Search Console",
-        "instruction": "Open Search Console, kies de property en ga naar Instellingen → Gebruikers en rechten. Klik op Gebruiker toevoegen, plak het e-mailadres van het serviceaccount (client_email in het sleutelbestand, eindigt op .iam.gserviceaccount.com), kies bij Rechten: Beperkt en klik op Toevoegen. Lezen is genoeg: Tailr Core wijzigt niets in Search Console.",
-        "url": "https://search.google.com/search-console"
+        "instruction": "Open Search Console, kies de property en ga naar Instellingen → Gebruikers en rechten. Klik op Gebruiker toevoegen, plak het e-mailadres van het serviceaccount ({{serviceAccountEmail}}), kies bij Rechten: Beperkt en klik op Toevoegen. Lezen is genoeg: Tailr Core wijzigt niets in Search Console. Daarna kan Tailr Core de website in de lijst vinden.",
+        "url": "https://search.google.com/search-console",
+        "copy": {
+          "E-mailadres van het serviceaccount": "{{serviceAccountEmail}}"
+        },
+        "afterConnect": true
       }
     ]
   },
