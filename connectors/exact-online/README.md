@@ -25,6 +25,8 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 | `list_documents` (code) | Documenten in 1–31 dagen, op documentdatum of aanmaakdatum, optioneel per soort, relatie of onderwerp. Per document de bijlagen (bestandsnaam, grootte) en of het aan een boeking hangt, plus een link (`exact_url`) om het document in Exact te openen. Geen inhoud, geen downloads. |
 | `check_uploads` (code) | Zijn ingestuurde bonnen in 1–31 dagen aangekomen en door Exact herkend? Per upload: herkend (open of verwerkt), niet herkend, dubbel of onduidelijk. Optioneel een lijst met wat je hebt ingestuurd, om te zien wat niet is aangekomen. |
 | `add_document_note` (code, schrijven) | Zet een opmerking van jou bij een document (tekstveld), achter wat er al staat, met datum en "Tailr" ervoor. Je bevestigt elke aanroep in Tailr. |
+| `list_mailboxes` (code) | De Exact-mailboxen van de administratie, om de scanmailbox te vinden. |
+| `upload_receipt` (code, schrijven, alleen API) | Stuurt een bon (pdf, jpg, png, hoogstens ~1,4 MB) naar Exact vanuit een dashboard of app: via de scanmailbox (herkenning door Exact) of als document met bijlage. Niet beschikbaar in de chat. |
 | `me`, `list_sales_invoices`, `list_accounts`, `list_items`, `list_transaction_lines`, `list_receivables` | Losse lijsten met OData-filters. |
 
 ## Wat de code mag (manifest)
@@ -45,9 +47,23 @@ Een bon die je mailt of uploadt, wordt in Exact eerst een ruwe scan (soort 202, 
 
 Een mail die Exact nooit heeft bereikt, laat geen spoor na. Geef daarom met `expected` op wat je hebt ingestuurd: per stuk een tekst uit het onderwerp of de bestandsnaam, een bedrag, of beide (`{"text": "Hornbach", "amount": 61.55}`). Het bedrag wordt gezocht in wat Exact van de factuur heeft gelezen; `match_basis` zegt waarop een stuk is gevonden en bij meer treffers is het `ambiguous`. Of zoek betalingen zonder bon met `review_receipt_evidence`.
 
+## Bon aanleveren via de API (`upload_receipt`)
+
+Foto's en pdf's gaan nooit via de chat. `upload_receipt` heeft `audience: "api"`: de functie staat niet in de lijst voor de AI en een AI krijgt `api_only`. Een dashboard of app met een eigen sleutel roept hem aan:
+
+```
+POST /api/v1/tools/exact-online__upload_receipt
+{ "file_name": "bon-hornbach.jpg", "file_base64": "<base64>", "note": "gereedschap project X" }
+```
+
+- **`route: "scan"`** (standaard) stuurt de bon als bericht naar de scanmailbox van de administratie (`mailbox/MailMessagesSent` met Operation 1, inkoopfactuur), zodat Exact hem uitleest zoals een gemailde bon. Is er meer dan één mailbox, geef dan `recipient_mailbox_id` mee (zie `list_mailboxes`). Controleer daarna met `check_uploads` of hij herkend is. Of Exact een via de API gestuurd bericht net zo verwerkt, is niet gedocumenteerd.
+- **`route: "document"`** maakt een document met bijlage, zonder herkenning; de boekhouder verwerkt het met de hand.
+- Hoogstens ongeveer 1,4 MB: een verzoek uit de zandbak mag hoogstens 2 MB zijn en base64 is een derde groter. Verklein een foto eerst (jpg, ongeveer 1600 px).
+- Een dashboard binnen Tailr (plugin) kan dit nog niet: dat geeft hoogstens 64 kB aan argumenten mee en roept standaard alleen leesfuncties aan.
+
 ## Opmerking bij een document (`add_document_note`)
 
-De enige functie van deze koppeling die iets in Exact verandert. Hij zet een opmerking die jij geeft in het tekstveld van één document, bijvoorbeeld "privé" of "hoort bij project X" voor je boekhouder. Bestaande tekst blijft staan; de opmerking komt erachter als `[datum Tailr] tekst`. Daarna leest de functie het document terug (`verified`). Bij een upload hoort de opmerking bij de herkende inkoopfactuur (soort 20), want die verwerkt de boekhouder. Teruglezen kan met `list_documents` en `include_body: true`.
+Een van de twee functies van deze koppeling die iets in Exact veranderen (de andere is `upload_receipt`). Hij zet een opmerking die jij geeft in het tekstveld van één document, bijvoorbeeld "privé" of "hoort bij project X" voor je boekhouder. Bestaande tekst blijft staan; de opmerking komt erachter als `[datum Tailr] tekst`. Daarna leest de functie het document terug (`verified`). Bij een upload hoort de opmerking bij de herkende inkoopfactuur (soort 20), want die verwerkt de boekhouder. Teruglezen kan met `list_documents` en `include_body: true`.
 
 Een opmerking in de mail waarmee je een bon instuurt, komt niet in Exact terecht: het tekstveld van gemailde uploads is leeg.
 
