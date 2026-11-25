@@ -4,7 +4,7 @@
     {
       "id": "exact-online",
       "file": "exact-online/connector.json",
-      "version": "0.6.3"
+      "version": "0.7.0"
     },
     {
       "id": "github",
