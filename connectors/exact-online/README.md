@@ -42,7 +42,7 @@ Een bon die je mailt of uploadt, wordt in Exact eerst een ruwe scan (soort 202, 
 - `duplicate_of_earlier_upload`: hetzelfde bestand was al eerder ingestuurd en herkend;
 - `ambiguous_multiple_recognized_documents`: meer dan één inkoopfactuur met dit bestand.
 
-Een mail die Exact nooit heeft bereikt, laat geen spoor na. Geef daarom met `expected` op wat je hebt ingestuurd (een stuk tekst uit het onderwerp of de bestandsnaam), of zoek betalingen zonder bon met `review_receipt_evidence`.
+Een mail die Exact nooit heeft bereikt, laat geen spoor na. Geef daarom met `expected` op wat je hebt ingestuurd: per stuk een tekst uit het onderwerp of de bestandsnaam, een bedrag, of beide (`{"text": "Hornbach", "amount": 61.55}`). Het bedrag wordt gezocht in wat Exact van de factuur heeft gelezen; `match_basis` zegt waarop een stuk is gevonden en bij meer treffers is het `ambiguous`. Of zoek betalingen zonder bon met `review_receipt_evidence`.
 
 ## Documenten zoeken (`list_documents`)
 
