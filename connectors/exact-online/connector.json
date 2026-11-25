@@ -25,17 +25,37 @@
           "get_general_ledger_card",
           "get_financial_entry"
         ]
+      },
+      {
+        "prompt": {
+          "en": "What is still open with suppliers? Show open invoices and payments that are not linked to an invoice yet, per supplier.",
+          "nl": "Wat staat er nog open bij leveranciers? Toon openstaande facturen en betalingen die nog niet aan een factuur hangen, per leverancier."
+        },
+        "requires": [
+          "me",
+          "list_payables"
+        ]
+      },
+      {
+        "prompt": {
+          "en": "Check last month's outgoing bank payments: which have a receipt or invoice attached, and which should I look at?",
+          "nl": "Controleer de uitgaande bankbetalingen van vorige maand: bij welke hangt een bon of factuur, en welke moet ik nakijken?"
+        },
+        "requires": [
+          "me",
+          "review_receipt_evidence"
+        ]
       }
     ],
     "whatsNew": {
-      "en": "Investigate outstanding invoices and trace entries in your accounts.",
-      "nl": "Onderzoek openstaande facturen en zoek boekingen in je administratie terug."
+      "en": "See what you still owe suppliers, find documents with their attachments, and check receipts for bank payments through the purchase invoice.",
+      "nl": "Zie wat je leveranciers nog moet betalen, zoek documenten met hun bijlagen, en controleer bonnen bij bankbetalingen via de inkoopfactuur."
     }
   },
   "$schema": "../../schemas/connector.json",
   "id": "exact-online",
   "name": "Exact Online",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": {
     "en": "Invoices, contacts, items, general ledger entries, matching status and bank transactions from Exact Online. Read access only.",
     "nl": "Facturen, relaties, artikelen, grootboekregels, afletterstatus en banktransacties uit Exact Online. Alleen lezen."
@@ -653,7 +673,7 @@
         "en": "Which outgoing bank payments still lack a receipt or invoice."
       },
       "description": "Voor uitgaande bankregels in een periode van 1–31 dagen: is er een gekoppeld document met bijlage? Volgt het document van de bankregel zelf en, via het factuurnummer op de tegenregel van de bankboeking, het document van de inkoopfactuur (evidence_path). Categorieën evidence_present, evidence_needed, needs_review, plus het soort beweging per regel (movement_kind: uitgave, overboeking, privé, kruispost enz.). Stelt nooit vast dat een bon echt ontbreekt, controleert de inhoud van bijlagen niet en koppelt nooit op bedrag, datum of omschrijving.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "level": "read",
       "file": "tools/receipt_evidence.ts",
       "requests": [

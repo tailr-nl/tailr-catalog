@@ -57,6 +57,7 @@ const INCOMPLETE_REASONS = [
 ];
 const CATEGORIES = ["evidence_present", "evidence_needed", "needs_review"];
 const NO_PURCHASE_LINK = "shared_explicit_document_not_payment_matching";
+const UNLINKED_SUPPLIER_PAYMENT = "supplier_payment_not_linked_to_invoice";
 
 /** TransactionLines.Type volgens de Exact-documentatie: 30 = Purchase entry, 31 = Purchase credit note. */
 const PURCHASE_LINE_TYPES = [30, 31];
@@ -322,6 +323,9 @@ export default async function receiptEvidence(args: { start_date: string; end_da
     const numbers = unique(counterLines.map((l) => String(l.InvoiceNumber)));
     if (numbers.length !== 1) {
       row.reasons.push(numbers.length ? "multiple_invoice_numbers_on_bank_entry_counter_line" : "no_invoice_number_on_bank_entry_counter_line");
+      // Betaald aan een leverancier (tegenrekening crediteuren) maar niet aan een factuur gehangen:
+      // dezelfde posten als de losse betalingen in list_payables. Geen bewijs dat een factuur ontbreekt.
+      if (!numbers.length && row.movement_kind === "payables_settlement") row.reasons.push(UNLINKED_SUPPLIER_PAYMENT);
       continue;
     }
     w.invoiceNumber = numbers[0];
@@ -421,6 +425,7 @@ export default async function receiptEvidence(args: { start_date: string; end_da
       rows_with_explicit_purchase_link: rows.filter((r) => r.purchase_link_semantics !== NO_PURCHASE_LINK).length,
       amounts_and_settlement_status_verified: false,
     },
+    supplier_payments_not_linked_to_invoice: having(UNLINKED_SUPPLIER_PAYMENT),
     attachment_observations: { present: rows.filter((r) => r.attachment_observation === "present").length, absent: rows.filter((r) => r.attachment_observation === "absent").length, unknown: rows.filter((r) => r.attachment_observation === "unknown").length },
     linkage_complete: !truncated && !duplicates && count("needs_review") === 0,
     query_budget: { documents_followed: bankDocs.length, purchase_documents_followed: purchaseDocs.length, max_document_ids: MAX_DOCS, ids_per_request: BATCH, max_pages_per_request: PAGES },
@@ -432,6 +437,7 @@ export default async function receiptEvidence(args: { start_date: string; end_da
       "The purchase path shows which invoice the payment was booked against. Amounts, partial payments and matching status are not checked, so purchase_payment_linkage_verified stays false; use get_matching_details for that.",
       "No matching on amount, date, description, OffsetID or OurRef. Without an invoice number, or without exactly one purchase entry and document, the row keeps its category and gets a reason.",
       "attachment_observation, document_role and purchase_entries describe the bank line's own document; purchase_invoice has its own. A shared Document identifies related purchase metadata, not a settlement.",
+      "supplier_payment_not_linked_to_invoice: the payment was booked on the accounts payable account without an invoice number. The invoice may still have to be entered or matched; it is not proof that a receipt is missing. list_payables shows the same items as unmatched_payment.",
       "movement_kind comes from the counter account: its Exact G/L account type, else words in its name (see movement_kind_source). It is a label for review, not a ruling; clearing accounts go through the same evidence check as every other row.",
       "A row with rate_limited_evidence_not_checked was not checked because the Exact rate limit was reached; it says nothing about missing evidence. Run again later or for a shorter period.",
       "Requests cover ten keys each; a truncated or failed request counts for all ten, so those rows are needs_review unless the other path found a document with attachment.",
