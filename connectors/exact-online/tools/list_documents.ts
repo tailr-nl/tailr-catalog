@@ -33,7 +33,7 @@ function optionalBoolean(ctx: any, name: string, value: unknown): boolean | null
 }
 
 export default async function listDocuments(
-  args: { start_date: string; end_date: string; date_field?: string; type?: number; account?: string; subject_contains?: string; only_unbooked?: boolean; has_attachments?: boolean; max_documents?: number },
+  args: { start_date: string; end_date: string; date_field?: string; type?: number; account?: string; subject_contains?: string; only_unbooked?: boolean; only_open_proposals?: boolean; has_attachments?: boolean; max_documents?: number },
   ctx: any,
 ) {
   const start = dayNumber(args.start_date);
@@ -53,6 +53,7 @@ export default async function listDocuments(
     ctx.fail("invalid_input", "subject_contains must be 2–60 characters, without quotes, backslashes or control characters");
   }
   const onlyUnbooked = optionalBoolean(ctx, "only_unbooked", args.only_unbooked) === true;
+  const onlyOpenProposals = optionalBoolean(ctx, "only_open_proposals", args.only_open_proposals) === true;
   const hasAttachments = optionalBoolean(ctx, "has_attachments", args.has_attachments);
 
   // 1. Documenten in de periode: alleen vaste, gecontroleerde waarden in het filter
@@ -100,7 +101,7 @@ export default async function listDocuments(
   }
   const lowered = needle?.toLowerCase() ?? null;
   const candidates = documents
-    .filter((d) => (lowered === null || String(d.subject ?? "").toLowerCase().includes(lowered)) && (!onlyUnbooked || !d.booked))
+    .filter((d) => (lowered === null || String(d.subject ?? "").toLowerCase().includes(lowered)) && (!onlyUnbooked || !d.booked) && (!onlyOpenProposals || d.proposed_entry_status === 20))
     .sort((a, b) => String(b[dateField] ?? "").localeCompare(String(a[dateField] ?? "")) || String(a.id).localeCompare(String(b.id)));
 
   // 3. Bijlagen per tien documenten; met has_attachments zoeken we door tot max of tot het budget op is
@@ -156,7 +157,7 @@ export default async function listDocuments(
     division: await divisionInfo(ctx),
     query: {
       start_date: args.start_date, end_date_exclusive: args.end_date, date_field: dateField, type, account,
-      subject_contains: needle, only_unbooked: onlyUnbooked, has_attachments: hasAttachments, max_documents: max,
+      subject_contains: needle, only_unbooked: onlyUnbooked, only_open_proposals: onlyOpenProposals, has_attachments: hasAttachments, max_documents: max,
     },
     snapshot_at: ctx.now,
     documents: selected,
@@ -167,6 +168,8 @@ export default async function listDocuments(
       attachments_unknown: unknown,
       booked: selected.filter((d) => d.booked).length,
       unbooked: selected.filter((d) => !d.booked).length,
+      open_proposals: selected.filter((d) => d.proposed_entry_status === 20).length,
+      by_type: Object.fromEntries([...new Set(selected.map((d) => String(d.type_description ?? d.type ?? "unknown")))].sort().map((t) => [t, selected.filter((d) => String(d.type_description ?? d.type ?? "unknown") === t).length])),
       // Vóór has_attachments en max_documents: alles wat op periode, soort, relatie, onderwerp en only_unbooked past
       matched_in_scan: candidates.length,
       scanned: documents.length,
@@ -177,6 +180,7 @@ export default async function listDocuments(
     attachment_queries: { complete: attachmentsComplete, batches, documents_examined: examined, documents_with_unknown_attachments: unknownDocuments, max_documents_examined: BATCH * MAX_BATCHES, error: attachmentError, attachments_outside_batch: foreignAttachments },
     limitations: [
       "booked = the document has a FinancialTransactionEntryID. For a sales invoice document Exact puts the sales invoice ID there, not a financial entry.",
+      "only_unbooked also returns documents that never get an entry link, such as bank import files and the raw scan of an upload. For uploads that still have to be processed use only_open_proposals (proposed_entry_status 20 = open): Exact keeps the raw scan and the recognised purchase invoice as two documents.",
       "booked = false does not prove that nothing was booked: an entry can exist without a link to the document.",
       "Only attachment metadata (file name, size). Document bodies and attachment contents are not read; there are no download links.",
       "Counts are over the returned documents. If complete is false or truncated is true, do not conclude that a document does not exist.",

@@ -55,7 +55,7 @@
   "$schema": "../../schemas/connector.json",
   "id": "exact-online",
   "name": "Exact Online",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": {
     "en": "Invoices, contacts, items, general ledger entries, matching status and bank transactions from Exact Online. Read access only.",
     "nl": "Facturen, relaties, artikelen, grootboekregels, afletterstatus en banktransacties uit Exact Online. Alleen lezen."
@@ -563,7 +563,7 @@
         "en": "Whether invoices are matched and what is still open."
       },
       "description": "Afletterstatus van verkoop- en inkoopfacturen (matched, partially_matched, open, unknown) met openstaand bedrag en tegenboekingen. Op invoice_number, your_ref of entry_number (+ journal_code). Met entry_number ook de openstaande post van de boeking zelf (entry_outstanding_items): een betaling of ontvangst zonder factuurnummer krijgt open_not_linked_to_invoice. Afletteren op een grootboekkaart (bijv. kruisposten) zit niet in de API van Exact en wordt nooit geraden.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "level": "read",
       "file": "tools/matching_details.ts",
       "requests": [
@@ -574,6 +574,14 @@
         {
           "method": "GET",
           "path": "/*/cashflow/Payments"
+        },
+        {
+          "method": "GET",
+          "path": "/*/read/financial/PayablesList"
+        },
+        {
+          "method": "GET",
+          "path": "/*/read/financial/ReceivablesList"
         },
         {
           "method": "GET",
@@ -737,8 +745,8 @@
         "nl": "Documenten in een periode van hoogstens een maand, met hun bijlagen en of ze geboekt zijn.",
         "en": "Documents in a period of at most one month, with their attachments and whether they are booked."
       },
-      "description": "Documenten in een periode van 1–31 dagen (op documentdatum of aanmaakdatum), optioneel gefilterd op soort, relatie en onderwerp. Per document: onderwerp, soort, datums, relatie (id en code, geen naam), booked (hangt aan een boeking, met het id) en de bijlagen (bestandsnaam en grootte). only_unbooked=true voor stukken die nog niet aan een boeking hangen. Geen inhoud en geen downloads. booked=false bewijst niet dat er niets geboekt is; bij complete=false of truncated=true nooit concluderen dat een document niet bestaat.",
-      "version": "0.1.0",
+      "description": "Documenten in een periode van 1–31 dagen (op documentdatum of aanmaakdatum), optioneel gefilterd op soort, relatie en onderwerp. Per document: onderwerp, soort, datums, relatie (id en code, geen naam), booked (hangt aan een boeking, met het id) en de bijlagen (bestandsnaam en grootte). only_open_proposals=true voor geüploade stukken die nog verwerkt moeten worden (open boekingsvoorstel); only_unbooked=true voor alles zonder boeking, ook bankimports en ruwe scans. Geen inhoud en geen downloads. booked=false bewijst niet dat er niets geboekt is; bij complete=false of truncated=true nooit concluderen dat een document niet bestaat.",
+      "version": "0.2.0",
       "level": "read",
       "file": "tools/list_documents.ts",
       "requests": [
@@ -785,6 +793,10 @@
         "only_unbooked": {
           "type": "boolean",
           "description": "Alleen documenten die niet aan een boeking hangen"
+        },
+        "only_open_proposals": {
+          "type": "boolean",
+          "description": "Alleen stukken met een open boekingsvoorstel: geüpload of gescand, nog te verwerken"
         },
         "has_attachments": {
           "type": "boolean",
