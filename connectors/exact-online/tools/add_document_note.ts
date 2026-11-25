@@ -20,6 +20,7 @@ function preview(value: unknown): string | null {
     .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
     .replace(/[ \t]+/g, " ")
     .trim();
+  if (!text) return null;
   return text.length > 600 ? `${text.slice(0, 600)}…` : text;
 }
 
@@ -52,7 +53,9 @@ export default async function addDocumentNote(args: { document_id?: string; docu
   const line = `[${ctx.today ?? String(ctx.now ?? "").slice(0, 10)} Tailr] ${note}`;
   // Exact toont Body als HTML: tekens escapen en regels met <br> scheiden, anders komt alles op één regel
   const html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
-  const body = before.trim() ? `${before.replace(/\s+$/, "")}<br><br>${html}` : html;
+  // Een veld met alleen lege HTML (bijv. na wissen in Exact) telt als leeg
+  const hasText = preview(before) !== null;
+  const body = hasText ? `${before.replace(/(\s|<br\s*\/?>|&nbsp;)+$/gi, "")}<br><br>${html}` : html;
   if (body.length > BODY_LIMIT) ctx.fail("invalid_input", `The document text would become longer than ${BODY_LIMIT} characters; use a shorter note`);
 
   await ctx.request({ method: "PUT", path: `/${divisionOf(ctx)}/documents/Documents(guid'${id}')`, body: { Body: body } });
@@ -80,6 +83,7 @@ export default async function addDocumentNote(args: { document_id?: string; docu
     },
     added: line,
     previous_text: preview(before),
+    replaced_empty_markup: !hasText && before.length > 0,
     text_now: preview(after),
     verified,
     limitations: [
