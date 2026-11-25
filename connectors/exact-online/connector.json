@@ -655,6 +655,79 @@
         "maxCalls": 160,
         "timeoutSeconds": 300
       }
+    },
+    {
+      "name": "list_documents",
+      "title": {
+        "nl": "Documenten zoeken",
+        "en": "Find documents"
+      },
+      "summary": {
+        "nl": "Documenten in een periode van hoogstens een maand, met hun bijlagen en of ze geboekt zijn.",
+        "en": "Documents in a period of at most one month, with their attachments and whether they are booked."
+      },
+      "description": "Documenten in een periode van 1–31 dagen (op documentdatum of aanmaakdatum), optioneel gefilterd op soort, relatie en onderwerp. Per document: onderwerp, soort, datums, relatie (id en code, geen naam), booked (hangt aan een boeking, met het id) en de bijlagen (bestandsnaam en grootte). only_unbooked=true voor stukken die nog niet aan een boeking hangen. Geen inhoud en geen downloads. booked=false bewijst niet dat er niets geboekt is; bij complete=false of truncated=true nooit concluderen dat een document niet bestaat.",
+      "version": "0.1.0",
+      "level": "read",
+      "file": "tools/list_documents.ts",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/*/documents/Documents"
+        },
+        {
+          "method": "GET",
+          "path": "/*/documents/DocumentAttachments"
+        },
+        {
+          "method": "GET",
+          "path": "/*/system/Divisions"
+        }
+      ],
+      "params": {
+        "start_date": {
+          "type": "string",
+          "required": true,
+          "description": "Begin (YYYY-MM-DD), inclusief"
+        },
+        "end_date": {
+          "type": "string",
+          "required": true,
+          "description": "Eind (YYYY-MM-DD), exclusief"
+        },
+        "date_field": {
+          "type": "string",
+          "description": "Welke datum: document_date (standaard) of created (aanmaakdatum, bijv. voor pas geüploade stukken)"
+        },
+        "type": {
+          "type": "integer",
+          "description": "Soortnummer van het document (Type in Exact)"
+        },
+        "account": {
+          "type": "string",
+          "description": "Relatie (GUID, zie list_accounts)"
+        },
+        "subject_contains": {
+          "type": "string",
+          "description": "Tekst in het onderwerp, 2–60 tekens, hoofdletters maken niet uit"
+        },
+        "only_unbooked": {
+          "type": "boolean",
+          "description": "Alleen documenten die niet aan een boeking hangen"
+        },
+        "has_attachments": {
+          "type": "boolean",
+          "description": "true = alleen met bijlage, false = alleen zonder; weglaten = beide"
+        },
+        "max_documents": {
+          "type": "integer",
+          "description": "1–200, standaard 100"
+        }
+      },
+      "limits": {
+        "maxCalls": 60,
+        "timeoutSeconds": 180
+      }
     }
   ],
   "maturity": "beta"

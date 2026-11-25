@@ -1,6 +1,6 @@
 # Exact Online
 
-Facturen, relaties, artikelen en boekingsregels uit Exact Online. Daarnaast code-functies voor het boekhoudwerk: grootboekkaart, boekingen, afletterstatus, bankregels per periode en bewijs bij bankuitgaven. **Alleen lezen.**
+Facturen, relaties, artikelen en boekingsregels uit Exact Online. Daarnaast code-functies voor het boekhoudwerk: grootboekkaart, boekingen, afletterstatus, bankregels per periode, bewijs bij bankuitgaven en documenten zoeken. **Alleen lezen.**
 
 De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien in de zandbak van Tailr Core.
 
@@ -21,14 +21,29 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 | `get_matching_details` (code) | Afletterstatus van facturen, met openstaand bedrag en tegenboekingen, en een controle of factuur plus tegenregels gelijk is aan het openstaande bedrag. |
 | `list_bank_lines_by_period` (code) | Bankregels in 1–31 dagen, optioneel per grootboekrekening. |
 | `review_receipt_evidence` (code) | Bij uitgaande bankregels: is er een document met bijlage, aan de bankregel zelf of aan de inkoopfactuur die ermee is betaald? Met het soort beweging per regel. Zie [Bonnetjescontrole](#bonnetjescontrole). |
+| `list_documents` (code) | Documenten in 1–31 dagen, op documentdatum of aanmaakdatum, optioneel per soort, relatie of onderwerp. Per document de bijlagen (bestandsnaam, grootte) en of het aan een boeking hangt. Geen inhoud, geen downloads. |
 | `me`, `list_sales_invoices`, `list_accounts`, `list_items`, `list_transaction_lines`, `list_receivables` | Losse lijsten met OData-filters. |
 
 ## Wat de code mag (manifest)
 
 - **Host:** alleen het Exact-domein uit de instellingen (standaard `start.exactonline.nl`).
-- **Verzoeken:** alleen `GET` op vaste resources: TransactionLines, BankEntryLines, ReportingBalance, FinancialPeriods, GLAccounts, Receivables, Payments, Documents, DocumentAttachments, PurchaseEntries en Divisions.
+- **Verzoeken:** alleen `GET` op vaste resources (per functie alleen wat die functie nodig heeft; `list_documents` gebruikt Documents, DocumentAttachments en Divisions): TransactionLines, BankEntryLines, ReportingBalance, FinancialPeriods, GLAccounts, Receivables, Payments, Documents, DocumentAttachments, PurchaseEntries en Divisions.
 - Bladeren alleen met de `$skiptoken` uit `__next`; de volgende URL zelf wordt nooit opgevraagd.
 - De code ziet het OAuth-token niet. Tailr Core voegt het toe en vernieuwt het.
+
+## Documenten zoeken (`list_documents`)
+
+- **Filters.** Exact filtert op datum (`date_field`: `document_date` of `created`), soort (`type`) en relatie (`account`). Onderwerp (`subject_contains`), `only_unbooked` en `has_attachments` filtert de code zelf na het ophalen; die waarden gaan nooit in een OData-filter.
+- **Geboekt.** `booked` is waar als het document een `FinancialTransactionEntryID` heeft; dat id staat in `financial_entry_id` (te gebruiken met `get_financial_entry`). Bij een document van de soort verkoopfactuur zet Exact daar het id van de verkoopfactuur neer, niet van een boeking. `booked: false` bewijst niet dat er niets geboekt is. `proposed_entry_status` is de status van het boekingsvoorstel bij het document (0 = vervallen, 5 = afgewezen, 20 = open, 50 = verwerkt).
+- **Bijlagen.** Alleen bestandsnaam en grootte, per tien documenten tegelijk opgehaald. Lukt dat niet, dan staat er `attachments_known: false`; dat is iets anders dan "geen bijlage".
+- **Grenzen per aanroep.** De functie bekijkt hooguit 900 documenten in de periode en haalt van hooguit 200 documenten de bijlagen op. Daarboven is `complete` onwaar en `truncated` of `scan.complete` zegt waarom. Kies dan een kortere periode of een extra filter. Ergste geval: 56 aanroepen (15 pagina's documenten, 20 groepen bijlagen van elk hooguit 2 pagina's, 1 voor de administratie).
+- **Nog niet geboekte uploads.** Wat de documentatie van Exact zegt: `documents/Documents` heeft een eigen documentdatum ("Entry date of the incoming document"), een status van het boekingsvoorstel (`ProposedEntryStatus`, met 20 = open) en een verwijzing naar de boeking die leeg kan zijn. Dat past bij geüploade of gescande stukken die nog verwerkt moeten worden. Wat **niet** in de documentatie staat en niet met een echte administratie is getest: of elk geüpload of gescand stuk (Scan & herken, de digitale brievenbus, de app) meteen als document in deze resource staat, welke soortnummers ze krijgen, en of `FinancialTransactionEntryID` bij elke soort boeking wordt gevuld. Controleer dat eerst in je eigen administratie voordat je op `only_unbooked` vertrouwt, en zoek pas geüploade stukken met `date_field: "created"`.
+- **Filters bij Exact.** De documentatie van Exact zegt niet per veld of je erop kunt filteren. Filteren op `DocumentDate`, `Created`, `Type` en `Account` is niet tegen een echte administratie getest; weigert Exact een filter, dan geeft de functie een fout en geen lege lijst.
+- **Soortnummers** staan in Exact onder de documentsoorten; de functie geeft per document `type` en `type_description` terug.
+
+## Persoonsgegevens
+
+`list_documents` volgt het patroon "een lijst zonder persoonsgegevens": de naam van de relatie, de contactpersoon en de maker van het document worden niet bij Exact opgevraagd. De relatie komt terug als id en relatiecode. De inhoud van documenten en bijlagen wordt niet gelezen. Onderwerp en bestandsnaam zijn vrije tekst en komen wel mee, omdat een document anders niet te herkennen is; daar kan een naam in staan als iemand die er zelf in heeft gezet of als Exact het onderwerp zo heeft opgebouwd. Wil je dat niet, geef een rol dan geen recht op deze functie.
 
 ## Limieten
 
