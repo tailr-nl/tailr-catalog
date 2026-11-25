@@ -66,7 +66,9 @@ export default async function addDocumentNote(args: { document_id?: string; docu
   try {
     const r = await collect(ctx, "documents/Documents", FIELDS, `ID eq guid'${id}'`, { maxRows: 1, maxPages: 1 });
     after = typeof r.items[0]?.Body === "string" ? r.items[0]!.Body : null;
-    verified = after !== null && after.includes(html);
+    // Exact kan de HTML anders opslaan (bijv. <br /> of extra tags): vergelijk de leesbare tekst
+    const flat = (t: string | null) => (t ?? "").replace(/\s+/g, " ").trim();
+    verified = after !== null && flat(preview(after)).includes(flat(line));
   } catch {
     verified = null;
   }
