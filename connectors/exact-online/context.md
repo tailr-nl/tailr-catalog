@@ -14,3 +14,4 @@ Functies:
 - Is factuur X betaald of afgeletterd: get_matching_details.
 - Bankregels in een periode (bijv. om een Mollie-uitbetaling af te letteren): list_bank_lines_by_period.
 - Welke uitgaven op de bank hebben een bon of factuur, en wat voor beweging is het: review_receipt_evidence.
+- Documenten zoeken in een periode (ook stukken die nog niet aan een boeking hangen, met only_unbooked), met bestandsnaam en grootte van de bijlagen: list_documents. Geen inhoud; booked = false of complete = false bewijst niet dat een boeking of document ontbreekt.
