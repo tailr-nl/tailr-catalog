@@ -58,7 +58,7 @@ POST /api/v1/tools/exact-online__upload_receipt
 
 - **`route: "scan"`** (standaard) stuurt de bon als bericht naar de scanmailbox van de administratie (`mailbox/MailMessagesSent` met Operation 1, inkoopfactuur), zodat Exact hem uitleest zoals een gemailde bon. Is er meer dan één mailbox, geef dan `recipient_mailbox_id` mee (zie `list_mailboxes`). Controleer daarna met `check_uploads` of hij herkend is. Of Exact een via de API gestuurd bericht net zo verwerkt, is niet gedocumenteerd.
 - **`route: "document"`** maakt een document met bijlage, zonder herkenning; de boekhouder verwerkt het met de hand.
-- Voorbeeld: [`examples/upload_receipt.py`](examples/upload_receipt.py) leest een bestand van schijf en stuurt het met een app-sleutel naar Tailr. Een AI-agent die het script draait, ziet alleen het antwoord, niet het bestand.
+- Voorbeeld: [`examples/exact-online/upload_receipt.py`](../../examples/exact-online/upload_receipt.py) (buiten de connectormap, want een connector bevat alleen tekstbestanden die Tailr kent) leest een bestand van schijf en stuurt het met een app-sleutel naar Tailr. Een AI-agent die het script draait, ziet alleen het antwoord, niet het bestand.
 - Hoogstens ongeveer 1,4 MB: een verzoek uit de zandbak mag hoogstens 2 MB zijn en base64 is een derde groter. Verklein een foto eerst (jpg, ongeveer 1600 px).
 - Een dashboard binnen Tailr (plugin) kan dit nog niet: dat geeft hoogstens 64 kB aan argumenten mee en roept standaard alleen leesfuncties aan.
 
