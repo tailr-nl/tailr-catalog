@@ -17,7 +17,10 @@ const KINDS: { ext: RegExp; prefix: string; label: string; attachmentType: numbe
   { ext: /\.jpe?g$/i, prefix: "/9j/", label: "jpg", attachmentType: null },
   { ext: /\.png$/i, prefix: "iVBORw0KGgo", label: "png", attachmentType: null },
 ];
-const SCAN_OPERATION_PURCHASE_INVOICE = 1;
+// Operation op MailMessagesSent: 1 = inkoopfactuur zonder details (Exact zet hem op "alleen handmatig"),
+// 2 = inkoopfactuur met details (naar de scanservice). Live gezien op 25 nov 2026 met 1.
+const SCAN_OPERATIONS: Record<number, string> = { 1: "purchase_invoice_without_details", 2: "purchase_invoice_with_details" };
+const DEFAULT_SCAN_OPERATION = 2;
 const MAIL_TYPE_PURCHASE_INVOICE = 1000;
 const DEFAULT_DOCUMENT_TYPE = 20;
 
@@ -38,7 +41,7 @@ function createdId(res: any): string | null {
 }
 
 export default async function uploadReceipt(
-  args: { file_base64: string; file_name: string; note?: string; subject?: string; route?: string; recipient_mailbox_id?: string; sender_mailbox_id?: string; document_type?: number },
+  args: { file_base64: string; file_name: string; note?: string; subject?: string; route?: string; operation?: number; recipient_mailbox_id?: string; sender_mailbox_id?: string; document_type?: number },
   ctx: any,
 ) {
   // 1. Invoer
@@ -58,6 +61,8 @@ export default async function uploadReceipt(
   if (subject.length < 2 || subject.length > 200 || /[\u0000-\u001f\u007f]/.test(subject)) ctx.fail("invalid_input", "subject must be 2–200 characters without control characters");
   const route = args.route ?? "scan";
   if (route !== "scan" && route !== "document") ctx.fail("invalid_input", 'route must be "scan" or "document"');
+  const operation = args.operation ?? DEFAULT_SCAN_OPERATION;
+  if (!Object.prototype.hasOwnProperty.call(SCAN_OPERATIONS, operation)) ctx.fail("invalid_input", "operation must be 2 (purchase invoice with details, scan service) or 1 (without details, manual entry)");
   const division = divisionOf(ctx);
 
   // 2a. Via de scanmailbox
@@ -73,7 +78,7 @@ export default async function uploadReceipt(
     const message = await ctx.request({
       method: "POST",
       path: `/${division}/mailbox/MailMessagesSent`,
-      body: { Subject: subject, RecipientMailboxID: recipient, SenderMailboxID: sender, Type: MAIL_TYPE_PURCHASE_INVOICE, Operation: SCAN_OPERATION_PURCHASE_INVOICE, ...(note ? { Body: note } : {}) },
+      body: { Subject: subject, RecipientMailboxID: recipient, SenderMailboxID: sender, Type: MAIL_TYPE_PURCHASE_INVOICE, Operation: operation, ...(note ? { Body: note } : {}) },
     });
     const messageId = createdId(message);
     if (!messageId) ctx.fail("source_error", "Exact did not return the ID of the mail message; check the Exact mailbox before trying again");
@@ -87,6 +92,8 @@ export default async function uploadReceipt(
       route,
       file: { file_name: fileName, kind: kind!.label, bytes },
       mail_message_id: messageId,
+      operation,
+      operation_label: SCAN_OPERATIONS[operation],
       recipient_mailbox_id: recipient,
       next_step: `Exact's scan service processes the mail; after a few minutes check_uploads with expected [{"text": "${fileName.replace(/"/g, "")}"}] shows whether it arrived and was recognised. Then add_document_note can add the note to the recognised invoice.`,
       limitations: [
