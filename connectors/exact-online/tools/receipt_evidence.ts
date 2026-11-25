@@ -1,5 +1,5 @@
 import { Decimal } from "@tailr/connector";
-import { collect, dayNumber, divisionInfo, GUID, type Row } from "./lib/exact";
+import { collect, dayNumber, divisionInfo, documentUrl, GUID, type Row } from "./lib/exact";
 
 /**
  * Bewijs bij uitgaande bankregels: welke regels hebben een gekoppeld document met bijlage?
@@ -360,6 +360,7 @@ export default async function receiptEvidence(args: { start_date: string; end_da
     const doc = docs[0]!;
     row.purchase_link_semantics = "explicit_invoice_number_on_bank_entry_counter_line_to_single_purchase_entry";
     row.purchase_invoice.document_id = doc;
+    row.purchase_invoice.exact_url = documentUrl(ctx, doc);
     if (!purchaseDocs.includes(doc) && purchaseDocs.length >= MAX_DOCS) {
       w.purchasePathFailed = true;
       row.reasons.push("document_query_budget_exhausted");
@@ -432,7 +433,7 @@ export default async function receiptEvidence(args: { start_date: string; end_da
     rows,
     limitations: [
       "Negative AmountFC bank line components are outflow candidates, not distinct expense payments.",
-      "Attachment metadata is not proof of a valid supplier receipt; document bodies are not inspected.",
+      "Attachment metadata is not proof of a valid supplier receipt; document bodies are not inspected. purchase_invoice.exact_url opens the supplier document in Exact for a person signed in to Exact; it cannot be fetched through this connection.",
       "evidence_path says where the document came from: bank_line_document is the bank line's own Document; purchase_invoice_document follows the invoice number on the bank entry's counter line to exactly one purchase entry (TransactionLines Type 30 or 31 with that EntryNumber) and its Document.",
       "The purchase path shows which invoice the payment was booked against. Amounts, partial payments and matching status are not checked, so purchase_payment_linkage_verified stays false; use get_matching_details for that.",
       "No matching on amount, date, description, OffsetID or OurRef. Without an invoice number, or without exactly one purchase entry and document, the row keeps its category and gets a reason.",
