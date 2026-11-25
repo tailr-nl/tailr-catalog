@@ -18,4 +18,5 @@ Functies:
 - Wat staat er nog open bij leveranciers (te betalen): list_payables. Bij klanten: list_receivables.
 - Bankregels in een periode (bijv. om een Mollie-uitbetaling af te letteren): list_bank_lines_by_period.
 - Welke uitgaven op de bank hebben een bon of factuur, en wat voor beweging is het: review_receipt_evidence.
+- Controleren of ingestuurde bonnen zijn aangekomen en herkend: check_uploads (op aanmaakdatum; met expected wat de gebruiker heeft ingestuurd). scan_only_not_recognized en duplicate_of_earlier_upload zijn punten om na te kijken, geen bewijs van een fout in de boekhouding.
 - Documenten zoeken in een periode (geüploade stukken die nog verwerkt moeten worden: only_open_proposals met date_field created; only_unbooked geeft ook bankimports en ruwe scans), met bestandsnaam en grootte van de bijlagen: list_documents. Geen inhoud; exact_url is een link voor de gebruiker om het document in Exact te openen, niet voor jou om te lezen; booked = false of complete = false bewijst niet dat een boeking of document ontbreekt.

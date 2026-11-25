@@ -45,17 +45,27 @@
           "me",
           "review_receipt_evidence"
         ]
+      },
+      {
+        "prompt": {
+          "en": "Did the receipts I sent this month arrive in Exact, and which ones were not recognised?",
+          "nl": "Zijn de bonnen die ik deze maand heb ingestuurd in Exact aangekomen, en welke zijn niet herkend?"
+        },
+        "requires": [
+          "me",
+          "check_uploads"
+        ]
       }
     ],
     "whatsNew": {
-      "en": "See what you still owe suppliers, find documents with their attachments and a link to open them in Exact, and check receipts for bank payments through the purchase invoice.",
-      "nl": "Zie wat je leveranciers nog moet betalen, zoek documenten met hun bijlagen en een link om ze in Exact te openen, en controleer bonnen bij bankbetalingen via de inkoopfactuur."
+      "en": "Check whether the receipts you sent arrived in Exact and were recognised, and spot files you sent twice.",
+      "nl": "Controleer of je ingestuurde bonnen in Exact zijn aangekomen en herkend, en zie welke bestanden dubbel zijn ingestuurd."
     }
   },
   "$schema": "../../schemas/connector.json",
   "id": "exact-online",
   "name": "Exact Online",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": {
     "en": "Invoices, contacts, items, general ledger entries, matching status and bank transactions from Exact Online. Read access only.",
     "nl": "Facturen, relaties, artikelen, grootboekregels, afletterstatus en banktransacties uit Exact Online. Alleen lezen."
@@ -805,6 +815,62 @@
         "max_documents": {
           "type": "integer",
           "description": "1–200, standaard 100"
+        }
+      },
+      "limits": {
+        "maxCalls": 60,
+        "timeoutSeconds": 180
+      }
+    },
+    {
+      "name": "check_uploads",
+      "title": {
+        "nl": "Uploads controleren",
+        "en": "Check uploads"
+      },
+      "summary": {
+        "nl": "Zijn de ingestuurde bonnen aangekomen en door Exact herkend?",
+        "en": "Did the receipts you sent arrive, and did Exact recognise them?"
+      },
+      "description": "Voor geüploade of gemailde bonnen in een periode van 1–31 dagen (op aanmaakdatum): per upload (ruwe scan) of Exact er een inkoopfactuur van heeft gemaakt, met status recognized_open, recognized_processed, scan_only_not_recognized (nakijken) of ambiguous. Koppelt scan en inkoopfactuur alleen op identiek bestand (naam en grootte). Signaleert hetzelfde bestand in meerdere uploads. Geef met expected op wat je hebt ingestuurd (tekst uit onderwerp of bestandsnaam) om te zien wat niet is aangekomen. Een mail die Exact nooit bereikte laat verder geen spoor na. Alleen metadata; exact_url opent het document in Exact voor wie daar is ingelogd.",
+      "version": "0.1.0",
+      "level": "read",
+      "file": "tools/check_uploads.ts",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/*/documents/Documents"
+        },
+        {
+          "method": "GET",
+          "path": "/*/documents/DocumentAttachments"
+        },
+        {
+          "method": "GET",
+          "path": "/*/system/Divisions"
+        }
+      ],
+      "params": {
+        "start_date": {
+          "type": "string",
+          "required": true,
+          "description": "Begin (YYYY-MM-DD), inclusief, op aanmaakdatum"
+        },
+        "end_date": {
+          "type": "string",
+          "required": true,
+          "description": "Eind (YYYY-MM-DD), exclusief"
+        },
+        "expected": {
+          "type": "array",
+          "description": "Optioneel: wat je hebt ingestuurd, per stuk een tekst uit het onderwerp of de bestandsnaam (2–100 tekens, hoogstens 50)",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50
+          }
         }
       },
       "limits": {
