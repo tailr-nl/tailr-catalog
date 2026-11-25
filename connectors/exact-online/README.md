@@ -23,6 +23,7 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 | `list_bank_lines_by_period` (code) | Bankregels in 1–31 dagen, optioneel per grootboekrekening. |
 | `review_receipt_evidence` (code) | Bij uitgaande bankregels: is er een document met bijlage, aan de bankregel zelf of aan de inkoopfactuur die ermee is betaald? Met het soort beweging per regel. Zie [Bonnetjescontrole](#bonnetjescontrole). |
 | `list_documents` (code) | Documenten in 1–31 dagen, op documentdatum of aanmaakdatum, optioneel per soort, relatie of onderwerp. Per document de bijlagen (bestandsnaam, grootte) en of het aan een boeking hangt, plus een link (`exact_url`) om het document in Exact te openen. Geen inhoud, geen downloads. |
+| `check_uploads` (code) | Zijn ingestuurde bonnen in 1–31 dagen aangekomen en door Exact herkend? Per upload: herkend (open of verwerkt), niet herkend, dubbel of onduidelijk. Optioneel een lijst met wat je hebt ingestuurd, om te zien wat niet is aangekomen. |
 | `me`, `list_sales_invoices`, `list_accounts`, `list_items`, `list_transaction_lines`, `list_receivables` | Losse lijsten met OData-filters. |
 
 ## Wat de code mag (manifest)
@@ -31,6 +32,17 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 - **Verzoeken:** alleen `GET` op vaste resources: TransactionLines, BankEntryLines, ReportingBalance, FinancialPeriods, GLAccounts, Journals, Receivables, Payments, PayablesList, Documents, DocumentAttachments, PurchaseEntries en Divisions.
 - Bladeren alleen met de `$skiptoken` uit `__next`; de volgende URL zelf wordt nooit opgevraagd.
 - De code ziet het OAuth-token niet. Tailr Core voegt het toe en vernieuwt het.
+
+## Uploads controleren (`check_uploads`)
+
+Een bon die je mailt of uploadt, wordt in Exact eerst een ruwe scan (soort 202, zonder relatie of bedrag). Herkent Exact hem, dan komt er een tweede document bij: een inkoopfactuur (soort 20) met relatie en bedrag, met hetzelfde bestand erin. `check_uploads` koppelt die twee alleen op een identiek bestand (naam en grootte) en geeft per upload een status:
+
+- `recognized_open` / `recognized_processed`: herkend, nog te verwerken of al verwerkt;
+- `scan_only_not_recognized`: aangekomen maar niet herkend, dus zelf nakijken;
+- `duplicate_of_earlier_upload`: hetzelfde bestand was al eerder ingestuurd en herkend;
+- `ambiguous_multiple_recognized_documents`: meer dan één inkoopfactuur met dit bestand.
+
+Een mail die Exact nooit heeft bereikt, laat geen spoor na. Geef daarom met `expected` op wat je hebt ingestuurd (een stuk tekst uit het onderwerp of de bestandsnaam), of zoek betalingen zonder bon met `review_receipt_evidence`.
 
 ## Documenten zoeken (`list_documents`)
 
