@@ -25,7 +25,8 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 | `list_documents` (code) | Documenten in 1–31 dagen, op documentdatum of aanmaakdatum, optioneel per soort, relatie of onderwerp. Per document de bijlagen (bestandsnaam, grootte) en of het aan een boeking hangt, plus een link (`exact_url`) om het document in Exact te openen. Geen inhoud, geen downloads. |
 | `check_uploads` (code) | Zijn ingestuurde bonnen in 1–31 dagen aangekomen en door Exact herkend? Per upload: herkend (open of verwerkt), niet herkend, dubbel of onduidelijk. Optioneel een lijst met wat je hebt ingestuurd, om te zien wat niet is aangekomen. |
 | `add_document_note` (code, schrijven) | Zet een opmerking van jou bij een document (tekstveld), achter wat er al staat, met datum en "Tailr" ervoor. Je bevestigt elke aanroep in Tailr. |
-| `list_mailboxes` (code) | De Exact-mailboxen van de administratie, om de scanmailbox te vinden. |
+| `list_mailboxes` (code) | De Exact-mailboxen van de administratie, de digitale postbus en de mailbox die Exact kiest voor een inkoopfactuur (met `is_scan_service_mailbox`). |
+| `list_mail_messages` (code) | Recente berichten in de Exact-mailbox met soort, Operation, ontvanger en scanstatus (43 = bij de scanservice), zonder tekst of bijlagen. |
 | `upload_receipt` (code, schrijven, alleen API) | Stuurt een bon (pdf, jpg, png, hoogstens ~1,4 MB) naar Exact vanuit een dashboard of app: via de scanmailbox (herkenning door Exact) of als document met bijlage. Niet beschikbaar in de chat. |
 | `me`, `list_sales_invoices`, `list_accounts`, `list_items`, `list_transaction_lines`, `list_receivables` | Losse lijsten met OData-filters. |
 
