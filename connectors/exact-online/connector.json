@@ -65,7 +65,7 @@
   "$schema": "../../schemas/connector.json",
   "id": "exact-online",
   "name": "Exact Online",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": {
     "en": "Invoices, contacts, items, general ledger entries, matching status and bank transactions from Exact Online. Read access only.",
     "nl": "Facturen, relaties, artikelen, grootboekregels, afletterstatus en banktransacties uit Exact Online. Alleen lezen."
@@ -987,7 +987,7 @@
         "en": "Sends a receipt (pdf, jpg, png) to Exact from a dashboard or app. API only."
       },
       "description": "Stuurt één bon naar Exact. Alleen via de API (dashboards, apps), nooit via de chat: het bestand gaat als base64 mee (hoogstens ~1,4 MB; verklein een foto eerst). route \"scan\" (standaard) stuurt het naar de scanmailbox van de administratie, zodat Exact het uitleest zoals een gemailde bon; controleer daarna met check_uploads. route \"document\" maakt een document met bijlage zonder herkenning. Optioneel een opmerking (note). Stuur hetzelfde bestand niet opnieuw voordat check_uploads is bekeken.",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "level": "write",
       "audience": "api",
       "file": "tools/upload_receipt.ts",
@@ -1043,6 +1043,14 @@
             "document"
           ],
           "description": "scan (standaard): via de scanservice van Exact; document: document met bijlage zonder herkenning"
+        },
+        "operation": {
+          "type": "integer",
+          "enum": [
+            2,
+            1
+          ],
+          "description": "Alleen bij route scan: 2 (standaard) = inkoopfactuur met details, naar de scanservice; 1 = zonder details, Exact zet hem op handmatig invoeren"
         },
         "recipient_mailbox_id": {
           "type": "string",
