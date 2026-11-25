@@ -65,7 +65,7 @@
   "$schema": "../../schemas/connector.json",
   "id": "exact-online",
   "name": "Exact Online",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": {
     "en": "Invoices, contacts, items, general ledger entries, matching status and bank transactions from Exact Online. Read access only.",
     "nl": "Facturen, relaties, artikelen, grootboekregels, afletterstatus en banktransacties uit Exact Online. Alleen lezen."
@@ -755,8 +755,8 @@
         "nl": "Documenten in een periode van hoogstens een maand, met hun bijlagen en of ze geboekt zijn.",
         "en": "Documents in a period of at most one month, with their attachments and whether they are booked."
       },
-      "description": "Documenten in een periode van 1–31 dagen (op documentdatum of aanmaakdatum), optioneel gefilterd op soort, relatie en onderwerp. Per document: onderwerp, soort, datums, relatie (id en code, geen naam), booked (hangt aan een boeking, met het id) en de bijlagen (bestandsnaam en grootte). only_open_proposals=true voor geüploade stukken die nog verwerkt moeten worden (open boekingsvoorstel); only_unbooked=true voor alles zonder boeking, ook bankimports en ruwe scans. Geen inhoud en geen downloads; exact_url opent het document in Exact voor wie daar in de browser is ingelogd (de AI kan de link niet openen). booked=false bewijst niet dat er niets geboekt is; bij complete=false of truncated=true nooit concluderen dat een document niet bestaat.",
-      "version": "0.2.1",
+      "description": "Documenten in een periode van 1–31 dagen (op documentdatum of aanmaakdatum), optioneel gefilterd op soort, relatie en onderwerp. Per document: onderwerp, soort, datums, relatie (id en code, geen naam), booked (hangt aan een boeking, met het id) en de bijlagen (bestandsnaam en grootte). only_open_proposals=true voor geüploade stukken die nog verwerkt moeten worden (open boekingsvoorstel); only_unbooked=true voor alles zonder boeking, ook bankimports en ruwe scans. Met include_body ook het tekstveld (opmerking of mailtekst). Geen bijlage-inhoud en geen downloads; exact_url opent het document in Exact voor wie daar in de browser is ingelogd (de AI kan de link niet openen). booked=false bewijst niet dat er niets geboekt is; bij complete=false of truncated=true nooit concluderen dat een document niet bestaat.",
+      "version": "0.3.0",
       "level": "read",
       "file": "tools/list_documents.ts",
       "requests": [
@@ -811,6 +811,10 @@
         "has_attachments": {
           "type": "boolean",
           "description": "true = alleen met bijlage, false = alleen zonder; weglaten = beide"
+        },
+        "include_body": {
+          "type": "boolean",
+          "description": "Ook het tekstveld van het document (bijv. de tekst van een gemailde bon of een opmerking), als platte tekst, hoogstens 1000 tekens. Vrije tekst, kan namen bevatten; alleen vragen als het nodig is."
         },
         "max_documents": {
           "type": "integer",

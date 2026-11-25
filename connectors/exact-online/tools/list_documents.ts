@@ -10,6 +10,7 @@ import { collect, dayNumber, divisionInfo, documentUrl, exactDate, GUID, type Ro
  * - Alleen metadata: geen inhoud van documenten of bijlagen, geen download-URL's, geen wijzigingen.
  * - Geen namen van relaties of medewerkers. Onderwerp en bestandsnaam zijn vrije tekst uit Exact.
  */
+const BODY_MAX = 1000;
 const DOC_FIELDS = ["ID", "HID", "Subject", "Type", "TypeDescription", "DocumentDate", "Created", "Account", "AccountCode", "FinancialTransactionEntryID", "ProposedEntryStatus", "AmountFC", "Currency"];
 const ATTACHMENT_FIELDS = ["ID", "Document", "FileName", "FileSize"];
 const DATE_FIELDS: Record<string, string> = { document_date: "DocumentDate", created: "Created" };
@@ -26,6 +27,20 @@ function guidOrNull(value: unknown): string | null {
   return GUID.test(g) && g !== ZERO_GUID ? g : null;
 }
 
+/** Tekstveld van een document als platte tekst: html-tags en -entiteiten eruit, witruimte samengevoegd, ingekort */
+function plainBody(value: unknown): { body: string | null; body_truncated: boolean } {
+  if (typeof value !== "string") return { body: null, body_truncated: false };
+  const text = value
+    .replace(/<(br|\/p|\/div|\/li)\s*\/?>/gi, "\n")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/[ \t\r\f\v]+/g, " ")
+    .replace(/\s*\n\s*/g, "\n")
+    .trim();
+  if (!text) return { body: null, body_truncated: false };
+  return text.length > BODY_MAX ? { body: text.slice(0, BODY_MAX), body_truncated: true } : { body: text, body_truncated: false };
+}
+
 function optionalBoolean(ctx: any, name: string, value: unknown): boolean | null {
   if (value === undefined || value === null) return null;
   if (typeof value !== "boolean") ctx.fail("invalid_input", `${name} must be true or false`);
@@ -33,7 +48,7 @@ function optionalBoolean(ctx: any, name: string, value: unknown): boolean | null
 }
 
 export default async function listDocuments(
-  args: { start_date: string; end_date: string; date_field?: string; type?: number; account?: string; subject_contains?: string; only_unbooked?: boolean; only_open_proposals?: boolean; has_attachments?: boolean; max_documents?: number },
+  args: { start_date: string; end_date: string; date_field?: string; type?: number; account?: string; subject_contains?: string; only_unbooked?: boolean; only_open_proposals?: boolean; has_attachments?: boolean; include_body?: boolean; max_documents?: number },
   ctx: any,
 ) {
   const start = dayNumber(args.start_date);
@@ -55,13 +70,14 @@ export default async function listDocuments(
   const onlyUnbooked = optionalBoolean(ctx, "only_unbooked", args.only_unbooked) === true;
   const onlyOpenProposals = optionalBoolean(ctx, "only_open_proposals", args.only_open_proposals) === true;
   const hasAttachments = optionalBoolean(ctx, "has_attachments", args.has_attachments);
+  const includeBody = optionalBoolean(ctx, "include_body", args.include_body) === true;
 
   // 1. Documenten in de periode: alleen vaste, gecontroleerde waarden in het filter
   const column = DATE_FIELDS[dateField]!;
   let filter = `${column} ge datetime'${args.start_date}T00:00:00' and ${column} lt datetime'${args.end_date}T00:00:00'`;
   if (type !== null) filter += ` and Type eq ${type}`;
   if (account !== null) filter += ` and Account eq guid'${account}'`;
-  const scan = await collect(ctx, "documents/Documents", DOC_FIELDS, filter, { maxRows: MAX_SCAN_ROWS, maxPages: MAX_SCAN_PAGES });
+  const scan = await collect(ctx, "documents/Documents", includeBody ? [...DOC_FIELDS, "Body"] : DOC_FIELDS, filter, { maxRows: MAX_SCAN_ROWS, maxPages: MAX_SCAN_PAGES });
 
   // 2. Ontdubbelen, eigen filters, nieuwste eerst
   const seen = new Set<string>();
@@ -98,6 +114,7 @@ export default async function listDocuments(
       proposed_entry_status: status,
       proposed_entry_status_label: status === null ? null : (PROPOSED_ENTRY_STATUS[status] ?? "unknown"),
       exact_url: documentUrl(ctx, id),
+      ...(includeBody ? plainBody(row.Body) : {}),
     });
   }
   const lowered = needle?.toLowerCase() ?? null;
@@ -158,7 +175,7 @@ export default async function listDocuments(
     division: await divisionInfo(ctx),
     query: {
       start_date: args.start_date, end_date_exclusive: args.end_date, date_field: dateField, type, account,
-      subject_contains: needle, only_unbooked: onlyUnbooked, only_open_proposals: onlyOpenProposals, has_attachments: hasAttachments, max_documents: max,
+      subject_contains: needle, only_unbooked: onlyUnbooked, only_open_proposals: onlyOpenProposals, has_attachments: hasAttachments, include_body: includeBody, max_documents: max,
     },
     snapshot_at: ctx.now,
     documents: selected,
@@ -186,6 +203,7 @@ export default async function listDocuments(
       "Only attachment metadata (file name, size). Document bodies and attachment contents are not read. exact_url opens the document in Exact for a person who is signed in to Exact in a browser; it is not a download link and cannot be fetched through this connection.",
       "Counts are over the returned documents. If complete is false or truncated is true, do not conclude that a document does not exist.",
       "subject and file_name are free text from Exact and may contain a name. Relation names are left out; use account or account_code.",
+      `With include_body, body is the document's text field in Exact as plain text (HTML removed, at most ${BODY_MAX} characters, body_truncated if longer). It is free text: for a mailed upload it may hold the mail text, names and e-mail addresses. Only ask for it when needed.`,
       "Sequential API reads are not a transactionally consistent Exact snapshot.",
     ],
   };
