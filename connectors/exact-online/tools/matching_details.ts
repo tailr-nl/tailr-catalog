@@ -93,6 +93,35 @@ function entryItemView(item: Item, followed: Set<number>) {
   return { ...item, linked_to_invoice_number: hasInvoice, entry_item_status: status, entry_item_status_source: "exact_outstanding_item_status", also_under_invoices: hasInvoice && followed.has(item.InvoiceNumber) };
 }
 
+const OPEN_LIST_FIELDS = ["HID", "AccountCode", "AccountName", "Amount", "CurrencyCode", "Description", "DueDate", "EntryNumber", "InvoiceDate", "InvoiceNumber", "JournalCode", "JournalDescription", "YourRef"];
+
+/** Regels van één boeking uit een openpostlijst. Het filter gaat naar Exact én wordt hier toegepast. */
+async function openListRows(ctx: any, resource: string, entryNumber: number, journalCode: string | undefined, note: (r: { complete: boolean; incompleteReason: string | null }) => void): Promise<Row[]> {
+  let r;
+  try {
+    r = await collect(ctx, resource, OPEN_LIST_FIELDS, `EntryNumber eq ${entryNumber}`, { maxRows: 300, maxPages: 5 });
+  } catch (e: any) {
+    if (["rate_limited", "user_rate_limited", "daily_limit_reached"].includes(e?.code)) throw e;
+    // Weigert Exact het filter op deze lijst, dan de lijst zelf (begrensd) en hier filteren
+    r = await collect(ctx, resource, OPEN_LIST_FIELDS, undefined, { maxRows: 600, maxPages: 10 });
+  }
+  note(r);
+  return r.items.filter((row) => row.EntryNumber === entryNumber && (journalCode === undefined || String(row.JournalCode ?? "").trim() === journalCode));
+}
+
+/** Post uit een openpostlijst: die staat per definitie open. Bedrag met het teken van de lijst (zoals het scherm in Exact). */
+function openListView(kind: "payable" | "receivable", row: Row) {
+  const hasInvoice = Number.isInteger(row.InvoiceNumber) && row.InvoiceNumber > 0;
+  return {
+    kind, EntryNumber: row.EntryNumber, JournalCode: typeof row.JournalCode === "string" ? row.JournalCode.trim() : null, JournalDescription: row.JournalDescription ?? null,
+    InvoiceNumber: hasInvoice ? row.InvoiceNumber : null, YourRef: row.YourRef ?? null, AccountCode: String(row.AccountCode ?? "").trim() || null, AccountName: row.AccountName ?? null,
+    Description: row.Description ?? null, date: exactDate(row.InvoiceDate), due_date: exactDate(row.DueDate),
+    open_amount_as_listed: money(amount(row.Amount ?? 0)), Currency: row.CurrencyCode ?? null,
+    linked_to_invoice_number: hasInvoice, entry_item_status: hasInvoice ? "open" : "open_not_linked_to_invoice",
+    entry_item_status_source: kind === "payable" ? "exact_payables_list" : "exact_receivables_list",
+  };
+}
+
 const orFilter = (field: string, values: number[]) => `(${values.map((v) => `${field} eq ${v}`).join(" or ")})`;
 
 export default async function matchingDetails(args: { invoice_number?: number; your_ref?: string; entry_number?: number; journal_code?: string }, ctx: any) {
@@ -142,6 +171,7 @@ export default async function matchingDetails(args: { invoice_number?: number; y
 
   // De openstaande post(en) van de boeking zelf, ook zonder factuurnummer (bijv. een losse bankbetaling op een leverancier)
   const entryItems: ReturnType<typeof entryItemView>[] = [];
+  const entryListItems: ReturnType<typeof openListView>[] = [];
   if (args.entry_number !== undefined) {
     const own = `EntryNumber eq ${args.entry_number}` + (args.journal_code !== undefined ? ` and Journal eq '${args.journal_code}'` : "");
     const rec = await collect(ctx, "cashflow/Receivables", RECEIVABLE_FIELDS, own, { maxRows: 200, maxPages: 5 });
@@ -149,6 +179,14 @@ export default async function matchingDetails(args: { invoice_number?: number; y
     [rec, pay].forEach(note);
     const followed = new Set(numbers);
     entryItems.push(...rec.items.map((r) => entryItemView(itemView("receivable", r), followed)), ...pay.items.map((r) => entryItemView(itemView("payable", r), followed)));
+    // Een boeking die nog niet is verwerkt staat niet in cashflow/Payments of Receivables, maar wel in de
+    // openpostlijsten (live gezien bij bankbetalingen op een leverancier zonder factuur). Wat daar staat, staat open.
+    if (!entryItems.length) {
+      for (const [kind, resource] of [["payable", "read/financial/PayablesList"], ["receivable", "read/financial/ReceivablesList"]] as const) {
+        const rows = await openListRows(ctx, resource, args.entry_number, args.journal_code, note);
+        entryListItems.push(...rows.map((r) => openListView(kind, r)));
+      }
+    }
   }
 
   // Regels van de boeking zonder factuur: afletteren op een grootboekkaart staat niet in de REST API
@@ -178,14 +216,14 @@ export default async function matchingDetails(args: { invoice_number?: number; y
       matching_status: "cashflow/Receivables + cashflow/Payments Status (50 = matched)",
       counter_lines: "TransactionLines with the same InvoiceNumber on the same receivable/payable G/L account, other entry",
       gl_account_matching: GL_MATCHING_UNKNOWN,
-      entry_outstanding_items: "cashflow/Receivables + cashflow/Payments with the EntryNumber of the entry itself (only with entry_number); open_not_linked_to_invoice = Status 20, 30 or 40 and no InvoiceNumber",
+      entry_outstanding_items: "cashflow/Receivables + cashflow/Payments with the EntryNumber of the entry itself (only with entry_number); open_not_linked_to_invoice = Status 20, 30 or 40 and no InvoiceNumber. If nothing is found there (e.g. an entry that is not processed yet): read/financial/PayablesList and ReceivablesList by EntryNumber; an item in those lists is open, amount with the sign of that list (open_amount_as_listed)",
     },
     invoices,
     invoice_count: invoices.length,
     gl_account_matching: glMatching,
-    entry_outstanding_items: entryItems,
-    entry_outstanding_item_count: entryItems.length,
-    empty: !invoices.length && !glMatching.length && !entryItems.length,
+    entry_outstanding_items: [...entryItems, ...entryListItems],
+    entry_outstanding_item_count: entryItems.length + entryListItems.length,
+    empty: !invoices.length && !glMatching.length && !entryItems.length && !entryListItems.length,
     complete: incomplete.size === 0,
     incomplete_reasons: [...incomplete].sort(),
   };

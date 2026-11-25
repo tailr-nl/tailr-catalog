@@ -38,8 +38,8 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 - **Geboekt.** `booked` is waar als het document een `FinancialTransactionEntryID` heeft; dat id staat in `financial_entry_id` (te gebruiken met `get_financial_entry`). Bij een document van de soort verkoopfactuur zet Exact daar het id van de verkoopfactuur neer, niet van een boeking. `booked: false` bewijst niet dat er niets geboekt is. `proposed_entry_status` is de status van het boekingsvoorstel bij het document (0 = vervallen, 5 = afgewezen, 20 = open, 50 = verwerkt).
 - **Bijlagen.** Alleen bestandsnaam en grootte, per tien documenten tegelijk opgehaald. Lukt dat niet, dan staat er `attachments_known: false`; dat is iets anders dan "geen bijlage".
 - **Grenzen per aanroep.** De functie bekijkt hooguit 900 documenten in de periode en haalt van hooguit 200 documenten de bijlagen op. Daarboven is `complete` onwaar en `truncated` of `scan.complete` zegt waarom. Kies dan een kortere periode of een extra filter. Ergste geval: 56 aanroepen (15 pagina's documenten, 20 groepen bijlagen van elk hooguit 2 pagina's, 1 voor de administratie).
-- **Nog niet geboekte uploads.** Wat de documentatie van Exact zegt: `documents/Documents` heeft een eigen documentdatum ("Entry date of the incoming document"), een status van het boekingsvoorstel (`ProposedEntryStatus`, met 20 = open) en een verwijzing naar de boeking die leeg kan zijn. Dat past bij geüploade of gescande stukken die nog verwerkt moeten worden. Wat **niet** in de documentatie staat en niet met een echte administratie is getest: of elk geüpload of gescand stuk (Scan & herken, de digitale brievenbus, de app) meteen als document in deze resource staat, welke soortnummers ze krijgen, en of `FinancialTransactionEntryID` bij elke soort boeking wordt gevuld. Controleer dat eerst in je eigen administratie voordat je op `only_unbooked` vertrouwt, en zoek pas geüploade stukken met `date_field: "created"`.
-- **Filters bij Exact.** De documentatie van Exact zegt niet per veld of je erop kunt filteren. Filteren op `DocumentDate`, `Created`, `Type` en `Account` is niet tegen een echte administratie getest; weigert Exact een filter, dan geeft de functie een fout en geen lege lijst.
+- **Nog niet verwerkte uploads.** Gebruik `only_open_proposals: true` (boekingsvoorstel open, `proposed_entry_status` 20) met `date_field: "created"`. Exact bewaart een upload als twee documenten: de ruwe scan (soort *Scanned purchase document*) en de herkende inkoopfactuur (soort *Purchase invoice*, met relatie, bedrag en het open voorstel). `only_unbooked` geeft alles zonder boeking, dus ook bankimports en ruwe scans. In een echte administratie gecontroleerd (november 2026).
+- **Filters bij Exact.** Filteren op `DocumentDate`, `Created`, `Type` en `Account` werkt (in een echte administratie gecontroleerd, november 2026).
 - **Soortnummers** staan in Exact onder de documentsoorten; de functie geeft per document `type` en `type_description` terug.
 
 ## Persoonsgegevens
@@ -57,16 +57,9 @@ Bron: `read/financial/PayablesList`, de tegenhanger van `ReceivablesList` achter
 - **Volledigheid:** hoogstens 3.000 regels of 50 pagina's; daarboven `complete: false`. In het ergste geval 56 aanroepen (50 pagina's, 5 voor dagboeken, 1 voor de administratie).
 - De naam van de leverancier staat in de uitvoer (`account_name`), net als bij `list_accounts`.
 
-**Nog niet tegen een echte administratie gecontroleerd** (alleen tegen de documentatie en een lokale test met nepantwoorden):
+**Tegen een echte administratie gecontroleerd (november 2026):** aantal, bedragen en teken komen overeen met het scherm in Exact; niet-afgeletterde betalingen staan in de lijst met een leeg factuurnummer en het bankdagboek (`unmatched_payment`). Niet gecontroleerd: of `Amount` bij een deels betaalde factuur het restant is, het bedrag bij een post in vreemde valuta, en bladeren over meer dan één pagina.
 
-1. Of niet-afgeletterde betalingen op een leverancier werkelijk in `PayablesList` staan, met een leeg factuurnummer en het bankdagboek.
-2. Het teken van `Amount`: verwacht als op het scherm (factuur positief, losse betaling negatief).
-3. Of `Amount` het resterende bedrag is bij een deels betaalde factuur, en in welke valuta bij een post in vreemde valuta.
-4. Of `$select`, `$filter` op `AccountId` en bladeren met `__next` op deze bron werken zoals bij de andere bronnen. Het filter op leverancier wordt ook in de code toegepast, dus een genegeerd filter geeft geen verkeerde lijst.
-
-Vergelijk daarvoor aantal en totaal met het scherm in Exact voor dezelfde administratie.
-
-Bij `get_matching_details` met `entry_number` geldt hetzelfde voorbehoud: de documentatie noemt `EntryNumber` en `Journal` in `cashflow/Payments` en `cashflow/Receivables` ("entry number of the linked transaction"), maar of een bankbetaling zonder factuur daar onder haar eigen boekstuknummer staat, moet nog live blijken. Staat ze er niet, dan blijft `entry_outstanding_items` leeg en zegt de functie niets over de status.
+`get_matching_details` met `entry_number` zoekt de openstaande post van de boeking eerst in `cashflow/Payments` en `cashflow/Receivables`. Een bankboeking die nog niet is verwerkt staat daar niet in; dan komt de post uit `read/financial/PayablesList` of `ReceivablesList` (wat daar staat, staat open; het bedrag heeft het teken van die lijst, `open_amount_as_listed`). Zo krijgt een losse betaling aan een leverancier `open_not_linked_to_invoice`.
 
 ## Limieten
 
