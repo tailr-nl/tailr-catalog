@@ -22,7 +22,7 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 | `list_payables` (code) | Openstaande leveranciersposten zoals het scherm *Openstaande posten \| Te betalen*: inkoopfacturen en losse betalingen, met totalen per valuta en subtotalen per leverancier. |
 | `list_bank_lines_by_period` (code) | Bankregels in 1–31 dagen, optioneel per grootboekrekening. |
 | `review_receipt_evidence` (code) | Bij uitgaande bankregels: is er een document met bijlage, aan de bankregel zelf of aan de inkoopfactuur die ermee is betaald? Met het soort beweging per regel. Zie [Bonnetjescontrole](#bonnetjescontrole). |
-| `list_documents` (code) | Documenten in 1–31 dagen, op documentdatum of aanmaakdatum, optioneel per soort, relatie of onderwerp. Per document de bijlagen (bestandsnaam, grootte) en of het aan een boeking hangt. Geen inhoud, geen downloads. |
+| `list_documents` (code) | Documenten in 1–31 dagen, op documentdatum of aanmaakdatum, optioneel per soort, relatie of onderwerp. Per document de bijlagen (bestandsnaam, grootte) en of het aan een boeking hangt, plus een link (`exact_url`) om het document in Exact te openen. Geen inhoud, geen downloads. |
 | `me`, `list_sales_invoices`, `list_accounts`, `list_items`, `list_transaction_lines`, `list_receivables` | Losse lijsten met OData-filters. |
 
 ## Wat de code mag (manifest)
@@ -44,7 +44,7 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 
 ## Persoonsgegevens
 
-`list_documents` volgt het patroon "een lijst zonder persoonsgegevens": de naam van de relatie, de contactpersoon en de maker van het document worden niet bij Exact opgevraagd. De relatie komt terug als id en relatiecode. De inhoud van documenten en bijlagen wordt niet gelezen. Onderwerp en bestandsnaam zijn vrije tekst en komen wel mee, omdat een document anders niet te herkennen is; daar kan een naam in staan als iemand die er zelf in heeft gezet of als Exact het onderwerp zo heeft opgebouwd. Wil je dat niet, geef een rol dan geen recht op deze functie.
+`list_documents` volgt het patroon "een lijst zonder persoonsgegevens": de naam van de relatie, de contactpersoon en de maker van het document worden niet bij Exact opgevraagd. De relatie komt terug als id en relatiecode. De inhoud van documenten en bijlagen wordt niet gelezen. `exact_url` (ook bij `purchase_invoice` in `review_receipt_evidence`) opent het document in Exact; dat werkt alleen in een browser waarin je bij Exact bent ingelogd. De AI kan de link niet openen. Onderwerp en bestandsnaam zijn vrije tekst en komen wel mee, omdat een document anders niet te herkennen is; daar kan een naam in staan als iemand die er zelf in heeft gezet of als Exact het onderwerp zo heeft opgebouwd. Wil je dat niet, geef een rol dan geen recht op deze functie.
 
 ## Openstaande leveranciersposten (`list_payables`)
 

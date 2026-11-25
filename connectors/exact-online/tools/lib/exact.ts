@@ -128,6 +128,18 @@ export async function collect(ctx: any, resource: string, fields: string[], filt
   return { items: projected, pages, complete: incompleteReason === null, incompleteReason };
 }
 
+/**
+ * Link naar het document in Exact (DocView). Werkt alleen in een browser waarin de gebruiker
+ * bij Exact is ingelogd; de AI kan hem niet openen. null bij een onverwacht domein of id.
+ */
+export function documentUrl(ctx: any, id: unknown): string | null {
+  const host = String(ctx.vars.EXACT_HOST ?? "").trim().toLowerCase() || "start.exactonline.nl";
+  const division = String(ctx.vars.DIVISION ?? "").trim();
+  if (!/^start\.exactonline\.[a-z]{2,3}(\.[a-z]{2})?$/.test(host) || !/^\d{1,10}$/.test(division)) return null;
+  if (typeof id !== "string" || !GUID.test(id)) return null;
+  return `https://${host}/docs/DocView.aspx?DocumentID=${id}&_Division_=${division}`;
+}
+
 export async function divisionInfo(ctx: any): Promise<{ code: number | null; name: string | null; currency: string | null }> {
   const division = divisionOf(ctx);
   try {

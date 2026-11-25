@@ -1,4 +1,4 @@
-import { collect, dayNumber, divisionInfo, exactDate, GUID, type Row } from "./lib/exact";
+import { collect, dayNumber, divisionInfo, documentUrl, exactDate, GUID, type Row } from "./lib/exact";
 
 /**
  * Documenten in een periode van 1–31 dagen (begin inclusief, eind exclusief), met per document
@@ -97,6 +97,7 @@ export default async function listDocuments(
       financial_entry_id: entry,
       proposed_entry_status: status,
       proposed_entry_status_label: status === null ? null : (PROPOSED_ENTRY_STATUS[status] ?? "unknown"),
+      exact_url: documentUrl(ctx, id),
     });
   }
   const lowered = needle?.toLowerCase() ?? null;
@@ -182,7 +183,7 @@ export default async function listDocuments(
       "booked = the document has a FinancialTransactionEntryID. For a sales invoice document Exact puts the sales invoice ID there, not a financial entry.",
       "only_unbooked also returns documents that never get an entry link, such as bank import files and the raw scan of an upload. For uploads that still have to be processed use only_open_proposals (proposed_entry_status 20 = open): Exact keeps the raw scan and the recognised purchase invoice as two documents.",
       "booked = false does not prove that nothing was booked: an entry can exist without a link to the document.",
-      "Only attachment metadata (file name, size). Document bodies and attachment contents are not read; there are no download links.",
+      "Only attachment metadata (file name, size). Document bodies and attachment contents are not read. exact_url opens the document in Exact for a person who is signed in to Exact in a browser; it is not a download link and cannot be fetched through this connection.",
       "Counts are over the returned documents. If complete is false or truncated is true, do not conclude that a document does not exist.",
       "subject and file_name are free text from Exact and may contain a name. Relation names are left out; use account or account_code.",
       "Sequential API reads are not a transactionally consistent Exact snapshot.",
