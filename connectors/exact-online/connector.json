@@ -65,7 +65,7 @@
   "$schema": "../../schemas/connector.json",
   "id": "exact-online",
   "name": "Exact Online",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": {
     "en": "Invoices, contacts, items, general ledger entries, matching status and bank transactions from Exact Online. Read access only.",
     "nl": "Facturen, relaties, artikelen, grootboekregels, afletterstatus en banktransacties uit Exact Online. Alleen lezen."
@@ -909,7 +909,7 @@
         "en": "Adds a note to a receipt or invoice in Exact, for example for the bookkeeper."
       },
       "description": "Zet een opmerking van de gebruiker bij één document in Exact (tekstveld), achter wat er al staat, met datum en 'Tailr' ervoor. Document op document_id (GUID uit list_documents of check_uploads) of document_number. Bij een upload: zet de opmerking bij de herkende inkoopfactuur (type 20), die verwerkt de boekhouder. Alleen met een opmerking die de gebruiker zelf heeft gegeven; schrijf nooit zelf een opmerking zonder dat de gebruiker erom vraagt. Leest het document daarna terug (verified).",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "level": "write",
       "file": "tools/add_document_note.ts",
       "requests": [

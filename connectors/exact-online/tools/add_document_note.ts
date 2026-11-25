@@ -14,7 +14,12 @@ const ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 
 function preview(value: unknown): string | null {
   if (typeof value !== "string" || !value.trim()) return null;
-  const text = value.replace(/<[^>]*>/g, " ").replace(/[ \t]+/g, " ").trim();
+  const text = value
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
+    .replace(/[ \t]+/g, " ")
+    .trim();
   return text.length > 600 ? `${text.slice(0, 600)}…` : text;
 }
 
@@ -45,7 +50,9 @@ export default async function addDocumentNote(args: { document_id?: string; docu
   const id = String(doc.ID).toLowerCase();
   const before = typeof doc.Body === "string" ? doc.Body : "";
   const line = `[${ctx.today ?? String(ctx.now ?? "").slice(0, 10)} Tailr] ${note}`;
-  const body = before.trim() ? `${before.replace(/\s+$/, "")}\n\n${line}` : line;
+  // Exact toont Body als HTML: tekens escapen en regels met <br> scheiden, anders komt alles op één regel
+  const html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+  const body = before.trim() ? `${before.replace(/\s+$/, "")}<br><br>${html}` : html;
   if (body.length > BODY_LIMIT) ctx.fail("invalid_input", `The document text would become longer than ${BODY_LIMIT} characters; use a shorter note`);
 
   await ctx.request({ method: "PUT", path: `/${divisionOf(ctx)}/documents/Documents(guid'${id}')`, body: { Body: body } });
@@ -56,7 +63,7 @@ export default async function addDocumentNote(args: { document_id?: string; docu
   try {
     const r = await collect(ctx, "documents/Documents", FIELDS, `ID eq guid'${id}'`, { maxRows: 1, maxPages: 1 });
     after = typeof r.items[0]?.Body === "string" ? r.items[0]!.Body : null;
-    verified = after !== null && after.includes(line);
+    verified = after !== null && after.includes(html);
   } catch {
     verified = null;
   }
