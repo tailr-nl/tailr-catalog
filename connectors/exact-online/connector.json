@@ -542,8 +542,8 @@
         "nl": "Of facturen zijn afgeletterd en wat er nog openstaat.",
         "en": "Whether invoices are matched and what is still open."
       },
-      "description": "Afletterstatus van verkoop- en inkoopfacturen (matched, partially_matched, open, unknown) met openstaand bedrag en tegenboekingen. Op invoice_number, your_ref of entry_number (+ journal_code). Afletteren op een grootboekkaart (bijv. kruisposten) zit niet in de API van Exact en wordt nooit geraden.",
-      "version": "0.2.0",
+      "description": "Afletterstatus van verkoop- en inkoopfacturen (matched, partially_matched, open, unknown) met openstaand bedrag en tegenboekingen. Op invoice_number, your_ref of entry_number (+ journal_code). Met entry_number ook de openstaande post van de boeking zelf (entry_outstanding_items): een betaling of ontvangst zonder factuurnummer krijgt open_not_linked_to_invoice. Afletteren op een grootboekkaart (bijv. kruisposten) zit niet in de API van Exact en wordt nooit geraden.",
+      "version": "0.3.0",
       "level": "read",
       "file": "tools/matching_details.ts",
       "requests": [
@@ -588,6 +588,57 @@
       },
       "limits": {
         "maxCalls": 80,
+        "timeoutSeconds": 180
+      }
+    },
+    {
+      "name": "list_payables",
+      "title": {
+        "nl": "Openstaande crediteuren",
+        "en": "Outstanding payables"
+      },
+      "summary": {
+        "nl": "Welke leveranciersposten nog openstaan: facturen en losse betalingen, met totalen per leverancier.",
+        "en": "Which supplier items are still open: invoices and unmatched payments, with totals per supplier."
+      },
+      "description": "Openstaande posten van leveranciers, zoals het scherm Openstaande posten | Te betalen: openstaande inkoopfacturen (open_invoice) en betalingen aan een leverancier zonder factuurnummer (unmatched_payment), met factuurnummer, datum, boekstuk, dagboek, omschrijving, ouderdom, vervaldatum, valuta en bedrag. Totalen per valuta en subtotalen per leverancier over alle regels; complete=false als niet alles is opgehaald. Bedrag zoals in Exact: factuur positief, losse betaling negatief. Stand van nu, geen peildatum. Geeft geen afletterstatus: gebruik get_matching_details.",
+      "version": "0.1.0",
+      "level": "read",
+      "file": "tools/list_payables.ts",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/*/read/financial/PayablesList"
+        },
+        {
+          "method": "GET",
+          "path": "/*/financial/Journals"
+        },
+        {
+          "method": "GET",
+          "path": "/*/system/Divisions"
+        }
+      ],
+      "params": {
+        "account_id": {
+          "type": "string",
+          "description": "Alleen deze leverancier: ID (GUID) van de relatie uit list_accounts"
+        },
+        "account_code": {
+          "type": "string",
+          "description": "Alleen deze leverancier: relatiecode, bijv. 1005 (niet samen met account_id)"
+        },
+        "only_overdue": {
+          "type": "boolean",
+          "description": "Alleen posten met een vervaldatum vóór vandaag (standaard false)"
+        },
+        "max_items": {
+          "type": "integer",
+          "description": "Aantal regels in items, 1–1000, standaard 300. Totalen tellen altijd alle regels."
+        }
+      },
+      "limits": {
+        "maxCalls": 60,
         "timeoutSeconds": 180
       }
     },
