@@ -18,7 +18,8 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 | --- | --- |
 | `get_general_ledger_card` (code) | Grootboekkaart tussen twee datums binnen één boekjaar: beginsaldo (saldibalans plus regels uit de startperiode), regels, eindsaldo, controle met de saldibalans. |
 | `get_financial_entry` (code) | Eén boeking met al haar regels, debet- en credittotaal en of ze in balans is. |
-| `get_matching_details` (code) | Afletterstatus van facturen, met openstaand bedrag en tegenboekingen, en een controle of factuur plus tegenregels gelijk is aan het openstaande bedrag. |
+| `get_matching_details` (code) | Afletterstatus van facturen, met openstaand bedrag en tegenboekingen, en een controle of factuur plus tegenregels gelijk is aan het openstaande bedrag. Met `entry_number` ook de openstaande post van de boeking zelf (`entry_outstanding_items`). |
+| `list_payables` (code) | Openstaande leveranciersposten zoals het scherm *Openstaande posten \| Te betalen*: inkoopfacturen en losse betalingen, met totalen per valuta en subtotalen per leverancier. |
 | `list_bank_lines_by_period` (code) | Bankregels in 1–31 dagen, optioneel per grootboekrekening. |
 | `review_receipt_evidence` (code) | Bij uitgaande bankregels: is er een document met bijlage, aan de bankregel zelf of aan de inkoopfactuur die ermee is betaald? Met het soort beweging per regel. Zie [Bonnetjescontrole](#bonnetjescontrole). |
 | `list_documents` (code) | Documenten in 1–31 dagen, op documentdatum of aanmaakdatum, optioneel per soort, relatie of onderwerp. Per document de bijlagen (bestandsnaam, grootte) en of het aan een boeking hangt. Geen inhoud, geen downloads. |
@@ -27,7 +28,7 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 ## Wat de code mag (manifest)
 
 - **Host:** alleen het Exact-domein uit de instellingen (standaard `start.exactonline.nl`).
-- **Verzoeken:** alleen `GET` op vaste resources (per functie alleen wat die functie nodig heeft; `list_documents` gebruikt Documents, DocumentAttachments en Divisions): TransactionLines, BankEntryLines, ReportingBalance, FinancialPeriods, GLAccounts, Receivables, Payments, Documents, DocumentAttachments, PurchaseEntries en Divisions.
+- **Verzoeken:** alleen `GET` op vaste resources: TransactionLines, BankEntryLines, ReportingBalance, FinancialPeriods, GLAccounts, Journals, Receivables, Payments, PayablesList, Documents, DocumentAttachments, PurchaseEntries en Divisions.
 - Bladeren alleen met de `$skiptoken` uit `__next`; de volgende URL zelf wordt nooit opgevraagd.
 - De code ziet het OAuth-token niet. Tailr Core voegt het toe en vernieuwt het.
 
@@ -44,6 +45,28 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 ## Persoonsgegevens
 
 `list_documents` volgt het patroon "een lijst zonder persoonsgegevens": de naam van de relatie, de contactpersoon en de maker van het document worden niet bij Exact opgevraagd. De relatie komt terug als id en relatiecode. De inhoud van documenten en bijlagen wordt niet gelezen. Onderwerp en bestandsnaam zijn vrije tekst en komen wel mee, omdat een document anders niet te herkennen is; daar kan een naam in staan als iemand die er zelf in heeft gezet of als Exact het onderwerp zo heeft opgebouwd. Wil je dat niet, geef een rol dan geen recht op deze functie.
+
+## Openstaande leveranciersposten (`list_payables`)
+
+Bron: `read/financial/PayablesList`, de tegenhanger van `ReceivablesList` achter `list_receivables`. Volgens de documentatie van Exact ontstaat daar een regel bij een inkoopfactuur én wanneer er geld aan een leverancier is betaald, en de velden zijn de kolommen van het scherm. `cashflow/Payments` is niet gekozen: die bron bevat ook afgeletterde posten, heeft een omgekeerd teken en geen dagboektype.
+
+- **Soort per regel** (`kind`), uit het type van het dagboek (`financial/Journals`) en het factuurnummer, nooit uit het teken of de omschrijving: `open_invoice` (inkoopdagboek), `unmatched_payment` (kas, bank of betaaldienst, zonder factuurnummer), `payment_with_invoice_number` (kas, bank of betaaldienst, met factuurnummer) en `other` (memoriaal of onbekend type; zie `kind_basis`).
+- **Bedrag** zoals Exact het in deze lijst geeft, als exacte decimaal met twee cijfers; er wordt niets omgedraaid. Totalen staan per valuta, met subtotalen per leverancier. Ze tellen alle opgehaalde regels, ook als `items` is ingekort (`max_items`, `items_truncated`).
+- **Filters:** `account_id` of `account_code` (één leverancier) en `only_overdue` (vervaldatum vóór vandaag). Ouderdom (`age_days`) is het aantal dagen sinds de datum van de post.
+- **Geen peildatum:** de lijst is de stand van nu. **Geen afletterstatus:** gebruik daarvoor `get_matching_details`.
+- **Volledigheid:** hoogstens 3.000 regels of 50 pagina's; daarboven `complete: false`. In het ergste geval 56 aanroepen (50 pagina's, 5 voor dagboeken, 1 voor de administratie).
+- De naam van de leverancier staat in de uitvoer (`account_name`), net als bij `list_accounts`.
+
+**Nog niet tegen een echte administratie gecontroleerd** (alleen tegen de documentatie en een lokale test met nepantwoorden):
+
+1. Of niet-afgeletterde betalingen op een leverancier werkelijk in `PayablesList` staan, met een leeg factuurnummer en het bankdagboek.
+2. Het teken van `Amount`: verwacht als op het scherm (factuur positief, losse betaling negatief).
+3. Of `Amount` het resterende bedrag is bij een deels betaalde factuur, en in welke valuta bij een post in vreemde valuta.
+4. Of `$select`, `$filter` op `AccountId` en bladeren met `__next` op deze bron werken zoals bij de andere bronnen. Het filter op leverancier wordt ook in de code toegepast, dus een genegeerd filter geeft geen verkeerde lijst.
+
+Vergelijk daarvoor aantal en totaal met het scherm in Exact voor dezelfde administratie.
+
+Bij `get_matching_details` met `entry_number` geldt hetzelfde voorbehoud: de documentatie noemt `EntryNumber` en `Journal` in `cashflow/Payments` en `cashflow/Receivables` ("entry number of the linked transaction"), maar of een bankbetaling zonder factuur daar onder haar eigen boekstuknummer staat, moet nog live blijken. Staat ze er niet, dan blijft `entry_outstanding_items` leeg en zegt de functie niets over de status.
 
 ## Limieten
 

@@ -9,10 +9,15 @@ import { amount, byDateEntryLine, CODE, collect, divisionInfo, exactDate, LINE_F
  * Tegenregels: TransactionLines met hetzelfde factuurnummer op dezelfde debiteuren-/crediteurenrekening,
  * in een andere boeking. Afletteren op een grootboekkaart (bijv. kruisposten 17910) zit niet
  * in de REST API van Exact: die regels krijgen matching_status "unknown", nooit een gok.
+ *
+ * Met entry_number zoeken we ook de openstaande post(en) van de boeking zelf op (EntryNumber in
+ * Receivables en Payments). Zo krijgt een bankbetaling op een leverancier zonder factuurnummer
+ * de status open_not_linked_to_invoice in plaats van niets. De status komt uit Status van Exact.
  */
 const MATCH_STATUS: Record<number, string> = { 20: "open", 30: "selected", 40: "processed_not_matched", 50: "matched" };
 const GL_MATCHING_UNKNOWN = "exact_rest_api_does_not_expose_gl_account_matching";
 const MAX_INVOICES = 20;
+const OPEN_STATUSES = new Set([20, 30, 40]);
 const ITEM_FIELDS = ["ID", "EntryID", "AccountCode", "AccountName", "AmountDC", "AmountFC", "Currency", "Description", "EntryNumber", "EntryDate", "InvoiceNumber", "InvoiceDate", "DueDate", "Journal", "Status", "EndDate", "EndYear", "EndPeriod", "GLAccountCode", "PaymentReference", "YourRef", "TransactionAmountDC", "TransactionEntryID", "TransactionID", "TransactionType"];
 const RECEIVABLE_FIELDS = [...ITEM_FIELDS, "IsFullyPaid", "LastPaymentDate"];
 
@@ -78,6 +83,16 @@ function invoiceMatching(number: number, items: Item[], lines: Row[]) {
   };
 }
 
+/** Openstaande post van de boeking zelf: status uit Exact, plus of er een factuurnummer aan hangt. */
+function entryItemView(item: Item, followed: Set<number>) {
+  const hasInvoice = Number.isInteger(item.InvoiceNumber) && item.InvoiceNumber > 0;
+  let status: string;
+  if (item.Status === 50) status = "matched";
+  else if (OPEN_STATUSES.has(item.Status)) status = hasInvoice ? "open" : "open_not_linked_to_invoice";
+  else status = "unknown";
+  return { ...item, linked_to_invoice_number: hasInvoice, entry_item_status: status, entry_item_status_source: "exact_outstanding_item_status", also_under_invoices: hasInvoice && followed.has(item.InvoiceNumber) };
+}
+
 const orFilter = (field: string, values: number[]) => `(${values.map((v) => `${field} eq ${v}`).join(" or ")})`;
 
 export default async function matchingDetails(args: { invoice_number?: number; your_ref?: string; entry_number?: number; journal_code?: string }, ctx: any) {
@@ -125,6 +140,17 @@ export default async function matchingDetails(args: { invoice_number?: number; y
   }
   const invoices = numbers.map((n) => invoiceMatching(n, items.filter((i) => i.InvoiceNumber === n), lines));
 
+  // De openstaande post(en) van de boeking zelf, ook zonder factuurnummer (bijv. een losse bankbetaling op een leverancier)
+  const entryItems: ReturnType<typeof entryItemView>[] = [];
+  if (args.entry_number !== undefined) {
+    const own = `EntryNumber eq ${args.entry_number}` + (args.journal_code !== undefined ? ` and Journal eq '${args.journal_code}'` : "");
+    const rec = await collect(ctx, "cashflow/Receivables", RECEIVABLE_FIELDS, own, { maxRows: 200, maxPages: 5 });
+    const pay = await collect(ctx, "cashflow/Payments", ITEM_FIELDS, own, { maxRows: 200, maxPages: 5 });
+    [rec, pay].forEach(note);
+    const followed = new Set(numbers);
+    entryItems.push(...rec.items.map((r) => entryItemView(itemView("receivable", r), followed)), ...pay.items.map((r) => entryItemView(itemView("payable", r), followed)));
+  }
+
   // Regels van de boeking zonder factuur: afletteren op een grootboekkaart staat niet in de REST API
   const glLines = entryLines.filter((l) => !Number.isInteger(l.InvoiceNumber));
   const codes = [...new Set(glLines.map((l) => l.GLAccountCode).filter((c) => typeof c === "string" && CODE.test(c)))].sort() as string[];
@@ -152,11 +178,14 @@ export default async function matchingDetails(args: { invoice_number?: number; y
       matching_status: "cashflow/Receivables + cashflow/Payments Status (50 = matched)",
       counter_lines: "TransactionLines with the same InvoiceNumber on the same receivable/payable G/L account, other entry",
       gl_account_matching: GL_MATCHING_UNKNOWN,
+      entry_outstanding_items: "cashflow/Receivables + cashflow/Payments with the EntryNumber of the entry itself (only with entry_number); open_not_linked_to_invoice = Status 20, 30 or 40 and no InvoiceNumber",
     },
     invoices,
     invoice_count: invoices.length,
     gl_account_matching: glMatching,
-    empty: !invoices.length && !glMatching.length,
+    entry_outstanding_items: entryItems,
+    entry_outstanding_item_count: entryItems.length,
+    empty: !invoices.length && !glMatching.length && !entryItems.length,
     complete: incomplete.size === 0,
     incomplete_reasons: [...incomplete].sort(),
   };
