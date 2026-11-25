@@ -24,6 +24,7 @@ De code-functies zijn gebaseerd op `exact-mcp` (Joep Herrmann, 2026) en draaien 
 | `review_receipt_evidence` (code) | Bij uitgaande bankregels: is er een document met bijlage, aan de bankregel zelf of aan de inkoopfactuur die ermee is betaald? Met het soort beweging per regel. Zie [Bonnetjescontrole](#bonnetjescontrole). |
 | `list_documents` (code) | Documenten in 1–31 dagen, op documentdatum of aanmaakdatum, optioneel per soort, relatie of onderwerp. Per document de bijlagen (bestandsnaam, grootte) en of het aan een boeking hangt, plus een link (`exact_url`) om het document in Exact te openen. Geen inhoud, geen downloads. |
 | `check_uploads` (code) | Zijn ingestuurde bonnen in 1–31 dagen aangekomen en door Exact herkend? Per upload: herkend (open of verwerkt), niet herkend, dubbel of onduidelijk. Optioneel een lijst met wat je hebt ingestuurd, om te zien wat niet is aangekomen. |
+| `add_document_note` (code, schrijven) | Zet een opmerking van jou bij een document (tekstveld), achter wat er al staat, met datum en "Tailr" ervoor. Je bevestigt elke aanroep in Tailr. |
 | `me`, `list_sales_invoices`, `list_accounts`, `list_items`, `list_transaction_lines`, `list_receivables` | Losse lijsten met OData-filters. |
 
 ## Wat de code mag (manifest)
@@ -43,6 +44,12 @@ Een bon die je mailt of uploadt, wordt in Exact eerst een ruwe scan (soort 202, 
 - `ambiguous_multiple_recognized_documents`: meer dan één inkoopfactuur met dit bestand.
 
 Een mail die Exact nooit heeft bereikt, laat geen spoor na. Geef daarom met `expected` op wat je hebt ingestuurd: per stuk een tekst uit het onderwerp of de bestandsnaam, een bedrag, of beide (`{"text": "Hornbach", "amount": 61.55}`). Het bedrag wordt gezocht in wat Exact van de factuur heeft gelezen; `match_basis` zegt waarop een stuk is gevonden en bij meer treffers is het `ambiguous`. Of zoek betalingen zonder bon met `review_receipt_evidence`.
+
+## Opmerking bij een document (`add_document_note`)
+
+De enige functie van deze koppeling die iets in Exact verandert. Hij zet een opmerking die jij geeft in het tekstveld van één document, bijvoorbeeld "privé" of "hoort bij project X" voor je boekhouder. Bestaande tekst blijft staan; de opmerking komt erachter als `[datum Tailr] tekst`. Daarna leest de functie het document terug (`verified`). Bij een upload hoort de opmerking bij de herkende inkoopfactuur (soort 20), want die verwerkt de boekhouder. Teruglezen kan met `list_documents` en `include_body: true`.
+
+Een opmerking in de mail waarmee je een bon instuurt, komt niet in Exact terecht: het tekstveld van gemailde uploads is leeg.
 
 ## Documenten zoeken (`list_documents`)
 
