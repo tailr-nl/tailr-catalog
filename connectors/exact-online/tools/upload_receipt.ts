@@ -54,7 +54,7 @@ export default async function uploadReceipt(
   if (!data.startsWith(kind!.prefix)) ctx.fail("invalid_input", `The file content is not a ${kind!.label}, although the name ends in .${kind!.label}`);
   const note = args.note === undefined || args.note === null ? "" : String(args.note).replace(/\r\n?/g, "\n").trim();
   if (note.length > 500 || /[\u0000-\u0009\u000b-\u001f\u007f]/.test(note)) ctx.fail("invalid_input", "note must be at most 500 characters, without control characters");
-  const subject = (args.subject === undefined || args.subject === null || args.subject === "" ? `Tailr: ${fileName}` : String(args.subject).trim());
+  const subject = (args.subject === undefined || args.subject === null || args.subject === "" ? fileName : String(args.subject).trim());
   if (subject.length < 2 || subject.length > 200 || /[\u0000-\u001f\u007f]/.test(subject)) ctx.fail("invalid_input", "subject must be 2–200 characters without control characters");
   const route = args.route ?? "scan";
   if (route !== "scan" && route !== "document") ctx.fail("invalid_input", 'route must be "scan" or "document"');
