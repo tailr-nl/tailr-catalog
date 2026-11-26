@@ -28,7 +28,7 @@ const ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 const MAX_DOCS = 400;
 const BATCH = 10;
 const MAX_EXPECTED = 50;
-const MAX_NAME_LOOKUPS = 25;
+const MAX_NAME_LOOKUPS = 40;
 const NAME_BATCH = 5;
 const MAX_EARLIER_DOCS = 30;
 const SAFE_FILE_NAME = /^[A-Za-z0-9 ._()+,-]{1,120}$/;
@@ -121,7 +121,7 @@ type EarlierBookings = {
 
 /**
  * Per open voorstel: eerder geboekte inkoopfacturen (Type 20 met boeking) met een bijlage met dezelfde
- * bestandsnaam. Alleen naam, geen grootte: dezelfde factuur kan als bestand een paar bytes verschillen.
+ * bestandsnaam van de scan. Alleen naam, geen grootte: dezelfde factuur kan als bestand een paar bytes verschillen.
  * Alleen veilige bestandsnamen (letters, cijfers, spatie en . _ ( ) + , -) gaan in een filter.
  */
 async function findEarlierBookings(ctx: any, uploads: { recognized: ReturnType<typeof docView> | null; scan: { files: { file_name: unknown }[] } }[], docs: Map<string, Row>, attachments: Map<string, Row[]>): Promise<EarlierBookings> {
@@ -132,7 +132,9 @@ async function findEarlierBookings(ctx: any, uploads: { recognized: ReturnType<t
     const r = u.recognized;
     if (!r || r.booked || r.proposed_entry_status === 50) continue;
     const names = new Set<string>();
-    for (const a of [...(attachments.get(r.id) ?? []), ...u.scan.files]) {
+    // Alleen de bestanden van de scan (wat de gebruiker instuurde): de herkende inkoopfactuur heeft
+    // daarnaast een xml en RawResponse.txt die de scanservice zelf maakt en die niets zeggen over een eerdere boeking.
+    for (const a of u.scan.files) {
       const n = typeof a.file_name === "string" ? a.file_name : null;
       if (!n || n.toLowerCase() === "rawresponse.txt") continue;
       names.add(n.toLowerCase());

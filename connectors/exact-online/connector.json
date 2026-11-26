@@ -58,14 +58,14 @@
       }
     ],
     "whatsNew": {
-      "en": "check_uploads handles invoices in a foreign currency: it warns when Exact read no amount (often no exchange rate), compares amounts in the invoice currency (optionally with currency in expected), and flags an open proposal whose file was booked before.",
-      "nl": "check_uploads gaat om met facturen in vreemde valuta: een waarschuwing als Exact geen bedrag las (vaak geen wisselkoers), bedragen vergelijken in de valuta van de factuur (eventueel met currency in expected), en een signaal als het bestand van een open voorstel al eerder is geboekt."
+      "en": "check_uploads checks for an earlier booking only by the files you sent (not the xml Exact's scanning service adds), up to 40 names per call, so a month of uploads fits in one check.",
+      "nl": "check_uploads zoekt naar een eerdere boeking alleen op de bestanden die je instuurde (niet de xml die de scanservice van Exact maakt), hooguit 40 namen per aanroep, zodat een maand uploads in één controle past."
     }
   },
   "$schema": "../../schemas/connector.json",
   "id": "exact-online",
   "name": "Exact Online",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": {
     "en": "Invoices, contacts, items, general ledger entries, matching status and bank transactions from Exact Online. Read access only.",
     "nl": "Facturen, relaties, artikelen, grootboekregels, afletterstatus en banktransacties uit Exact Online. Alleen lezen."
@@ -837,7 +837,7 @@
         "en": "Did the receipts you sent arrive, and did Exact recognise them?"
       },
       "description": "Voor geüploade of gemailde bonnen in een periode van 1–31 dagen (op aanmaakdatum): per upload (ruwe scan) of Exact er een inkoopfactuur van heeft gemaakt, met status recognized_open, recognized_processed, scan_only_not_recognized (nakijken) of ambiguous, en per upload warnings: amount_not_read (Exact las geen bedrag, vaak bij vreemde valuta zonder wisselkoers), foreign_currency en possibly_already_booked (een eerder geboekte inkoopfactuur heeft een bijlage met dezelfde bestandsnaam, bijv. een oude factuur die met een refund-mail opnieuw binnenkwam). Koppelt scan en inkoopfactuur alleen op identiek bestand (naam en grootte). Signaleert hetzelfde bestand in meerdere uploads. Geef met expected op wat je hebt ingestuurd, per stuk tekst (uit onderwerp of bestandsnaam), bedrag of beide, en eventueel de valuta, om te zien wat niet is aangekomen; bedrag zoekt in wat Exact van de factuur heeft gelezen, in de valuta van de factuur (een eurobedrag van de bank is bij een factuur in vreemde valuta pas na het boeken te vergelijken). Een zoekhulp, geen koppeling: meer treffers is ambiguous. Een mail die Exact nooit bereikte laat verder geen spoor na. Alleen metadata; exact_url opent het document in Exact voor wie daar is ingelogd.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "level": "read",
       "file": "tools/check_uploads.ts",
       "requests": [
