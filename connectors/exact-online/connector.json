@@ -58,14 +58,14 @@
       }
     ],
     "whatsNew": {
-      "en": "Send receipts to Exact from your own dashboard or app through the Tailr API (never through the chat), and find the scan mailbox with list_mailboxes.",
-      "nl": "Stuur bonnen naar Exact vanuit je eigen dashboard of app via de API van Tailr (nooit via de chat), en vind de scanmailbox met list_mailboxes."
+      "en": "Receipt upload through the API has been removed: Exact only sends mailed or uploaded receipts to its scanning service. Mail your receipts and check them with check_uploads.",
+      "nl": "Bonnen aanleveren via de API is eruit gehaald: Exact stuurt alleen gemailde of geüploade bonnen naar de scanservice. Mail je bonnen en controleer ze met check_uploads."
     }
   },
   "$schema": "../../schemas/connector.json",
   "id": "exact-online",
   "name": "Exact Online",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "description": {
     "en": "Invoices, contacts, items, general ledger entries, matching status and bank transactions from Exact Online. Read access only.",
     "nl": "Facturen, relaties, artikelen, grootboekregels, afletterstatus en banktransacties uit Exact Online. Alleen lezen."
@@ -943,191 +943,6 @@
       },
       "limits": {
         "maxCalls": 10,
-        "timeoutSeconds": 60
-      }
-    },
-    {
-      "name": "list_mailboxes",
-      "title": {
-        "nl": "Mailboxen",
-        "en": "Mailboxes"
-      },
-      "summary": {
-        "nl": "De Exact-mailboxen van deze administratie, zoals de scanmailbox.",
-        "en": "The Exact mailboxes of this administration, such as the scan mailbox."
-      },
-      "description": "De mailboxen van Exact voor deze administratie (id, adres, soort), de digitale postbus (DefaultMailbox) en de mailbox die Exact kiest voor een inkoopfactuur zonder en met details (PreferredMailboxForOperation, met is_scan_service_mailbox). Om te zien waar upload_receipt naartoe moet. Alleen lezen.",
-      "version": "0.2.0",
-      "level": "read",
-      "file": "tools/list_mailboxes.ts",
-      "requests": [
-        {
-          "method": "GET",
-          "path": "/*/mailbox/Mailboxes"
-        },
-        {
-          "method": "GET",
-          "path": "/*/read/mailbox/DefaultMailbox"
-        },
-        {
-          "method": "GET",
-          "path": "/*/read/mailbox/PreferredMailboxForOperation"
-        },
-        {
-          "method": "GET",
-          "path": "/*/system/Divisions"
-        }
-      ],
-      "params": {},
-      "limits": {
-        "maxCalls": 5,
-        "timeoutSeconds": 60
-      }
-    },
-    {
-      "name": "upload_receipt",
-      "title": {
-        "nl": "Bon aanleveren",
-        "en": "Send a receipt"
-      },
-      "summary": {
-        "nl": "Stuurt een bon (pdf, jpg, png) naar Exact, vanuit een dashboard of app. Alleen via de API.",
-        "en": "Sends a receipt (pdf, jpg, png) to Exact from a dashboard or app. API only."
-      },
-      "description": "Stuurt één bon naar Exact. Alleen via de API (dashboards, apps), nooit via de chat: het bestand gaat als base64 mee (hoogstens ~1,4 MB; verklein een foto eerst). route \"scan\" (standaard) stuurt het naar de scanmailbox van de administratie, zodat Exact het uitleest zoals een gemailde bon; controleer daarna met check_uploads. route \"document\" maakt een document met bijlage zonder herkenning. Optioneel een opmerking (note). Stuur hetzelfde bestand niet opnieuw voordat check_uploads is bekeken.",
-      "version": "0.2.0",
-      "level": "write",
-      "audience": "api",
-      "file": "tools/upload_receipt.ts",
-      "requests": [
-        {
-          "method": "GET",
-          "path": "/*/mailbox/Mailboxes"
-        },
-        {
-          "method": "POST",
-          "path": "/*/mailbox/MailMessagesSent"
-        },
-        {
-          "method": "POST",
-          "path": "/*/mailbox/MailMessageAttachments"
-        },
-        {
-          "method": "POST",
-          "path": "/*/documents/Documents"
-        },
-        {
-          "method": "POST",
-          "path": "/*/documents/DocumentAttachments"
-        },
-        {
-          "method": "GET",
-          "path": "/*/system/Divisions"
-        }
-      ],
-      "params": {
-        "file_base64": {
-          "type": "string",
-          "required": true,
-          "description": "Het bestand als base64 (pdf, jpg of png), hoogstens ~1,4 MB"
-        },
-        "file_name": {
-          "type": "string",
-          "required": true,
-          "description": "Bestandsnaam met extensie .pdf, .jpg, .jpeg of .png, bijv. bon-hornbach-2026-11-12.jpg"
-        },
-        "note": {
-          "type": "string",
-          "description": "Optioneel: opmerking voor de boekhouder, hoogstens 500 tekens"
-        },
-        "subject": {
-          "type": "string",
-          "description": "Optioneel: onderwerp in Exact; standaard de bestandsnaam"
-        },
-        "route": {
-          "type": "string",
-          "enum": [
-            "scan",
-            "document"
-          ],
-          "description": "scan (standaard): via de scanservice van Exact; document: document met bijlage zonder herkenning"
-        },
-        "operation": {
-          "type": "integer",
-          "enum": [
-            2,
-            1
-          ],
-          "description": "Alleen bij route scan: 2 (standaard) = inkoopfactuur met details, naar de scanservice; 1 = zonder details, Exact zet hem op handmatig invoeren"
-        },
-        "recipient_mailbox_id": {
-          "type": "string",
-          "description": "Alleen bij route scan: de scanmailbox (zie list_mailboxes); nodig als er meer dan één mailbox is"
-        },
-        "sender_mailbox_id": {
-          "type": "string",
-          "description": "Alleen bij route scan: afzender-mailbox; standaard gelijk aan de ontvanger"
-        },
-        "document_type": {
-          "type": "integer",
-          "description": "Alleen bij route document: soortnummer, standaard 20 (inkoopfactuur)"
-        }
-      },
-      "limits": {
-        "maxCalls": 10,
-        "timeoutSeconds": 120
-      }
-    },
-    {
-      "name": "list_mail_messages",
-      "title": {
-        "nl": "Mailberichten",
-        "en": "Mail messages"
-      },
-      "summary": {
-        "nl": "Recente berichten in de Exact-mailbox, met soort, ontvanger en scanstatus.",
-        "en": "Recent messages in the Exact mailbox, with type, recipient and scan status."
-      },
-      "description": "Verzonden en ontvangen berichten in de Exact-mailbox in een periode van 1–31 dagen: onderwerp, soort (Type), Operation, ontvanger, afzender, status (43 = bij de scanservice, 50 = verwerkt) en OriginalMessage. Om een gemailde bon die gescand is te vergelijken met een bericht van upload_receipt. Geen berichttekst of bijlagen. Alleen lezen.",
-      "version": "0.1.0",
-      "level": "read",
-      "file": "tools/list_mail_messages.ts",
-      "requests": [
-        {
-          "method": "GET",
-          "path": "/*/mailbox/MailMessagesSent"
-        },
-        {
-          "method": "GET",
-          "path": "/*/mailbox/MailMessagesReceived"
-        },
-        {
-          "method": "GET",
-          "path": "/*/system/Divisions"
-        }
-      ],
-      "params": {
-        "start_date": {
-          "type": "string",
-          "required": true,
-          "description": "Begin (YYYY-MM-DD), inclusief, op aanmaakdatum"
-        },
-        "end_date": {
-          "type": "string",
-          "required": true,
-          "description": "Eind (YYYY-MM-DD), exclusief"
-        },
-        "subject_contains": {
-          "type": "string",
-          "description": "Optioneel: tekst in het onderwerp, 2–60 tekens"
-        },
-        "max_messages": {
-          "type": "integer",
-          "description": "1–100 per bron, standaard 30"
-        }
-      },
-      "limits": {
-        "maxCalls": 5,
         "timeoutSeconds": 60
       }
     }
